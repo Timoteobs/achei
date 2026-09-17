@@ -1,5 +1,7 @@
 import { Box } from "@chakra-ui/react";
 import { HomeHeader } from "./components/home-header";
+import { SpacesSection } from "./components/spaces-section";
+import { spacesMock } from "./spaces-mock";
 
 export function HomePage() {
   return (
@@ -12,6 +14,7 @@ export function HomePage() {
       py={{ base: "6", lg: "8" }}
     >
       <HomeHeader />
+      <SpacesSection spaces={spacesMock} />
     </Box>
   );
 }
