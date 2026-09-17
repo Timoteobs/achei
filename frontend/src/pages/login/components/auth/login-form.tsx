@@ -165,8 +165,8 @@ export function LoginForm() {
               </Checkbox.Root>
             )}
           />
-          <Button type="button" variant="link" onClick={() => {}}>
-            Esqueci minha senha
+          <Button variant="link" asChild>
+            <Link to="/forgot-password">Esqueci minha senha</Link>
           </Button>
         </Flex>
 
