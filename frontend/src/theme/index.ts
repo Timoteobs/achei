@@ -10,6 +10,11 @@ const config = defineConfig({
   },
 
   globalCss: {
+    "*:focus-visible": {
+      outline: "2px solid",
+      outlineColor: "brand.focusRing",
+      outlineOffset: "2px",
+    },
     body: {
       bg: "bg.canvas",
       color: "fg.default",

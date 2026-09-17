@@ -58,10 +58,10 @@ export const tokens = defineTokens({
 
   fonts: {
     heading: {
-      value: "Inter, system-ui, sans-serif",
+      value: "'Inter Variable', Inter, system-ui, sans-serif",
     },
     body: {
-      value: "Inter, system-ui, sans-serif",
+      value: "'Inter Variable', Inter, system-ui, sans-serif",
     },
   },
 
@@ -92,13 +92,11 @@ export const tokens = defineTokens({
     },
 
     md: {
-      value:
-        "0 4px 12px rgba(8, 20, 28, 0.08), 0 2px 4px rgba(8, 20, 28, 0.04)",
+      value: "0 4px 12px rgba(8, 20, 28, 0.08), 0 2px 4px rgba(8, 20, 28, 0.04)",
     },
 
     lg: {
-      value:
-        "0 12px 32px rgba(8, 20, 28, 0.10), 0 4px 8px rgba(8, 20, 28, 0.04)",
+      value: "0 12px 32px rgba(8, 20, 28, 0.10), 0 4px 8px rgba(8, 20, 28, 0.04)",
     },
   },
 

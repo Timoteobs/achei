@@ -9,50 +9,309 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as AppIndexRouteImport } from './routes/_app.index'
+import { Route as AppAtividadeRouteImport } from './routes/_app.atividade'
+import { Route as AppBuscarRouteImport } from './routes/_app.buscar'
+import { Route as AppEspacosRouteImport } from './routes/_app.espacos'
+import { Route as AppFavoritosRouteImport } from './routes/_app.favoritos'
+import { Route as AppLixeiraRouteImport } from './routes/_app.lixeira'
+import { Route as AppNotificacoesRouteImport } from './routes/_app.notificacoes'
+import { Route as AppEspacosSpaceIdRouteImport } from './routes/_app.espacos.$spaceId'
+import { Route as AppEspacosSpaceIdLocaisLocationIdRouteImport } from './routes/_app.espacos.$spaceId.locais.$locationId'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAtividadeRoute = AppAtividadeRouteImport.update({
+  id: '/atividade',
+  path: '/atividade',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBuscarRoute = AppBuscarRouteImport.update({
+  id: '/buscar',
+  path: '/buscar',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEspacosRoute = AppEspacosRouteImport.update({
+  id: '/espacos',
+  path: '/espacos',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFavoritosRoute = AppFavoritosRouteImport.update({
+  id: '/favoritos',
+  path: '/favoritos',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLixeiraRoute = AppLixeiraRouteImport.update({
+  id: '/lixeira',
+  path: '/lixeira',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNotificacoesRoute = AppNotificacoesRouteImport.update({
+  id: '/notificacoes',
+  path: '/notificacoes',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEspacosSpaceIdRoute = AppEspacosSpaceIdRouteImport.update({
+  id: '/$spaceId',
+  path: '/$spaceId',
+  getParentRoute: () => AppEspacosRoute,
+} as any)
+const AppEspacosSpaceIdLocaisLocationIdRoute =
+  AppEspacosSpaceIdLocaisLocationIdRouteImport.update({
+    id: '/locais/$locationId',
+    path: '/locais/$locationId',
+    getParentRoute: () => AppEspacosSpaceIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AppIndexRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/atividade': typeof AppAtividadeRoute
+  '/buscar': typeof AppBuscarRoute
+  '/espacos': typeof AppEspacosRouteWithChildren
+  '/favoritos': typeof AppFavoritosRoute
+  '/lixeira': typeof AppLixeiraRoute
+  '/notificacoes': typeof AppNotificacoesRoute
+  '/espacos/$spaceId': typeof AppEspacosSpaceIdRouteWithChildren
+  '/espacos/$spaceId/locais/$locationId': typeof AppEspacosSpaceIdLocaisLocationIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/atividade': typeof AppAtividadeRoute
+  '/buscar': typeof AppBuscarRoute
+  '/espacos': typeof AppEspacosRouteWithChildren
+  '/favoritos': typeof AppFavoritosRoute
+  '/lixeira': typeof AppLixeiraRoute
+  '/notificacoes': typeof AppNotificacoesRoute
+  '/': typeof AppIndexRoute
+  '/espacos/$spaceId': typeof AppEspacosSpaceIdRouteWithChildren
+  '/espacos/$spaceId/locais/$locationId': typeof AppEspacosSpaceIdLocaisLocationIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/_app/atividade': typeof AppAtividadeRoute
+  '/_app/buscar': typeof AppBuscarRoute
+  '/_app/espacos': typeof AppEspacosRouteWithChildren
+  '/_app/favoritos': typeof AppFavoritosRoute
+  '/_app/lixeira': typeof AppLixeiraRoute
+  '/_app/notificacoes': typeof AppNotificacoesRoute
+  '/_app/': typeof AppIndexRoute
+  '/_app/espacos/$spaceId': typeof AppEspacosSpaceIdRouteWithChildren
+  '/_app/espacos/$spaceId/locais/$locationId': typeof AppEspacosSpaceIdLocaisLocationIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/atividade'
+    | '/buscar'
+    | '/espacos'
+    | '/favoritos'
+    | '/lixeira'
+    | '/notificacoes'
+    | '/espacos/$spaceId'
+    | '/espacos/$spaceId/locais/$locationId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/login'
+    | '/register'
+    | '/atividade'
+    | '/buscar'
+    | '/espacos'
+    | '/favoritos'
+    | '/lixeira'
+    | '/notificacoes'
+    | '/'
+    | '/espacos/$spaceId'
+    | '/espacos/$spaceId/locais/$locationId'
+  id:
+    | '__root__'
+    | '/_app'
+    | '/login'
+    | '/register'
+    | '/_app/atividade'
+    | '/_app/buscar'
+    | '/_app/espacos'
+    | '/_app/favoritos'
+    | '/_app/lixeira'
+    | '/_app/notificacoes'
+    | '/_app/'
+    | '/_app/espacos/$spaceId'
+    | '/_app/espacos/$spaceId/locais/$locationId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  RegisterRoute: typeof RegisterRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/': {
+      id: '/_app/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/atividade': {
+      id: '/_app/atividade'
+      path: '/atividade'
+      fullPath: '/atividade'
+      preLoaderRoute: typeof AppAtividadeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/buscar': {
+      id: '/_app/buscar'
+      path: '/buscar'
+      fullPath: '/buscar'
+      preLoaderRoute: typeof AppBuscarRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/espacos': {
+      id: '/_app/espacos'
+      path: '/espacos'
+      fullPath: '/espacos'
+      preLoaderRoute: typeof AppEspacosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/favoritos': {
+      id: '/_app/favoritos'
+      path: '/favoritos'
+      fullPath: '/favoritos'
+      preLoaderRoute: typeof AppFavoritosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/lixeira': {
+      id: '/_app/lixeira'
+      path: '/lixeira'
+      fullPath: '/lixeira'
+      preLoaderRoute: typeof AppLixeiraRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/notificacoes': {
+      id: '/_app/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/notificacoes'
+      preLoaderRoute: typeof AppNotificacoesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/espacos/$spaceId': {
+      id: '/_app/espacos/$spaceId'
+      path: '/$spaceId'
+      fullPath: '/espacos/$spaceId'
+      preLoaderRoute: typeof AppEspacosSpaceIdRouteImport
+      parentRoute: typeof AppEspacosRoute
+    }
+    '/_app/espacos/$spaceId/locais/$locationId': {
+      id: '/_app/espacos/$spaceId/locais/$locationId'
+      path: '/locais/$locationId'
+      fullPath: '/espacos/$spaceId/locais/$locationId'
+      preLoaderRoute: typeof AppEspacosSpaceIdLocaisLocationIdRouteImport
+      parentRoute: typeof AppEspacosSpaceIdRoute
     }
   }
 }
 
+interface AppEspacosSpaceIdRouteChildren {
+  AppEspacosSpaceIdLocaisLocationIdRoute: typeof AppEspacosSpaceIdLocaisLocationIdRoute
+}
+
+const AppEspacosSpaceIdRouteChildren: AppEspacosSpaceIdRouteChildren = {
+  AppEspacosSpaceIdLocaisLocationIdRoute:
+    AppEspacosSpaceIdLocaisLocationIdRoute,
+}
+
+const AppEspacosSpaceIdRouteWithChildren =
+  AppEspacosSpaceIdRoute._addFileChildren(AppEspacosSpaceIdRouteChildren)
+
+interface AppEspacosRouteChildren {
+  AppEspacosSpaceIdRoute: typeof AppEspacosSpaceIdRouteWithChildren
+}
+
+const AppEspacosRouteChildren: AppEspacosRouteChildren = {
+  AppEspacosSpaceIdRoute: AppEspacosSpaceIdRouteWithChildren,
+}
+
+const AppEspacosRouteWithChildren = AppEspacosRoute._addFileChildren(
+  AppEspacosRouteChildren,
+)
+
+interface AppRouteChildren {
+  AppAtividadeRoute: typeof AppAtividadeRoute
+  AppBuscarRoute: typeof AppBuscarRoute
+  AppEspacosRoute: typeof AppEspacosRouteWithChildren
+  AppFavoritosRoute: typeof AppFavoritosRoute
+  AppLixeiraRoute: typeof AppLixeiraRoute
+  AppNotificacoesRoute: typeof AppNotificacoesRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAtividadeRoute: AppAtividadeRoute,
+  AppBuscarRoute: AppBuscarRoute,
+  AppEspacosRoute: AppEspacosRouteWithChildren,
+  AppFavoritosRoute: AppFavoritosRoute,
+  AppLixeiraRoute: AppLixeiraRoute,
+  AppNotificacoesRoute: AppNotificacoesRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  LoginRoute: LoginRoute,
+  RegisterRoute: RegisterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

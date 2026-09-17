@@ -1,4 +1,5 @@
 import { StrictMode } from "react";
+import "@fontsource-variable/inter";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "@tanstack/react-router";
 
