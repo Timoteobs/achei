@@ -3,6 +3,7 @@ import { HomeHeader } from "./components/home-header";
 import { SpacesSection } from "./components/spaces-section";
 import { spacesMock } from "./spaces-mock";
 import { QuickAccessSection } from "./components/quick-access-section";
+import { RecentActivitySection } from "./components/recent-activity-section";
 
 export function HomePage() {
   return (
@@ -17,6 +18,7 @@ export function HomePage() {
       <HomeHeader />
       <SpacesSection spaces={spacesMock} />
       <QuickAccessSection />
+      <RecentActivitySection />
     </Box>
   );
 }
