@@ -1,11 +1,11 @@
 import { Box, Heading, Stack, Text } from "@chakra-ui/react";
 import { ArrowRight } from "lucide-react";
 import { useId } from "react";
+import { ActivityItem } from "../../../components/activity-item/activity-item";
 import { Button } from "../../../components/button/button";
-import { ItemListItem } from "../../../components/item-list-item/item-list-item";
-import { recentItemsMock } from "../recent-items-mock";
+import { spaceActivitiesMock } from "../space-activities-mock";
 
-export function RecentItemsSection() {
+export function SpaceActivitySection() {
   const headingId = useId();
 
   return (
@@ -29,15 +29,15 @@ export function RecentItemsSection() {
         fontSize="lg"
         fontWeight="semibold"
       >
-        Itens recentes
+        Atividade no espaço
       </Heading>
       <Text color="fg.muted" fontSize="sm" mt="1" mb="5">
-        Últimos itens adicionados, movidos ou atualizados neste espaço.
+        Acompanhe as últimas atividades realizadas pelos membros.
       </Text>
-      <Stack as="ul" gap="3" flex="1" listStyleType="none" m="0" p="0">
-        {recentItemsMock.map(({ id, ...item }) => (
+      <Stack as="ul" gap="4" flex="1" listStyleType="none" m="0" p="0">
+        {spaceActivitiesMock.map(({ id, ...activity }) => (
           <Box as="li" key={id} minW="0">
-            <ItemListItem {...item} />
+            <ActivityItem {...activity} />
           </Box>
         ))}
       </Stack>
@@ -53,7 +53,7 @@ export function RecentItemsSection() {
         fontSize="sm"
         _hover={{ bg: "brand.muted" }}
       >
-        Ver todos os itens
+        Ver todas as atividades
         <ArrowRight size={16} strokeWidth={1.8} aria-hidden="true" />
       </Button>
     </Box>
