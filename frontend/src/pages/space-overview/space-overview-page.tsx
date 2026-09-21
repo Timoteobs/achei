@@ -3,6 +3,7 @@ import { useParams } from "@tanstack/react-router";
 import { spacesMock } from "../home/spaces-mock";
 import { SpaceOverviewHeader } from "./components/space-overview-header";
 import { SpaceSummary } from "./components/space-summary";
+import { SpaceTabs } from "./components/space-tabs";
 
 export function SpaceOverviewPage() {
   const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
@@ -18,6 +19,7 @@ export function SpaceOverviewPage() {
     >
       <SpaceOverviewHeader name={space?.name ?? "Espaço"} icon={space?.icon} />
       <SpaceSummary />
+      <SpaceTabs />
     </Box>
   );
 }
