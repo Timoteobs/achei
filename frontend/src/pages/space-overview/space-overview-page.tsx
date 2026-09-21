@@ -2,6 +2,7 @@ import { Box } from "@chakra-ui/react";
 import { useParams } from "@tanstack/react-router";
 import { spacesMock } from "../home/spaces-mock";
 import { SpaceOverviewHeader } from "./components/space-overview-header";
+import { SpaceSummary } from "./components/space-summary";
 
 export function SpaceOverviewPage() {
   const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
@@ -16,6 +17,7 @@ export function SpaceOverviewPage() {
       py="5"
     >
       <SpaceOverviewHeader name={space?.name ?? "Espaço"} icon={space?.icon} />
+      <SpaceSummary />
     </Box>
   );
 }
