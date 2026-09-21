@@ -1,4 +1,5 @@
 import { Box, Flex, Heading } from "@chakra-ui/react";
+import { Link } from "@tanstack/react-router";
 import { useId } from "react";
 import { NewSpaceCard } from "../../../components/new-space-card/new-space-card";
 import { SpaceCard } from "../../../components/space-card/space-card";
@@ -36,7 +37,11 @@ export function SpacesSection({
       >
         {spaces.map(({ id, ...space }) => (
           <Box as="li" key={id} flexShrink="0">
-            <SpaceCard {...space} />
+            <Box asChild display="block" h="full" borderRadius="md">
+              <Link to="/espacos/$spaceId" params={{ spaceId: id }}>
+                <SpaceCard {...space} />
+              </Link>
+            </Box>
           </Box>
         ))}
         <Box as="li" flexShrink="0">
