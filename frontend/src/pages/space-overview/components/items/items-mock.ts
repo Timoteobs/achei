@@ -1,5 +1,5 @@
-import type { ColorVariant } from "../../components/color-variants";
-import type { ItemStatus } from "./components/item-status-badge";
+import type { ColorVariant } from "../../../../components/color-variants";
+import type { ItemStatus } from "./item-status-badge";
 
 export interface Item {
   id: string;

@@ -1,6 +1,6 @@
 import { SimpleGrid, Stack } from "@chakra-ui/react";
 import { RecentItemsSection } from "./recent-items-section";
-import { RoomsSection } from "./rooms-section";
+import { RoomsSection } from "../rooms/rooms-section";
 import { SpaceActivitySection } from "./space-activity-section";
 
 export function OverviewTab() {

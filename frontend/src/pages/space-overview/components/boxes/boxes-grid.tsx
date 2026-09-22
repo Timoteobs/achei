@@ -1,7 +1,7 @@
 import { Box, SimpleGrid } from "@chakra-ui/react";
-import { AddCard } from "../../../components/add-card/add-card";
-import { BoxCard } from "../../../components/box-card/box-card";
-import { boxesMock } from "../boxes-mock";
+import { AddCard } from "../../../../components/add-card/add-card";
+import { BoxCard } from "../../../../components/box-card/box-card";
+import { boxesMock } from "./boxes-mock";
 
 export function BoxesGrid() {
   return (

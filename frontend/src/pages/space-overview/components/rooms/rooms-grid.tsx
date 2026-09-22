@@ -1,7 +1,7 @@
 import { Box, SimpleGrid } from "@chakra-ui/react";
-import { AddCard } from "../../../components/add-card/add-card";
-import { RoomCard } from "../../../components/room-card/room-card";
-import { roomsMock } from "../rooms-mock";
+import { AddCard } from "../../../../components/add-card/add-card";
+import { RoomCard } from "../../../../components/room-card/room-card";
+import { roomsMock } from "./rooms-mock";
 
 export function RoomsGrid() {
   return (

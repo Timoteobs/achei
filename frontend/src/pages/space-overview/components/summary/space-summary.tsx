@@ -1,7 +1,7 @@
 import { Avatar, AvatarGroup, Flex, Grid, Text } from "@chakra-ui/react";
 import { CalendarDays, LayoutGrid, Package, UsersRound } from "lucide-react";
-import { InfoCard } from "../../../components/info-card/info-card";
-import { spaceSummaryMock } from "../space-summary-mock";
+import { InfoCard } from "../../../../components/info-card/info-card";
+import { spaceSummaryMock } from "./space-summary-mock";
 
 export function SpaceSummary() {
   const { members, itemsCount, roomsCount, createdAt } = spaceSummaryMock;

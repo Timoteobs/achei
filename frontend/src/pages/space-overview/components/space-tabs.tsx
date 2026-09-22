@@ -1,8 +1,8 @@
 import { Tabs } from "@chakra-ui/react";
-import { BoxesTab } from "./boxes-tab";
-import { ItemsTab } from "./items-tab";
-import { OverviewTab } from "./overview-tab";
-import { RoomsTab } from "./rooms-tab";
+import { BoxesTab } from "./boxes/boxes-tab";
+import { ItemsTab } from "./items/items-tab";
+import { OverviewTab } from "./overview/overview-tab";
+import { RoomsTab } from "./rooms/rooms-tab";
 
 const tabs = [
   { value: "overview", label: "Visão geral", Content: OverviewTab },

@@ -1,4 +1,4 @@
-import { CollectionHeader } from "../../../components/collection-header/collection-header";
+import { CollectionHeader } from "../../../../components/collection-header/collection-header";
 
 export function BoxesHeader() {
   return (

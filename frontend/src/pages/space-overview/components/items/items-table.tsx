@@ -1,11 +1,11 @@
 import { Badge, Box, Checkbox, Flex, IconButton, Text } from "@chakra-ui/react";
 import { MoreVertical, Package } from "lucide-react";
-import { colorVariantStyles } from "../../../components/color-variants";
-import { DataTable } from "../../../components/data-table/data-table";
-import type { DataTableColumn } from "../../../components/data-table/data-table";
-import { Pagination } from "../../../components/pagination/pagination";
-import { itemsMock, itemsTotalCount } from "../items-mock";
-import type { Item } from "../items-mock";
+import { colorVariantStyles } from "../../../../components/color-variants";
+import { DataTable } from "../../../../components/data-table/data-table";
+import type { DataTableColumn } from "../../../../components/data-table/data-table";
+import { Pagination } from "../../../../components/pagination/pagination";
+import { itemsMock, itemsTotalCount } from "./items-mock";
+import type { Item } from "./items-mock";
 import { ItemStatusBadge } from "./item-status-badge";
 
 function ItemRowCheckbox({ label }: Readonly<{ label: string }>) {

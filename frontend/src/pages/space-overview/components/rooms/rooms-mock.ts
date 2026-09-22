@@ -8,7 +8,7 @@ import {
   Utensils,
   WashingMachine,
 } from "lucide-react";
-import type { RoomCardProps } from "../../components/room-card/room-card";
+import type { RoomCardProps } from "../../../../components/room-card/room-card";
 
 export const roomsMock = [
   {

@@ -1,8 +1,8 @@
 import { Badge, Box, Flex, Heading, IconButton, Text } from "@chakra-ui/react";
 import { ArrowLeft, MapPin, MoreVertical, Package } from "lucide-react";
-import { Button } from "../../../components/button/button";
-import { colorVariantStyles } from "../../../components/color-variants";
-import { selectedBoxMock } from "../selected-box-mock";
+import { Button } from "../../../../components/button/button";
+import { colorVariantStyles } from "../../../../components/color-variants";
+import { selectedBoxMock } from "./selected-box-mock";
 
 export function SelectedBoxContext() {
   const { name, roomName, itemsCount, category, variant = "blue" } =

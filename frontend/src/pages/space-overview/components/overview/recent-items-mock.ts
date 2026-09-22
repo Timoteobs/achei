@@ -1,5 +1,5 @@
 import { BookOpen, Cable, CookingPot, Drill } from "lucide-react";
-import type { ItemListItemProps } from "../../components/item-list-item/item-list-item";
+import type { ItemListItemProps } from "../../../../components/item-list-item/item-list-item";
 
 export const recentItemsMock = [
   {

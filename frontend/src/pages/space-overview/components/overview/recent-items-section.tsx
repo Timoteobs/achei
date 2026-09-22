@@ -1,9 +1,9 @@
 import { Box, Heading, Stack, Text } from "@chakra-ui/react";
 import { ArrowRight } from "lucide-react";
 import { useId } from "react";
-import { Button } from "../../../components/button/button";
-import { ItemListItem } from "../../../components/item-list-item/item-list-item";
-import { recentItemsMock } from "../recent-items-mock";
+import { Button } from "../../../../components/button/button";
+import { ItemListItem } from "../../../../components/item-list-item/item-list-item";
+import { recentItemsMock } from "./recent-items-mock";
 
 export function RecentItemsSection() {
   const headingId = useId();

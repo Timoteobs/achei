@@ -1,11 +1,11 @@
 import { Box, Flex, Grid, Heading, Text } from "@chakra-ui/react";
 import { ArrowRight } from "lucide-react";
 import { useId } from "react";
-import { AddCard } from "../../../components/add-card/add-card";
-import { Button } from "../../../components/button/button";
-import { RoomCard } from "../../../components/room-card/room-card";
-import { roomsMock } from "../rooms-mock";
-import { spaceSummaryMock } from "../space-summary-mock";
+import { AddCard } from "../../../../components/add-card/add-card";
+import { Button } from "../../../../components/button/button";
+import { RoomCard } from "../../../../components/room-card/room-card";
+import { roomsMock } from "./rooms-mock";
+import { spaceSummaryMock } from "../summary/space-summary-mock";
 
 export function RoomsSection() {
   const headingId = useId();

@@ -1,9 +1,9 @@
 import { Box, Heading, Stack, Text } from "@chakra-ui/react";
 import { ArrowRight } from "lucide-react";
 import { useId } from "react";
-import { ActivityItem } from "../../../components/activity-item/activity-item";
-import { Button } from "../../../components/button/button";
-import { spaceActivitiesMock } from "../space-activities-mock";
+import { ActivityItem } from "../../../../components/activity-item/activity-item";
+import { Button } from "../../../../components/button/button";
+import { spaceActivitiesMock } from "./space-activities-mock";
 
 export function SpaceActivitySection() {
   const headingId = useId();

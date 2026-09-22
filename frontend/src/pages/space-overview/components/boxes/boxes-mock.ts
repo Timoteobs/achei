@@ -1,4 +1,4 @@
-import type { BoxCardProps } from "../../components/box-card/box-card";
+import type { BoxCardProps } from "../../../../components/box-card/box-card";
 
 export const boxesMock = [
   {
