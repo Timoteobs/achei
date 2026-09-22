@@ -7,7 +7,6 @@ import {
   CookingPot,
   House,
   HouseHeart,
-  Search,
   Sofa,
   Star,
   Trash2,
@@ -28,7 +27,6 @@ export const navigationPaths = {
 
 export const navigationItems: { id: SidebarSection; label: string; icon: LucideIcon }[] = [
   { id: "home", label: "Início", icon: House },
-  { id: "search", label: "Buscar", icon: Search },
   { id: "spaces", label: "Meus espaços", icon: Building2 },
   { id: "notifications", label: "Notificações", icon: Bell },
   { id: "favorites", label: "Favoritos", icon: Star },

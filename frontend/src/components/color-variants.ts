@@ -1,5 +1,5 @@
 export type ColorVariant =
-  "blue" | "green" | "purple" | "cyan" | "orange" | "teal" | "pink";
+  "blue" | "green" | "purple" | "cyan" | "orange" | "teal" | "pink" | "yellow";
 
 export const colorVariantStyles = {
   blue: { bg: "info.50", color: "info.700" },
@@ -9,4 +9,5 @@ export const colorVariantStyles = {
   orange: { bg: "warning.50", color: "warning.700" },
   teal: { bg: "brand.subtle", color: "brand.fg" },
   pink: { bg: "pink.50", color: "pink.700" },
+  yellow: { bg: "warning.50", color: "warning.500" },
 } satisfies Record<ColorVariant, { bg: string; color: string }>;

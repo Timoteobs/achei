@@ -1,0 +1,88 @@
+import {
+  House,
+  Package,
+  Pencil,
+  Share2,
+  Star,
+  Trash2,
+  UserPlus,
+  Users,
+} from "lucide-react";
+import type { NotificationItemProps } from "../../../components/notification-item/notification-item";
+
+export const notificationsMock = [
+  {
+    id: "space-invitation",
+    title: "Maria convidou você para o espaço “Apartamento”",
+    description:
+      "Você foi adicionado como membro com permissão de visualização.",
+    date: "Hoje, 14:32",
+    unread: true,
+    icon: UserPlus,
+    iconVariant: "teal",
+  },
+  {
+    id: "item-added",
+    title: "Um item foi adicionado na caixa “Documentos”",
+    description: "João adicionou o item “RG” na caixa “Documentos”.",
+    date: "Hoje, 11:20",
+    unread: true,
+    icon: Package,
+    iconVariant: "blue",
+  },
+  {
+    id: "item-updated",
+    title: "O item “Furadeira Bosch” foi atualizado",
+    description: "João editou as informações do item.",
+    date: "Ontem, 18:05",
+    unread: true,
+    icon: Pencil,
+    iconVariant: "purple",
+  },
+  {
+    id: "space-shared",
+    title: "Você compartilhou o espaço “Minha Casa”",
+    description: "Com Ana e mais 2 pessoas.",
+    date: "Ontem, 16:22",
+    unread: false,
+    icon: Share2,
+    iconVariant: "orange",
+  },
+  {
+    id: "item-removed",
+    title: "Um item foi removido",
+    description: "O item “Abajur” foi removido da caixa “Decoração”.",
+    date: "12 de jan. de 2024, 09:14",
+    unread: false,
+    icon: Trash2,
+    iconVariant: "pink",
+  },
+  {
+    id: "room-created",
+    title: "Novo ambiente criado",
+    description: "O ambiente “Varanda” foi criado no espaço “Minha Casa”.",
+    date: "10 de jan. de 2024, 20:41",
+    unread: false,
+    icon: House,
+    iconVariant: "teal",
+  },
+  {
+    id: "invitation-accepted",
+    title: "Lucas aceitou seu convite",
+    description: "Agora faz parte do espaço “Apartamento”.",
+    date: "8 de jan. de 2024, 13:27",
+    unread: false,
+    icon: Users,
+    iconVariant: "purple",
+  },
+  {
+    id: "item-favorited",
+    title: "Item adicionado aos favoritos",
+    description:
+      "O item “Controle de videogame” foi adicionado aos seus favoritos.",
+    date: "5 de jan. de 2024, 17:03",
+    unread: false,
+    icon: Star,
+    iconVariant: "yellow",
+  },
+] satisfies (Omit<NotificationItemProps, "actions"> & { id: string })[];
