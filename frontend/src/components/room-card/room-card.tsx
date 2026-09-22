@@ -1,9 +1,10 @@
 import { Box, Flex, Heading, IconButton, Text } from "@chakra-ui/react";
 import { ChevronRight, MoreVertical } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { colorVariantStyles } from "../color-variants";
+import type { ColorVariant } from "../color-variants";
 
-export type RoomCardVariant =
-  "blue" | "green" | "purple" | "cyan" | "orange" | "teal" | "pink";
+export type RoomCardVariant = ColorVariant;
 
 export interface RoomCardProps {
   name: string;
@@ -14,15 +15,7 @@ export interface RoomCardProps {
   layout?: "compact" | "detailed";
 }
 
-const variantStyles = {
-  blue: { bg: "info.50", color: "info.700" },
-  green: { bg: "success.50", color: "success.700" },
-  purple: { bg: "purple.50", color: "purple.700" },
-  cyan: { bg: "cyan.50", color: "cyan.700" },
-  orange: { bg: "warning.50", color: "warning.700" },
-  teal: { bg: "brand.subtle", color: "brand.fg" },
-  pink: { bg: "pink.50", color: "pink.700" },
-} satisfies Record<RoomCardVariant, { bg: string; color: string }>;
+const variantStyles = colorVariantStyles;
 
 export function RoomCard({
   name,

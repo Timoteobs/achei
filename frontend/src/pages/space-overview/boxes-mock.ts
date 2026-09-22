@@ -1,0 +1,68 @@
+import type { BoxCardProps } from "../../components/box-card/box-card";
+
+export const boxesMock = [
+  {
+    id: "caixa-ferramentas",
+    name: "Caixa de ferramentas",
+    itemsCount: 12,
+    roomName: "Garagem",
+    category: "Ferramentas",
+    variant: "blue",
+  },
+  {
+    id: "caixa-1",
+    name: "Caixa 1",
+    itemsCount: 8,
+    roomName: "Quarto",
+    category: "Documentos",
+    variant: "green",
+  },
+  {
+    id: "gaveta-2",
+    name: "Gaveta 2",
+    itemsCount: 6,
+    roomName: "Escritório",
+    category: "Eletrônicos",
+    variant: "purple",
+  },
+  {
+    id: "armario-3",
+    name: "Armário 3",
+    itemsCount: 14,
+    roomName: "Cozinha",
+    category: "Utensílios",
+    variant: "orange",
+  },
+  {
+    id: "brinquedos",
+    name: "Brinquedos",
+    itemsCount: 20,
+    roomName: "Quarto das crianças",
+    category: "Infantil",
+    variant: "pink",
+  },
+  {
+    id: "roupas-inverno",
+    name: "Roupas de inverno",
+    itemsCount: 18,
+    roomName: "Quarto",
+    category: "Roupas",
+    variant: "teal",
+  },
+  {
+    id: "produtos-limpeza",
+    name: "Produtos de limpeza",
+    itemsCount: 9,
+    roomName: "Lavanderia",
+    category: "Limpeza",
+    variant: "purple",
+  },
+  {
+    id: "decoracao",
+    name: "Decoração",
+    itemsCount: 7,
+    roomName: "Sala",
+    category: "Decoração",
+    variant: "blue",
+  },
+] satisfies (BoxCardProps & { id: string })[];
