@@ -68,6 +68,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             mb="1"
           >
             {label}
+            <Field.RequiredIndicator color="danger.500" ms="1" />
           </Field.Label>
         )}
         <Box position="relative" w="full">

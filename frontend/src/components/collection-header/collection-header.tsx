@@ -15,6 +15,7 @@ interface CollectionHeaderProps {
   description: string;
   actionLabel: string;
   searchLabel: string;
+  onActionClick?: () => void;
 }
 
 export function CollectionHeader({
@@ -22,6 +23,7 @@ export function CollectionHeader({
   description,
   actionLabel,
   searchLabel,
+  onActionClick,
 }: Readonly<CollectionHeaderProps>) {
   return (
     <Box as="header">
@@ -40,6 +42,7 @@ export function CollectionHeader({
           h="10"
           px="4"
           flexShrink="0"
+          onClick={onActionClick}
         >
           <Plus size={16} strokeWidth={1.8} aria-hidden="true" />
           {actionLabel}

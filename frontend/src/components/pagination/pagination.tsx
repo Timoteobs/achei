@@ -33,7 +33,7 @@ export function Pagination({
 
         <ChakraPagination.Items
           render={(page) => (
-            <ChakraPagination.Item key={page.value} value={page.value} asChild>
+            <ChakraPagination.Item key={page.value} type={page.type} value={page.value} asChild>
               <IconButton
                 variant={{ base: "ghost", _selected: "outline" }}
                 borderWidth="1px"
