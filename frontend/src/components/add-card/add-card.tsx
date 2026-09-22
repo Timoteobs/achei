@@ -11,12 +11,18 @@ const sizeStyles = {
 export function AddCard({
   label,
   size = "md",
-}: Readonly<{ label: string; size?: "sm" | "md" | "lg" }>) {
+  onClick,
+}: Readonly<{
+  label: string;
+  size?: "sm" | "md" | "lg";
+  onClick?: () => void;
+}>) {
   const { w, minH, iconBox } = sizeStyles[size];
 
   return (
     <Button
       type="button"
+      onClick={onClick}
       variant="link"
       w={w}
       h="full"

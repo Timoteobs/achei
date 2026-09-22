@@ -3,7 +3,9 @@ import { Plus, Search } from "lucide-react";
 import { Button } from "../../../components/button/button";
 import { Input } from "../../../components/input/input";
 
-export function HomeHeader() {
+export function HomeHeader({
+  onNewSpaceClick,
+}: Readonly<{ onNewSpaceClick?: () => void }>) {
   return (
     <Grid
       as="header"
@@ -25,7 +27,10 @@ export function HomeHeader() {
           lineHeight="1.25"
           letterSpacing="tight"
         >
-          Olá, Timóteo! <Box as="span" aria-hidden="true">👋</Box>
+          Olá, Timóteo!{" "}
+          <Box as="span" aria-hidden="true">
+            👋
+          </Box>
         </Heading>
         <Text color="fg.muted" fontSize={{ base: "sm", md: "md" }} mt="2">
           Organize seus espaços e encontre seus itens em segundos.
@@ -43,6 +48,7 @@ export function HomeHeader() {
       </Box>
       <Button
         type="button"
+        onClick={onNewSpaceClick}
         gridArea="action"
         w={{ base: "full", md: "auto" }}
         h="11"

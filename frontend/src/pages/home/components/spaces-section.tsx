@@ -7,21 +7,34 @@ import type { SpaceCardProps } from "../../../components/space-card/space-card";
 
 export function SpacesSection({
   spaces,
-}: Readonly<{ spaces: readonly (SpaceCardProps & { id: string })[] }>) {
+  showTitle = true,
+  onNewSpaceClick,
+}: Readonly<{
+  spaces: readonly (SpaceCardProps & { id: string })[];
+  showTitle?: boolean;
+  onNewSpaceClick?: () => void;
+}>) {
   const headingId = useId();
 
   return (
-    <Box as="section" aria-labelledby={headingId} mt="8" minW="0">
-      <Heading
-        as="h2"
-        id={headingId}
-        color="fg.default"
-        fontSize="lg"
-        fontWeight="semibold"
-        mb="4"
-      >
-        Meus espaços
-      </Heading>
+    <Box
+      as="section"
+      aria-labelledby={showTitle ? headingId : undefined}
+      mt="8"
+      minW="0"
+    >
+      {showTitle && (
+        <Heading
+          as="h2"
+          id={headingId}
+          color="fg.default"
+          fontSize="lg"
+          fontWeight="semibold"
+          mb="4"
+        >
+          Meus espaços
+        </Heading>
+      )}
       <Flex
         as="ul"
         aria-label="Lista de espaços"
@@ -35,6 +48,9 @@ export function SpacesSection({
         pb="3"
         borderRadius="md"
       >
+        <Box as="li" flexShrink="0">
+          <NewSpaceCard onClick={onNewSpaceClick} />
+        </Box>
         {spaces.map(({ id, ...space }) => (
           <Box as="li" key={id} flexShrink="0">
             <Box asChild display="block" h="full" borderRadius="md">
@@ -44,9 +60,6 @@ export function SpacesSection({
             </Box>
           </Box>
         ))}
-        <Box as="li" flexShrink="0">
-          <NewSpaceCard />
-        </Box>
       </Flex>
     </Box>
   );

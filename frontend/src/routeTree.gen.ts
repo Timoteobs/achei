@@ -21,6 +21,7 @@ import { Route as AppEspacosRouteImport } from './routes/_app.espacos'
 import { Route as AppFavoritosRouteImport } from './routes/_app.favoritos'
 import { Route as AppLixeiraRouteImport } from './routes/_app.lixeira'
 import { Route as AppNotificacoesRouteImport } from './routes/_app.notificacoes'
+import { Route as AppEspacosIndexRouteImport } from './routes/_app.espacos.index'
 import { Route as AppEspacosSpaceIdRouteImport } from './routes/_app.espacos.$spaceId'
 import { Route as AppEspacosSpaceIdIndexRouteImport } from './routes/_app.espacos.$spaceId.index'
 import { Route as AppEspacosSpaceIdLocaisLocationIdRouteImport } from './routes/_app.espacos.$spaceId.locais.$locationId'
@@ -84,6 +85,11 @@ const AppNotificacoesRoute = AppNotificacoesRouteImport.update({
   path: '/notificacoes',
   getParentRoute: () => AppRoute,
 } as any)
+const AppEspacosIndexRoute = AppEspacosIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppEspacosRoute,
+} as any)
 const AppEspacosSpaceIdRoute = AppEspacosSpaceIdRouteImport.update({
   id: '/$spaceId',
   path: '/$spaceId',
@@ -114,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/lixeira': typeof AppLixeiraRoute
   '/notificacoes': typeof AppNotificacoesRoute
   '/espacos/$spaceId': typeof AppEspacosSpaceIdRouteWithChildren
+  '/espacos/': typeof AppEspacosIndexRoute
   '/espacos/$spaceId/': typeof AppEspacosSpaceIdIndexRoute
   '/espacos/$spaceId/locais/$locationId': typeof AppEspacosSpaceIdLocaisLocationIdRoute
 }
@@ -124,11 +131,11 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/atividade': typeof AppAtividadeRoute
   '/buscar': typeof AppBuscarRoute
-  '/espacos': typeof AppEspacosRouteWithChildren
   '/favoritos': typeof AppFavoritosRoute
   '/lixeira': typeof AppLixeiraRoute
   '/notificacoes': typeof AppNotificacoesRoute
   '/': typeof AppIndexRoute
+  '/espacos': typeof AppEspacosIndexRoute
   '/espacos/$spaceId': typeof AppEspacosSpaceIdIndexRoute
   '/espacos/$spaceId/locais/$locationId': typeof AppEspacosSpaceIdLocaisLocationIdRoute
 }
@@ -147,6 +154,7 @@ export interface FileRoutesById {
   '/_app/notificacoes': typeof AppNotificacoesRoute
   '/_app/': typeof AppIndexRoute
   '/_app/espacos/$spaceId': typeof AppEspacosSpaceIdRouteWithChildren
+  '/_app/espacos/': typeof AppEspacosIndexRoute
   '/_app/espacos/$spaceId/': typeof AppEspacosSpaceIdIndexRoute
   '/_app/espacos/$spaceId/locais/$locationId': typeof AppEspacosSpaceIdLocaisLocationIdRoute
 }
@@ -165,6 +173,7 @@ export interface FileRouteTypes {
     | '/lixeira'
     | '/notificacoes'
     | '/espacos/$spaceId'
+    | '/espacos/'
     | '/espacos/$spaceId/'
     | '/espacos/$spaceId/locais/$locationId'
   fileRoutesByTo: FileRoutesByTo
@@ -175,11 +184,11 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/atividade'
     | '/buscar'
-    | '/espacos'
     | '/favoritos'
     | '/lixeira'
     | '/notificacoes'
     | '/'
+    | '/espacos'
     | '/espacos/$spaceId'
     | '/espacos/$spaceId/locais/$locationId'
   id:
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
     | '/_app/notificacoes'
     | '/_app/'
     | '/_app/espacos/$spaceId'
+    | '/_app/espacos/'
     | '/_app/espacos/$spaceId/'
     | '/_app/espacos/$spaceId/locais/$locationId'
   fileRoutesById: FileRoutesById
@@ -295,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppNotificacoesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/espacos/': {
+      id: '/_app/espacos/'
+      path: '/'
+      fullPath: '/espacos/'
+      preLoaderRoute: typeof AppEspacosIndexRouteImport
+      parentRoute: typeof AppEspacosRoute
+    }
     '/_app/espacos/$spaceId': {
       id: '/_app/espacos/$spaceId'
       path: '/$spaceId'
@@ -335,10 +352,12 @@ const AppEspacosSpaceIdRouteWithChildren =
 
 interface AppEspacosRouteChildren {
   AppEspacosSpaceIdRoute: typeof AppEspacosSpaceIdRouteWithChildren
+  AppEspacosIndexRoute: typeof AppEspacosIndexRoute
 }
 
 const AppEspacosRouteChildren: AppEspacosRouteChildren = {
   AppEspacosSpaceIdRoute: AppEspacosSpaceIdRouteWithChildren,
+  AppEspacosIndexRoute: AppEspacosIndexRoute,
 }
 
 const AppEspacosRouteWithChildren = AppEspacosRoute._addFileChildren(

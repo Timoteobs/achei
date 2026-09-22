@@ -13,9 +13,8 @@ import { useState } from "react";
 import { BrandMark as AcheiMark } from "../brand-logo/brand-logo";
 import { SidebarHeader } from "./sidebar-header";
 import { SidebarNavigation } from "./sidebar-navigation";
-import { SidebarSpaces } from "./sidebar-spaces";
 import { SidebarUser } from "./sidebar-user";
-import type { SidebarProps, SidebarSelection } from "./types";
+import type { SidebarProps } from "./types";
 
 export function Sidebar(props: Readonly<SidebarProps>) {
   const desktopExpanded =
@@ -25,27 +24,10 @@ export function Sidebar(props: Readonly<SidebarProps>) {
     boolean | undefined
   >();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [expandedSpaces, setExpandedSpaces] = useState(
-    () => new Set(props.selection ? [props.selection.spaceId] : []),
-  );
   const collapsed = collapsedOverride ?? !desktopExpanded;
 
   // A viewport change must release the drawer's focus trap and scroll lock.
   if (!mobile && drawerOpen) setDrawerOpen(false);
-
-  const onSelect = (selection: SidebarSelection) => {
-    setExpandedSpaces((previous) => new Set([...previous, selection.spaceId]));
-    props.onSelectLocation(selection);
-    setDrawerOpen(false);
-  };
-
-  const onToggleSpace = (id: string) =>
-    setExpandedSpaces((previous) => {
-      const next = new Set(previous);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
 
   const content = (compact: boolean, isDrawer = false) => (
     <Flex
@@ -69,18 +51,6 @@ export function Sidebar(props: Readonly<SidebarProps>) {
             setDrawerOpen(false);
           }}
         />
-        {!compact && (
-          <SidebarSpaces
-            spaces={props.spaces}
-            selection={
-              props.activeSection === "spaces" ? props.selection : undefined
-            }
-            expandedSpaces={expandedSpaces}
-            onToggleSpace={onToggleSpace}
-            onSelect={onSelect}
-            onCreateSpace={props.onCreateSpace}
-          />
-        )}
       </Flex>
       <SidebarUser
         user={props.user}
