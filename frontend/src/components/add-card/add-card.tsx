@@ -2,17 +2,25 @@ import { Flex, Text } from "@chakra-ui/react";
 import { Plus } from "lucide-react";
 import { Button } from "../button/button";
 
+const sizeStyles = {
+  sm: { w: "36", minH: "32", iconBox: "10" },
+  md: { w: "60", minH: "48", iconBox: "12" },
+  lg: { w: "full", minH: "28", iconBox: "12" },
+} satisfies Record<string, { w: string; minH: string; iconBox: string }>;
+
 export function AddCard({
   label,
   size = "md",
-}: Readonly<{ label: string; size?: "sm" | "md" }>) {
+}: Readonly<{ label: string; size?: "sm" | "md" | "lg" }>) {
+  const { w, minH, iconBox } = sizeStyles[size];
+
   return (
     <Button
       type="button"
       variant="link"
-      w={size === "sm" ? "36" : "60"}
+      w={w}
       h="full"
-      minH={size === "sm" ? "32" : "48"}
+      minH={minH}
       flexShrink="0"
       flexDirection="column"
       gap="3"
@@ -26,7 +34,7 @@ export function AddCard({
     >
       <Flex
         as="span"
-        boxSize={size === "sm" ? "10" : "12"}
+        boxSize={iconBox}
         align="center"
         justify="center"
         borderRadius="full"
