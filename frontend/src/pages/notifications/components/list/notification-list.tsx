@@ -1,6 +1,6 @@
 import { Box, IconButton } from "@chakra-ui/react";
 import { MoreVertical } from "lucide-react";
-import { NotificationItem } from "../../../components/notification-item/notification-item";
+import { NotificationItem } from "../../../../components/notification-item/notification-item";
 import { notificationsMock } from "./notifications-mock";
 
 export function NotificationList() {

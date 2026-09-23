@@ -9,11 +9,11 @@ import {
   Textarea,
 } from "@chakra-ui/react";
 import { House } from "lucide-react";
-import { Button } from "../../../components/button/button";
-import { colorVariantStyles } from "../../../components/color-variants";
-import { Input } from "../../../components/input/input";
-import { Modal } from "../../../components/modal/modal";
-import type { ModalProps } from "../../../components/modal/modal";
+import { Button } from "../../../../components/button/button";
+import { colorVariantStyles } from "../../../../components/color-variants";
+import { Input } from "../../../../components/input/input";
+import { Modal } from "../../../../components/modal/modal";
+import type { ModalProps } from "../../../../components/modal/modal";
 import { spaceColorsMock, spaceIconsMock } from "./new-space-mock";
 
 export function NewSpaceModal({

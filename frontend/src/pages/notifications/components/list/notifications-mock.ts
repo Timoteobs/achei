@@ -8,7 +8,7 @@ import {
   UserPlus,
   Users,
 } from "lucide-react";
-import type { NotificationItemProps } from "../../../components/notification-item/notification-item";
+import type { NotificationItemProps } from "../../../../components/notification-item/notification-item";
 
 export const notificationsMock = [
   {

@@ -1,9 +1,9 @@
 import { Box } from "@chakra-ui/react";
 import { useState } from "react";
 import { CollectionHeader } from "../../components/collection-header/collection-header";
-import { SpacesSection } from "../home/components/spaces-section";
-import { spacesMock } from "../home/spaces-mock";
-import { NewSpaceModal } from "./components/new-space-modal";
+import { SpacesSection } from "../home/components/spaces/spaces-section";
+import { spacesMock } from "../home/components/spaces/spaces-mock";
+import { NewSpaceModal } from "./components/new-space/new-space-modal";
 
 export function SpacesPage() {
   const [isNewSpaceOpen, setIsNewSpaceOpen] = useState(false);

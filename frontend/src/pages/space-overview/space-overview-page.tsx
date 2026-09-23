@@ -1,6 +1,6 @@
 import { Box } from "@chakra-ui/react";
 import { useParams } from "@tanstack/react-router";
-import { spacesMock } from "../home/spaces-mock";
+import { spacesMock } from "../home/components/spaces/spaces-mock";
 import { SpaceOverviewHeader } from "./components/space-overview-header";
 import { SpaceSummary } from "./components/summary/space-summary";
 import { SpaceTabs } from "./components/space-tabs";

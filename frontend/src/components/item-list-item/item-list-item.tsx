@@ -5,6 +5,7 @@ import type { LucideIcon } from "lucide-react";
 export interface ItemListItemProps {
   name: string;
   location: readonly string[];
+  locationSeparator?: string;
   image?: string;
   icon?: LucideIcon;
   time?: string;
@@ -13,6 +14,7 @@ export interface ItemListItemProps {
 export function ItemListItem({
   name,
   location,
+  locationSeparator = " › ",
   image,
   icon: Icon = Package,
   time,
@@ -50,7 +52,7 @@ export function ItemListItem({
           {name}
         </Text>
         <Text color="fg.muted" fontSize="sm" mt="1">
-          {location.join(" › ")}
+          {location.join(locationSeparator)}
         </Text>
       </Box>
       {time && (

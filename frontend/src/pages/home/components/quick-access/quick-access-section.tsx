@@ -1,7 +1,7 @@
 import { Box, Grid, Heading } from "@chakra-ui/react";
 import { useId } from "react";
-import { QuickAccessCard } from "../../../components/quick-access-card/quick-access-card";
-import { quickAccessMock } from "../quick-access-mock";
+import { QuickAccessCard } from "../../../../components/quick-access-card/quick-access-card";
+import { quickAccessMock } from "./quick-access-mock";
 
 export function QuickAccessSection() {
   const headingId = useId();

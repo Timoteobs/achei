@@ -1,5 +1,5 @@
 import { Building2, House, HouseHeart } from "lucide-react";
-import type { SpaceCardProps } from "../../components/space-card/space-card";
+import type { SpaceCardProps } from "../../../../components/space-card/space-card";
 
 export const spacesMock = [
   {

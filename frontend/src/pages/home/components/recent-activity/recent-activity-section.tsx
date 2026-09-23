@@ -1,8 +1,8 @@
 import { Box, Flex, Heading, Stack } from "@chakra-ui/react";
 import { useId } from "react";
-import { ActivityItem } from "../../../components/activity-item/activity-item";
-import { Button } from "../../../components/button/button";
-import { recentActivitiesMock } from "../recent-activities-mock";
+import { ActivityItem } from "../../../../components/activity-item/activity-item";
+import { Button } from "../../../../components/button/button";
+import { recentActivitiesMock } from "./recent-activities-mock";
 
 export function RecentActivitySection() {
   const headingId = useId();

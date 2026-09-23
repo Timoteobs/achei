@@ -1,4 +1,4 @@
-import type { ActivityItemProps } from "../../components/activity-item/activity-item";
+import type { ActivityItemProps } from "../../../../components/activity-item/activity-item";
 
 export const recentActivitiesMock = [
   {

@@ -1,5 +1,5 @@
 import { Clock3, Heart, ImageOff, Trash2 } from "lucide-react";
-import type { QuickAccessCardProps } from "../../components/quick-access-card/quick-access-card";
+import type { QuickAccessCardProps } from "../../../../components/quick-access-card/quick-access-card";
 
 export const quickAccessMock = [
   {

@@ -1,7 +1,7 @@
 import { Flex } from "@chakra-ui/react";
 import { Check } from "lucide-react";
-import { Button } from "../../../components/button/button";
-import { FilterChip } from "../../../components/filter-chip/filter-chip";
+import { Button } from "../../../../components/button/button";
+import { FilterChip } from "../../../../components/filter-chip/filter-chip";
 import { notificationFiltersMock } from "./notification-filters-mock";
 
 export function NotificationFilters() {

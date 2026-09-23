@@ -1,7 +1,16 @@
 export type ColorVariant =
-  "blue" | "green" | "purple" | "cyan" | "orange" | "teal" | "pink" | "yellow";
+  | "blue"
+  | "green"
+  | "purple"
+  | "cyan"
+  | "orange"
+  | "teal"
+  | "pink"
+  | "yellow"
+  | "neutral";
 
 export const colorVariantStyles = {
+  neutral: { bg: "bg.subtle", color: "fg.muted" },
   blue: { bg: "info.50", color: "info.700" },
   green: { bg: "success.50", color: "success.700" },
   purple: { bg: "purple.50", color: "purple.700" },

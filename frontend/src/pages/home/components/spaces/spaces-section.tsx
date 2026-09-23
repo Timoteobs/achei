@@ -1,9 +1,9 @@
 import { Box, Flex, Heading } from "@chakra-ui/react";
 import { Link } from "@tanstack/react-router";
 import { useId } from "react";
-import { NewSpaceCard } from "../../../components/new-space-card/new-space-card";
-import { SpaceCard } from "../../../components/space-card/space-card";
-import type { SpaceCardProps } from "../../../components/space-card/space-card";
+import { NewSpaceCard } from "../../../../components/new-space-card/new-space-card";
+import { SpaceCard } from "../../../../components/space-card/space-card";
+import type { SpaceCardProps } from "../../../../components/space-card/space-card";
 
 export function SpacesSection({
   spaces,

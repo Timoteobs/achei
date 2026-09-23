@@ -7,7 +7,7 @@ import {
   TreePalm,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { ColorVariant } from "../../../components/color-variants";
+import type { ColorVariant } from "../../../../components/color-variants";
 
 export const spaceIconsMock: {
   label: string;

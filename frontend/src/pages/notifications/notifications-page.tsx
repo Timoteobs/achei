@@ -1,7 +1,7 @@
 import { Box } from "@chakra-ui/react";
 import { CollectionHeader } from "../../components/collection-header/collection-header";
-import { NotificationFilters } from "./components/notification-filters";
-import { NotificationList } from "./components/notification-list";
+import { NotificationFilters } from "./components/filters/notification-filters";
+import { NotificationList } from "./components/list/notification-list";
 
 export function NotificationsPage() {
   return (
