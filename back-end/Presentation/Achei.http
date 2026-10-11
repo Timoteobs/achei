@@ -1,0 +1,6 @@
+@Achei_HostAddress = http://localhost:5022
+
+GET {{Achei_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
