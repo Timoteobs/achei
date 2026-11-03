@@ -8,6 +8,7 @@ public class User : BaseEntity
     public bool Active { get; private set; } = true;
     public string Name { get; private set; } = string.Empty;
     public string Email { get; private set; } = string.Empty;
+    public string PasswordHash { get; private set; } = string.Empty;
     public string? Phone { get; private set; }
     public string? AvatarUrl { get; private set; }
     public DateTime CreatedAt { get; private set; }
@@ -15,8 +16,7 @@ public class User : BaseEntity
 
     private User() { }
 
-    public User(string name, string email, string? phone = null, string? avatarUrl = null,
-        bool active = true)
+    public User(string name, string email, string passwordHash, string? phone = null, string? avatarUrl = null, bool active = true)
     {
         DomainValidator.Validator(
             ValidationRule.Required(name, "Nome"),
@@ -24,6 +24,9 @@ public class User : BaseEntity
             ValidationRule.Required(email, "E-mail"),
             ValidationRule.MaxLength(email, 255, "E-mail"),
             ValidationRule.Email(email, "E-mail"),
+            ValidationRule.Required(passwordHash, "Hash da senha"),
+            ValidationRule.MaxLength(passwordHash, 255, "Hash da senha"),
+            ValidationRule.Argon2idHash(passwordHash, "Hash da senha"),
             ValidationRule.MaxLength(phone, 20, "Telefone"),
             ValidationRule.MaxLength(avatarUrl, 1000, "URL do avatar")
         );
@@ -31,6 +34,7 @@ public class User : BaseEntity
         Active = active;
         Name = name.Trim();
         Email = email.Trim().ToLowerInvariant();
+        PasswordHash = passwordHash;
         Phone = phone?.Trim();
         AvatarUrl = avatarUrl?.Trim();
         CreatedAt = DateTime.UtcNow;

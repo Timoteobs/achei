@@ -10,7 +10,7 @@ public class ActivityConfiguration : IEntityTypeConfiguration<Activity>
 {
     public void Configure(EntityTypeBuilder<Activity> entity)
     {
-        entity.ToTable("activity");
+        entity.ToTable("tbl_activity");
 
         entity.HasKey(e => e.Id);
 

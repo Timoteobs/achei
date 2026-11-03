@@ -8,7 +8,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> entity)
     {
-        entity.ToTable("user");
+        entity.ToTable("tbl_user");
 
         entity.HasKey(e => e.Id);
 
@@ -34,6 +34,12 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired();
 
         entity.HasIndex(e => e.Email).IsUnique();
+
+        entity.Property(e => e.PasswordHash)
+            .HasColumnName("password_hash")
+            .HasMaxLength(255)
+            .IsUnicode(false)
+            .IsRequired();
 
         entity.Property(e => e.Phone)
             .HasColumnName("phone")

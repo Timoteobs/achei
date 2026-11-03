@@ -9,7 +9,7 @@ public class InvitationConfiguration : IEntityTypeConfiguration<Invitation>
 {
     public void Configure(EntityTypeBuilder<Invitation> entity)
     {
-        entity.ToTable("invitation");
+        entity.ToTable("tbl_invitation");
 
         entity.HasKey(e => e.Id);
 

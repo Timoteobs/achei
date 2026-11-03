@@ -9,7 +9,7 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
 {
     public void Configure(EntityTypeBuilder<Item> entity)
     {
-        entity.ToTable("item");
+        entity.ToTable("tbl_item");
 
         entity.HasKey(e => e.Id);
 

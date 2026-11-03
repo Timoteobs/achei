@@ -9,7 +9,7 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
 {
     public void Configure(EntityTypeBuilder<Member> entity)
     {
-        entity.ToTable("member");
+        entity.ToTable("tbl_member");
 
         entity.HasKey(e => e.Id);
 

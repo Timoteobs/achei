@@ -8,7 +8,7 @@ public class LocationImageConfiguration : IEntityTypeConfiguration<LocationImage
 {
     public void Configure(EntityTypeBuilder<LocationImage> entity)
     {
-        entity.ToTable("location_image");
+        entity.ToTable("tbl_location_image");
 
         entity.HasKey(e => e.Id);
 

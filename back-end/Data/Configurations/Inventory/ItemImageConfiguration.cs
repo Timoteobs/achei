@@ -8,7 +8,7 @@ public class ItemImageConfiguration : IEntityTypeConfiguration<ItemImage>
 {
     public void Configure(EntityTypeBuilder<ItemImage> entity)
     {
-        entity.ToTable("item_image");
+        entity.ToTable("tbl_item_image");
 
         entity.HasKey(e => e.Id);
 

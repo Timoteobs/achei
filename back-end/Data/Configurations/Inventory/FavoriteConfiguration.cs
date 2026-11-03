@@ -9,7 +9,7 @@ public class FavoriteConfiguration : IEntityTypeConfiguration<Favorite>
 {
     public void Configure(EntityTypeBuilder<Favorite> entity)
     {
-        entity.ToTable("favorite");
+        entity.ToTable("tbl_favorite");
         entity.Ignore(e => e.Id);
 
         entity.HasKey(e => new { e.UserId, e.ItemId });

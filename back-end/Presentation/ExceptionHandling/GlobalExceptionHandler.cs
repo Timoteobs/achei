@@ -1,0 +1,28 @@
+using Application.Common.Exceptions;
+using Microsoft.AspNetCore.Diagnostics;
+
+namespace Achei.ExceptionHandling;
+
+public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
+{
+    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
+    {
+        if (exception is OperationCanceledException && httpContext.RequestAborted.IsCancellationRequested)
+            return false;
+
+        var (status, title, detail) = exception switch
+        {
+            EmailAlreadyRegisteredException => (StatusCodes.Status409Conflict, "Não foi possível criar a conta.", exception.Message),
+            UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Falha na autenticação.", exception.Message),
+            ArgumentException => (StatusCodes.Status400BadRequest, "Dados inválidos.", exception.Message),
+            _ => (StatusCodes.Status500InternalServerError, "Erro interno do servidor.", "Ocorreu um erro inesperado.")
+        };
+
+        if (status == StatusCodes.Status500InternalServerError)
+            logger.LogError(exception, "Erro não tratado durante a requisição.");
+
+        await Results.Problem(statusCode: status, title: title, detail: detail).ExecuteAsync(httpContext);
+
+        return true;
+    }
+}

@@ -9,7 +9,7 @@ public class SpaceConfiguration : IEntityTypeConfiguration<Space>
 {
     public void Configure(EntityTypeBuilder<Space> entity)
     {
-        entity.ToTable("space");
+        entity.ToTable("tbl_space");
 
         entity.HasKey(e => e.Id);
 

@@ -8,7 +8,7 @@ public class ItemTagConfiguration : IEntityTypeConfiguration<ItemTag>
 {
     public void Configure(EntityTypeBuilder<ItemTag> entity)
     {
-        entity.ToTable("item_tag");
+        entity.ToTable("tbl_item_tag");
         entity.Ignore(e => e.Id);
 
         entity.HasKey(e => new { e.ItemId, e.TagId });

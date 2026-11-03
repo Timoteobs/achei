@@ -9,7 +9,7 @@ public class TagConfiguration : IEntityTypeConfiguration<Tag>
 {
     public void Configure(EntityTypeBuilder<Tag> entity)
     {
-        entity.ToTable("tag");
+        entity.ToTable("tbl_tag");
 
         entity.HasKey(e => e.Id);
 

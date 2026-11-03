@@ -10,7 +10,7 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
 {
     public void Configure(EntityTypeBuilder<Location> entity)
     {
-        entity.ToTable("location");
+        entity.ToTable("tbl_location");
 
         entity.HasKey(e => e.Id);
 
