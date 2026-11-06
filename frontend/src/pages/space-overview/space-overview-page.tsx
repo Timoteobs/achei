@@ -1,13 +1,17 @@
-import { Box } from "@chakra-ui/react";
-import { useParams } from "@tanstack/react-router";
-import { spacesMock } from "../home/components/spaces/spaces-mock";
+import { Box, Flex, Spinner, Text } from "@chakra-ui/react";
+import { Link, useParams } from "@tanstack/react-router";
+import { isAxiosError } from "axios";
+import { Button } from "../../components/button/button";
+import { useSpaceQuery } from "../../hooks/spaces/use-space-query";
 import { SpaceOverviewHeader } from "./components/space-overview-header";
 import { SpaceSummary } from "./components/summary/space-summary";
 import { SpaceTabs } from "./components/space-tabs";
 
 export function SpaceOverviewPage() {
   const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
-  const space = spacesMock.find(({ id }) => id === spaceId);
+  const spaceQuery = useSpaceQuery(spaceId);
+  const space = spaceQuery.data;
+  const notFound = isAxiosError(spaceQuery.error) && spaceQuery.error.response?.status === 404;
 
   return (
     <Box
@@ -17,9 +21,48 @@ export function SpaceOverviewPage() {
       px={{ base: "5", md: "6", lg: "8" }}
       py="5"
     >
-      <SpaceOverviewHeader name={space?.name ?? "Espaço"} icon={space?.icon} />
-      <SpaceSummary />
-      <SpaceTabs />
+      {spaceQuery.isPending ? (
+        <Flex role="status" align="center" gap="3" py="6" color="fg.muted">
+          <Spinner size="sm" color="brand.fg" />
+          <Text>Carregando espaço...</Text>
+        </Flex>
+      ) : spaceQuery.isError || !space ? (
+        <Box py="6">
+          <Text color="fg.muted" mb="4">
+            {notFound
+              ? "Espaço não encontrado ou sem permissão de acesso."
+              : "Não foi possível carregar este espaço."}
+          </Text>
+          <Flex gap="3" flexWrap="wrap">
+            <Button variant="outline" px="4" asChild>
+              <Link to="/espacos">Voltar para meus espaços</Link>
+            </Button>
+            {!notFound && (
+              <Button
+                type="button"
+                w="auto"
+                px="4"
+                loading={spaceQuery.isFetching}
+                onClick={() => {
+                  void spaceQuery.refetch();
+                }}
+              >
+                Tentar novamente
+              </Button>
+            )}
+          </Flex>
+        </Box>
+      ) : (
+        <>
+          <SpaceOverviewHeader
+            name={space.name}
+            description={space.description}
+            imageUrl={space.imageUrl}
+          />
+          <SpaceSummary createdAt={space.createdAt} />
+          <SpaceTabs key={space.id} />
+        </>
+      )}
     </Box>
   );
 }

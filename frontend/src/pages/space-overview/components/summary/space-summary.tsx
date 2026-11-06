@@ -1,10 +1,11 @@
 import { Avatar, AvatarGroup, Flex, Grid, Text } from "@chakra-ui/react";
 import { CalendarDays, LayoutGrid, Package, UsersRound } from "lucide-react";
 import { InfoCard } from "../../../../components/info-card/info-card";
+import { formatDate } from "../../../../utils/date";
 import { spaceSummaryMock } from "./space-summary-mock";
 
-export function SpaceSummary() {
-  const { members, itemsCount, roomsCount, createdAt } = spaceSummaryMock;
+export function SpaceSummary({ createdAt }: Readonly<{ createdAt: string }>) {
+  const { members, itemsCount, roomsCount } = spaceSummaryMock;
 
   return (
     <Grid
@@ -66,7 +67,7 @@ export function SpaceSummary() {
       <InfoCard
         icon={<CalendarDays size={18} strokeWidth={1.8} />}
         label="Criado em"
-        value={createdAt}
+        value={formatDate(createdAt)}
       />
     </Grid>
   );

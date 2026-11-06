@@ -2,7 +2,6 @@ import { Box } from "@chakra-ui/react";
 import { useState } from "react";
 import { CollectionHeader } from "../../components/collection-header/collection-header";
 import { SpacesSection } from "../home/components/spaces/spaces-section";
-import { spacesMock } from "../home/components/spaces/spaces-mock";
 import { NewSpaceModal } from "./components/new-space/new-space-modal";
 
 export function SpacesPage() {
@@ -24,7 +23,6 @@ export function SpacesPage() {
         onActionClick={() => setIsNewSpaceOpen(true)}
       />
       <SpacesSection
-        spaces={spacesMock}
         showTitle={false}
         onNewSpaceClick={() => setIsNewSpaceOpen(true)}
       />

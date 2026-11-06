@@ -38,6 +38,23 @@ O cache dessas mutations é descartado quando deixam de ser observadas, e o
 cache do cliente é limpo ao criar ou encerrar uma sessão. O cache do Query
 permanece apenas em memória; a persistência da sessão continua no Zustand.
 
+## Consulta de espaços
+
+A Home e a página “Meus espaços” consultam `GET /api/spaces` por meio de
+`useSpacesQuery`. Ao abrir um card, `useSpaceQuery` consulta
+`GET /api/spaces/{id}` para carregar os dados do espaço, inclusive em acesso direto.
+Os serviços ficam em `src/services/spaces.ts` e usam o Bearer do Axios.
+
+As queries têm cache separado por usuário, validade de 30 segundos e cancelamento
+via `AbortSignal`. A interface trata carregamento, lista vazia, erro com nova
+tentativa e espaço inexistente/sem acesso. Erros das consultas usam o Sonner;
+respostas `401` mantêm o encerramento de sessão existente.
+
+Os cards mostram nome, descrição e imagem, sem contagens fictícias. A visão geral
+usa também a data de criação retornada pela API. As demais seções de ambientes,
+itens, membros e atividades ainda usam seus mocks. Criação, edição e exclusão de
+espaços ainda não estão integradas no frontend.
+
 ## Login
 
 A tela está em `/login`, com layout próprio sem sidebar. Usa Chakra UI v3,

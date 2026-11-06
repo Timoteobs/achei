@@ -1,12 +1,21 @@
-import { Box, Flex, Heading, Text } from "@chakra-ui/react";
+import { Box, Flex, Heading, Image, Text } from "@chakra-ui/react";
+import { useState } from "react";
 import { ChevronDown, House, Plus, UserRoundPlus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "../../../components/button/button";
 
 export function SpaceOverviewHeader({
   name,
+  description,
+  imageUrl,
   icon: Icon = House,
-}: Readonly<{ name: string; icon?: LucideIcon }>) {
+}: Readonly<{
+  name: string;
+  description?: string | null;
+  imageUrl?: string | null;
+  icon?: LucideIcon;
+}>) {
+  const [failedImage, setFailedImage] = useState<string | null>(null);
   return (
     <Flex
       as="header"
@@ -25,9 +34,21 @@ export function SpaceOverviewHeader({
           bg="brand.subtle"
           color="brand.fg"
           borderRadius="sm"
+          overflow="hidden"
           aria-hidden="true"
         >
-          <Icon size={30} strokeWidth={1.8} />
+          {imageUrl && imageUrl !== failedImage ? (
+            <Image
+              src={imageUrl}
+              alt=""
+              w="full"
+              h="full"
+              objectFit="cover"
+              onError={() => setFailedImage(imageUrl)}
+            />
+          ) : (
+            <Icon size={30} strokeWidth={1.8} />
+          )}
         </Flex>
         <Box minW="0">
           <Heading
@@ -40,8 +61,8 @@ export function SpaceOverviewHeader({
           >
             {name}
           </Heading>
-          <Text color="fg.muted" fontSize="sm" mt="1">
-            Aqui estão todos os itens, ambientes e caixas deste espaço.
+          <Text color="fg.muted" fontSize="sm" mt="1" overflowWrap="anywhere">
+            {description || "Aqui estão todos os itens, ambientes e caixas deste espaço."}
           </Text>
         </Box>
       </Flex>
