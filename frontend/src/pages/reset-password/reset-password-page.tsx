@@ -1,6 +1,7 @@
 import { Box, Flex, Heading, Stack, Text, chakra } from "@chakra-ui/react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 import { BrandLogo } from "../../components/brand-logo/brand-logo";
 import { Button } from "../../components/button/button";
 import { PasswordInput } from "../../components/input/password-input";
@@ -44,7 +45,10 @@ export function ResetPasswordPage() {
         <chakra.form
           aria-label="Redefinir senha"
           noValidate
-          onSubmit={(event) => event.preventDefault()}
+          onSubmit={(event) => {
+            event.preventDefault();
+            toast.info("A redefinição de senha estará disponível em breve.");
+          }}
         >
           <Stack gap="5">
             <PasswordInput

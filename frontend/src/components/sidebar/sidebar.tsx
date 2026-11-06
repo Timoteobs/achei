@@ -56,6 +56,7 @@ export function Sidebar(props: Readonly<SidebarProps>) {
         user={props.user}
         collapsed={compact}
         onAction={props.onUserAction}
+        onSignOut={props.onSignOut}
       />
     </Flex>
   );

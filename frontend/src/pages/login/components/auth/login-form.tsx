@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
 import { useId, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -17,8 +18,10 @@ import { Input } from "../../../../components/input/input";
 import { loginSchema } from "./login-schema";
 import { SocialLogin } from "./social-login";
 import type { LoginValues } from "./types";
+import { useLoginMutation } from "../../../../hooks/auth/use-login-mutation";
 
 export function LoginForm() {
+  const loginMutation = useLoginMutation();
   const {
     register,
     control,
@@ -33,8 +36,10 @@ export function LoginForm() {
   const id = useId();
   const [showPassword, setShowPassword] = useState(false);
 
-  const submit = async (values: LoginValues) => {
-    console.log(values);
+  const isBusy = isSubmitting || loginMutation.isPending;
+
+  const submit = (values: LoginValues) => {
+    if (!loginMutation.isPending) loginMutation.mutate(values);
   };
 
   return (
@@ -63,7 +68,7 @@ export function LoginForm() {
           void handleSubmit(submit)(event);
         }}
         aria-label="Entrar na sua conta"
-        aria-busy={isSubmitting}
+        aria-busy={isBusy}
       >
         <Flex direction="column" gap="5">
           <Input
@@ -170,7 +175,7 @@ export function LoginForm() {
           </Button>
         </Flex>
 
-        <Button type="submit" loading={isSubmitting} loadingText="Entrando...">
+        <Button type="submit" loading={isBusy} loadingText="Entrando...">
           Entrar
           <ArrowRight size={17} strokeWidth={1.7} aria-hidden="true" />
         </Button>
@@ -190,9 +195,11 @@ export function LoginForm() {
         </Button>
       </Flex>
       <SocialLogin
-        disabled={false}
+        disabled={isBusy}
         onSelect={(provider) => {
-          console.log(provider);
+          toast.info(
+            `Login com ${provider === "google" ? "Google" : "Apple"} estará disponível em breve.`,
+          );
         }}
       />
     </Box>

@@ -7,10 +7,12 @@ export function SidebarUser({
   user,
   collapsed,
   onAction,
+  onSignOut,
 }: Readonly<{
   user: SidebarUserData;
   collapsed: boolean;
   onAction?: (action: SidebarUserAction) => void;
+  onSignOut?: () => void;
 }>) {
   const avatar = (
     <Avatar.Root size="sm" bg="brand.subtle" color="brand.fg">
@@ -108,15 +110,15 @@ export function SidebarUser({
             <Menu.Separator borderColor="border.default" />
             <Menu.Item
               value="sign-out"
-              disabled={!onAction}
-              onClick={() => onAction?.("sign-out")}
+              disabled={!onSignOut && !onAction}
+              onClick={() => onSignOut ? onSignOut() : onAction?.("sign-out")}
               gap="2"
               fontSize="sm"
             >
               <LogOut size={16} />
               Sair
             </Menu.Item>
-            {!onAction && (
+            {!onAction && !onSignOut && (
               <Text px="2" py="1.5" fontSize="xs" color="fg.muted">
                 Disponível em breve
               </Text>

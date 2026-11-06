@@ -1,6 +1,7 @@
 import { Box, Flex, Heading, Text, chakra } from "@chakra-ui/react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 import { BrandLogo } from "../../components/brand-logo/brand-logo";
 import { Button } from "../../components/button/button";
 import { Input } from "../../components/input/input";
@@ -45,7 +46,10 @@ export function ForgotPasswordPage() {
         <chakra.form
           aria-label="Recuperar senha"
           noValidate
-          onSubmit={(event) => event.preventDefault()}
+          onSubmit={(event) => {
+            event.preventDefault();
+            toast.info("A recuperação de senha estará disponível em breve.");
+          }}
         >
           <Input
             name="email"

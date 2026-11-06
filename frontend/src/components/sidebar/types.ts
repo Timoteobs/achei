@@ -39,4 +39,5 @@ export interface SidebarProps {
   onSelectLocation: (selection: SidebarSelection) => void;
   onCreateSpace: (name: string) => void;
   onUserAction?: (action: SidebarUserAction) => void;
+  onSignOut?: () => void;
 }

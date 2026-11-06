@@ -3,14 +3,15 @@ import { Outlet, useLocation, useNavigate, useParams } from "@tanstack/react-rou
 import { useState } from "react";
 import { initialSpaces, navigationItems, navigationPaths } from "./components/sidebar/data";
 import { Sidebar } from "./components/sidebar/sidebar";
+import { useAuthStore } from "./stores/auth-store";
 import type {
   SidebarSelection,
   SidebarSpace,
 } from "./components/sidebar/types";
 
-const user = { name: "Timóteo Barros", email: "timoteo@email.com" };
-
 function App() {
+  const session = useAuthStore((state) => state.session);
+  const signOut = useAuthStore((state) => state.signOut);
   const pathname = useLocation({ select: (location) => location.pathname });
   const { spaceId, locationId } = useParams({ strict: false });
   const navigate = useNavigate();
@@ -31,6 +32,8 @@ function App() {
     }
   };
 
+  if (!session) return null;
+
   return (
     <Flex
       minH="100dvh"
@@ -39,7 +42,8 @@ function App() {
     >
       <Sidebar
         spaces={spaces}
-        user={user}
+        user={{ ...session.user, avatarUrl: session.user.avatarUrl ?? undefined }}
+        onSignOut={signOut}
         activeSection={section}
         selection={spaceId ? { spaceId, locationId } : undefined}
         onSelectLocation={selectLocation}

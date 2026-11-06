@@ -10,10 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as RegisterRouteImport } from './routes/register'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
 import { Route as AppAtividadeRouteImport } from './routes/_app.atividade'
 import { Route as AppBuscarRouteImport } from './routes/_app.buscar'
@@ -21,6 +18,10 @@ import { Route as AppEspacosRouteImport } from './routes/_app.espacos'
 import { Route as AppFavoritosRouteImport } from './routes/_app.favoritos'
 import { Route as AppLixeiraRouteImport } from './routes/_app.lixeira'
 import { Route as AppNotificacoesRouteImport } from './routes/_app.notificacoes'
+import { Route as AuthForgotPasswordRouteImport } from './routes/_auth.forgot-password'
+import { Route as AuthLoginRouteImport } from './routes/_auth.login'
+import { Route as AuthRegisterRouteImport } from './routes/_auth.register'
+import { Route as AuthResetPasswordRouteImport } from './routes/_auth.reset-password'
 import { Route as AppEspacosIndexRouteImport } from './routes/_app.espacos.index'
 import { Route as AppEspacosSpaceIdRouteImport } from './routes/_app.espacos.$spaceId'
 import { Route as AppEspacosSpaceIdIndexRouteImport } from './routes/_app.espacos.$spaceId.index'
@@ -30,24 +31,8 @@ const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+const AuthRoute = AuthRouteImport.update({
+  id: '/_auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -85,6 +70,26 @@ const AppNotificacoesRoute = AppNotificacoesRouteImport.update({
   path: '/notificacoes',
   getParentRoute: () => AppRoute,
 } as any)
+const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthRegisterRoute = AuthRegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AppEspacosIndexRoute = AppEspacosIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -109,32 +114,32 @@ const AppEspacosSpaceIdLocaisLocationIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
-  '/forgot-password': typeof ForgotPasswordRoute
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
-  '/reset-password': typeof ResetPasswordRoute
   '/atividade': typeof AppAtividadeRoute
   '/buscar': typeof AppBuscarRoute
   '/espacos': typeof AppEspacosRouteWithChildren
   '/favoritos': typeof AppFavoritosRoute
   '/lixeira': typeof AppLixeiraRoute
   '/notificacoes': typeof AppNotificacoesRoute
+  '/forgot-password': typeof AuthForgotPasswordRoute
+  '/login': typeof AuthLoginRoute
+  '/register': typeof AuthRegisterRoute
+  '/reset-password': typeof AuthResetPasswordRoute
   '/espacos/$spaceId': typeof AppEspacosSpaceIdRouteWithChildren
   '/espacos/': typeof AppEspacosIndexRoute
   '/espacos/$spaceId/': typeof AppEspacosSpaceIdIndexRoute
   '/espacos/$spaceId/locais/$locationId': typeof AppEspacosSpaceIdLocaisLocationIdRoute
 }
 export interface FileRoutesByTo {
-  '/forgot-password': typeof ForgotPasswordRoute
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
-  '/reset-password': typeof ResetPasswordRoute
+  '/': typeof AppIndexRoute
   '/atividade': typeof AppAtividadeRoute
   '/buscar': typeof AppBuscarRoute
   '/favoritos': typeof AppFavoritosRoute
   '/lixeira': typeof AppLixeiraRoute
   '/notificacoes': typeof AppNotificacoesRoute
-  '/': typeof AppIndexRoute
+  '/forgot-password': typeof AuthForgotPasswordRoute
+  '/login': typeof AuthLoginRoute
+  '/register': typeof AuthRegisterRoute
+  '/reset-password': typeof AuthResetPasswordRoute
   '/espacos': typeof AppEspacosIndexRoute
   '/espacos/$spaceId': typeof AppEspacosSpaceIdIndexRoute
   '/espacos/$spaceId/locais/$locationId': typeof AppEspacosSpaceIdLocaisLocationIdRoute
@@ -142,16 +147,17 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
-  '/forgot-password': typeof ForgotPasswordRoute
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
-  '/reset-password': typeof ResetPasswordRoute
+  '/_auth': typeof AuthRouteWithChildren
   '/_app/atividade': typeof AppAtividadeRoute
   '/_app/buscar': typeof AppBuscarRoute
   '/_app/espacos': typeof AppEspacosRouteWithChildren
   '/_app/favoritos': typeof AppFavoritosRoute
   '/_app/lixeira': typeof AppLixeiraRoute
   '/_app/notificacoes': typeof AppNotificacoesRoute
+  '/_auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/_auth/login': typeof AuthLoginRoute
+  '/_auth/register': typeof AuthRegisterRoute
+  '/_auth/reset-password': typeof AuthResetPasswordRoute
   '/_app/': typeof AppIndexRoute
   '/_app/espacos/$spaceId': typeof AppEspacosSpaceIdRouteWithChildren
   '/_app/espacos/': typeof AppEspacosIndexRoute
@@ -162,48 +168,49 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/forgot-password'
-    | '/login'
-    | '/register'
-    | '/reset-password'
     | '/atividade'
     | '/buscar'
     | '/espacos'
     | '/favoritos'
     | '/lixeira'
     | '/notificacoes'
+    | '/forgot-password'
+    | '/login'
+    | '/register'
+    | '/reset-password'
     | '/espacos/$spaceId'
     | '/espacos/'
     | '/espacos/$spaceId/'
     | '/espacos/$spaceId/locais/$locationId'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/forgot-password'
-    | '/login'
-    | '/register'
-    | '/reset-password'
+    | '/'
     | '/atividade'
     | '/buscar'
     | '/favoritos'
     | '/lixeira'
     | '/notificacoes'
-    | '/'
+    | '/forgot-password'
+    | '/login'
+    | '/register'
+    | '/reset-password'
     | '/espacos'
     | '/espacos/$spaceId'
     | '/espacos/$spaceId/locais/$locationId'
   id:
     | '__root__'
     | '/_app'
-    | '/forgot-password'
-    | '/login'
-    | '/register'
-    | '/reset-password'
+    | '/_auth'
     | '/_app/atividade'
     | '/_app/buscar'
     | '/_app/espacos'
     | '/_app/favoritos'
     | '/_app/lixeira'
     | '/_app/notificacoes'
+    | '/_auth/forgot-password'
+    | '/_auth/login'
+    | '/_auth/register'
+    | '/_auth/reset-password'
     | '/_app/'
     | '/_app/espacos/$spaceId'
     | '/_app/espacos/'
@@ -213,10 +220,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
-  ForgotPasswordRoute: typeof ForgotPasswordRoute
-  LoginRoute: typeof LoginRoute
-  RegisterRoute: typeof RegisterRoute
-  ResetPasswordRoute: typeof ResetPasswordRoute
+  AuthRoute: typeof AuthRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -228,32 +232,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/': {
@@ -304,6 +287,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/notificacoes'
       preLoaderRoute: typeof AppNotificacoesRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/_auth/forgot-password': {
+      id: '/_auth/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof AuthForgotPasswordRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/login': {
+      id: '/_auth/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/register': {
+      id: '/_auth/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof AuthRegisterRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/reset-password': {
+      id: '/_auth/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof AuthResetPasswordRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/_app/espacos/': {
       id: '/_app/espacos/'
@@ -386,12 +397,25 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface AuthRouteChildren {
+  AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthRegisterRoute: typeof AuthRegisterRoute
+  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthRegisterRoute: AuthRegisterRoute,
+  AuthResetPasswordRoute: AuthResetPasswordRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
-  ForgotPasswordRoute: ForgotPasswordRoute,
-  LoginRoute: LoginRoute,
-  RegisterRoute: RegisterRoute,
-  ResetPasswordRoute: ResetPasswordRoute,
+  AuthRoute: AuthRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

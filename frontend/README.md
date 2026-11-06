@@ -21,32 +21,61 @@ Para alterar a URL base, copie `.env.example` para `.env.local` e ajuste
 a URL pública do backend (incluindo `/api`) e o CORS correspondente, ou sirva
 `/api` por um proxy no mesmo domínio do frontend.
 
-Os formulários ainda não estão integrados à API. O gerenciamento de sessão e
-o envio do token Bearer devem ser conectados ao implementar a autenticação.
+Login e cadastro usam os hooks em `src/hooks/auth`, com mutations do TanStack
+Query e chamadas Axios em `src/services/auth.ts`. O Axios envia o token Bearer
+nas chamadas autenticadas e encerra a sessão quando a API responde `401` para
+o token atual. Os erros continuam disponíveis para tratamento nos formulários.
+
+O `QueryClient` fica em `src/query-client.ts` e é disponibilizado globalmente pelo
+`QueryClientProvider`. Os hooks `useLoginMutation` e `useRegisterMutation`
+controlam carregamento, sucesso e erro, salvam a sessão no Zustand e exibem os
+feedbacks pelo Sonner. Os formulários usam `isPending` junto ao estado de
+validação do React Hook Form para impedir novos envios enquanto aguardam.
+
+As mutations de autenticação não repetem chamadas automaticamente nem ficam
+aguardando reconexão: falhas são informadas para uma nova tentativa manual.
+O cache dessas mutations é descartado quando deixam de ser observadas, e o
+cache do cliente é limpo ao criar ou encerrar uma sessão. O cache do Query
+permanece apenas em memória; a persistência da sessão continua no Zustand.
 
 ## Login
 
 A tela está em `/login`, com layout próprio sem sidebar. Usa Chakra UI v3,
 React Hook Form, Inter e o mesmo `BrandLogo` da navegação.
 
-`LoginPage` e `LoginForm` recebem os callbacks `onLogin`, `onSocialLogin`,
-`onForgotPassword` e `onCreateAccount`. `onLogin` recebe `{ email, password,
-rememberMe }` e deve retornar uma Promise; o formulário acompanha o carregamento
-e impede novos envios enquanto aguarda. O callback da integração deve tratar a
-sessão e a navegação após o sucesso.
+`LoginForm` chama `POST /api/auth/login`; `RegisterForm` chama
+`POST /api/auth/register`. Ambos salvam a resposta `{ accessToken, expiresAt,
+user }` no Zustand e o router redireciona para `/` após o sucesso. Os formulários
+acompanham o carregamento e exibem erros da API sem registrar senhas no console.
+As regras de validação ficam nos schemas Yup junto aos respectivos formulários.
 
-Para credenciais inválidas, lance `new LoginError("invalid_credentials")`.
-Outros erros exibem a mensagem genérica de tentativa novamente. Sem callbacks,
-a interface informa que o recurso estará disponível em breve, sem autenticar,
-enviar ou salvar credenciais. Nenhuma API ou proteção de rotas foi implementada.
+O store `src/stores/auth-store.ts` mantém a sessão em `sessionStorage` por padrão.
+Com “Lembrar de mim”, usa `localStorage`. A persistência contém apenas a sessão
+retornada pela API e essa preferência; as senhas não são armazenadas.
+Sessões expiradas ou com estrutura inválida não são restauradas.
 
-Use `showSocialLogin={false}` para remover a seção Google/Apple e `disabled`
-para desabilitar o formulário. O login social também aguarda uma Promise.
-As regras dos campos ficam em `src/components/auth/login-schema.ts`, usando Yup
-com `yupResolver` do [React Hook Form](https://github.com/react-hook-form/resolvers#yup).
-O tipo `LoginValues` é inferido do schema. `strictNullChecks` está habilitado
-para preservar a inferência dos campos obrigatórios. Erros da autenticação
-continuam sendo exibidos no alerta global.
+`AuthSession` acompanha as mudanças no store, revalida as rotas e encerra a sessão
+ao atingir `expiresAt`, inclusive quando a janela volta ao foco. Não há renovação
+automática de token: ao expirar, o usuário precisa entrar novamente.
+Login social e recuperação/redefinição de senha ainda não estão integrados à API.
+
+## Feedbacks
+
+O Sonner é montado uma única vez no `Provider`, com tema claro e tokens do Chakra.
+Use os métodos diretamente nos fluxos da aplicação:
+
+```ts
+import { toast } from "sonner";
+
+toast.success("Alterações salvas.");
+toast.info("Recurso disponível em breve.");
+toast.warning("Confira as informações antes de continuar.");
+toast.error("Não foi possível salvar. Tente novamente.");
+```
+
+Login, cadastro, saída e encerramento de sessão já usam esses feedbacks.
+Erros de validação do Yup continuam junto aos campos. Recursos de autenticação
+ainda não integrados exibem informação, sem simular sucesso.
 
 ## Sidebar
 
@@ -63,8 +92,9 @@ A seleção acompanha o caminho da rota, sem query params, com suporte a voltar/
 Para abrir Minha Casa > Quarto, acesse `/espacos/casa/locais/quarto`.
 Os novos espaços ficam somente na memória da sessão.
 A interface exibe somente a sidebar; as visualizações das seções serão adicionadas depois.
-As ações de perfil, configurações e saída ficam desabilitadas até fornecer
-`onUserAction`. Conecte os callbacks à API quando ela estiver disponível.
+O perfil na sidebar mostra o usuário autenticado. “Sair” limpa a sessão por
+`onSignOut` e redireciona para `/login`. Perfil e configurações continuam
+desabilitados enquanto `onUserAction` não for fornecido.
 
 A fonte Inter é servida localmente. As cores vêm dos tokens em `src/theme`.
 Drawer, Menu e Tooltip seguem as composições do [Chakra UI v3](https://chakra-ui.com/docs/components/drawer).
@@ -74,14 +104,22 @@ Drawer, Menu e Tooltip seguem as composições do [Chakra UI v3](https://chakra-
 O TanStack Router usa rotas por arquivos em `src/routes`:
 
 - `__root.tsx`: contém o `Outlet` comum às rotas públicas e às rotas da aplicação.
-- `login.tsx`: `/login`, com o layout de autenticação.
-- `_app.tsx`: layout sem segmento na URL, renderiza `App.tsx` com a sidebar.
+- `_auth.tsx`: layout público para visitantes; usuários autenticados vão para `/`.
+- `_auth.login.tsx`, `_auth.register.tsx`, `_auth.forgot-password.tsx` e
+  `_auth.reset-password.tsx`: preservam as URLs `/login`, `/register`,
+  `/forgot-password` e `/reset-password`.
+- `_app.tsx`: layout protegido; o `beforeLoad` exige sessão válida antes de carregar
+  qualquer rota filha. Sem sessão, redireciona para `/login`, sem query params.
 - `App.tsx`: layout compartilhado, com `Outlet` para as futuras telas.
 - `_app.index.tsx`: rota `/` (Início). Os demais arquivos `_app.*` mantêm as URLs existentes.
 - Menus: `/buscar`, `/espacos`, `/notificacoes`, `/favoritos`, `/atividade` e `/lixeira`.
 - Espaços: `/espacos/$spaceId`.
 - Locais: `/espacos/$spaceId/locais/$locationId`.
 - `src/router.ts`: configuração do router e registro dos tipos de navegação.
+
+A proteção de rotas controla a interface. A API continua responsável por validar
+o JWT e autorizar o acesso a cada recurso protegido. A implementação usa os
+[guards do TanStack Router](https://tanstack.com/router/latest/docs/guide/authenticated-routes).
 
 O plugin do Vite gera `src/routeTree.gen.ts` ao executar `npm run dev` ou
 `npm run build`. Não edite esse arquivo manualmente. O build gera as rotas
