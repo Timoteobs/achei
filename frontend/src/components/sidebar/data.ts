@@ -25,12 +25,16 @@ export const navigationPaths = {
   trash: "/lixeira",
 } as const satisfies Record<SidebarSection, string>;
 
-export const navigationItems: { id: SidebarSection; label: string; icon: LucideIcon }[] = [
+export const navigationItems: {
+  id: SidebarSection;
+  label: string;
+  icon: LucideIcon;
+}[] = [
   { id: "home", label: "Início", icon: House },
   { id: "spaces", label: "Meus espaços", icon: Building2 },
   { id: "notifications", label: "Notificações", icon: Bell },
-  { id: "favorites", label: "Favoritos", icon: Star },
   { id: "activity", label: "Atividade", icon: Clock3 },
+  { id: "favorites", label: "Favoritos", icon: Star },
   { id: "trash", label: "Lixeira", icon: Trash2 },
 ];
 
@@ -48,7 +52,12 @@ export const initialSpaces: SidebarSpace[] = [
     ],
   },
   { id: "escritorio", name: "Escritório", icon: Building2, locations: [] },
-  { id: "casa-pais", name: "Casa dos meus pais", icon: HouseHeart, locations: [] },
+  {
+    id: "casa-pais",
+    name: "Casa dos meus pais",
+    icon: HouseHeart,
+    locations: [],
+  },
 ];
 
 export function findLocationPath(

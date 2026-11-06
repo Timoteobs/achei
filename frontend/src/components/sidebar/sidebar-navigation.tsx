@@ -60,11 +60,11 @@ export function SidebarNavigation({
   collapsed,
   activeSection,
   onNavigate,
-}: {
+}: Readonly<{
   collapsed: boolean;
   activeSection: SidebarSection;
   onNavigate: (section: SidebarSection) => void;
-}) {
+}>) {
   return (
     <Box
       as="nav"

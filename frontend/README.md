@@ -1,5 +1,29 @@
 # Achei
 
+## API
+
+A instância compartilhada do Axios está em `src/services/api.ts`, com timeout
+de 15 segundos. Use caminhos relativos à API:
+
+```ts
+import { api } from "./services/api";
+
+const { data } = await api.post("/auth/login", { email, password });
+```
+
+Por padrão, a URL base é `/api`. Com o backend rodando no perfil `https`,
+o proxy do Vite encaminha as chamadas para `https://localhost:7092/api`,
+evitando CORS no desenvolvimento. O proxy aceita o certificado HTTPS local
+do ASP.NET; essa configuração fica restrita ao servidor de desenvolvimento.
+
+Para alterar a URL base, copie `.env.example` para `.env.local` e ajuste
+`VITE_API_URL`. Reinicie o Vite após alterar o arquivo. Em produção, configure
+a URL pública do backend (incluindo `/api`) e o CORS correspondente, ou sirva
+`/api` por um proxy no mesmo domínio do frontend.
+
+Os formulários ainda não estão integrados à API. O gerenciamento de sessão e
+o envio do token Bearer devem ser conectados ao implementar a autenticação.
+
 ## Login
 
 A tela está em `/login`, com layout próprio sem sidebar. Usa Chakra UI v3,
