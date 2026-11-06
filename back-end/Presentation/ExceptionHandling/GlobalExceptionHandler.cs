@@ -12,6 +12,8 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
 
         var (status, title, detail) = exception switch
         {
+            SpaceNotFoundException => (StatusCodes.Status404NotFound, "Espaço não encontrado.", exception.Message),
+            SpaceHasDependenciesException => (StatusCodes.Status409Conflict, "Não foi possível excluir o espaço.", exception.Message),
             EmailAlreadyRegisteredException => (StatusCodes.Status409Conflict, "Não foi possível criar a conta.", exception.Message),
             UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Falha na autenticação.", exception.Message),
             ArgumentException => (StatusCodes.Status400BadRequest, "Dados inválidos.", exception.Message),

@@ -2,10 +2,12 @@ using Application.Interfaces.Security;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Services.Auth;
+using Application.Services.Spaces;
 using Achei.Configurations;
 using Achei.ExceptionHandling;
 using Crosscutting.Common.Core.Security;
 using Data.Repositories.Identity;
+using Data.Repositories.Spaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +31,8 @@ builder.Services.AddSingleton<IEncryptionService>(provider =>
 builder.Services.AddSingleton<IPasswordHasherService, Argon2PasswordHasher>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ISpaceRepository, SpaceRepository>();
+builder.Services.AddScoped<ISpaceService, SpaceService>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
