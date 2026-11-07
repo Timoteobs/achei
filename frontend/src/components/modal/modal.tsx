@@ -10,6 +10,7 @@ export interface ModalProps {
   title: string;
   size?: ModalSize;
   footer?: ReactNode;
+  closeDisabled?: boolean;
   children: ReactNode;
 }
 
@@ -26,6 +27,7 @@ export function Modal({
   title,
   size = "md",
   footer,
+  closeDisabled = false,
   children,
 }: Readonly<ModalProps>) {
   return (
@@ -33,6 +35,8 @@ export function Modal({
       open={open}
       onOpenChange={(details) => onOpenChange(details.open)}
       placement="center"
+      closeOnEscape={!closeDisabled}
+      closeOnInteractOutside={!closeDisabled}
     >
       <Portal>
         <Dialog.Backdrop bg="blackAlpha.500" backdropFilter="blur(4px)" />
@@ -64,6 +68,7 @@ export function Modal({
               <Dialog.CloseTrigger asChild position="static">
                 <IconButton
                   aria-label="Fechar"
+                  disabled={closeDisabled}
                   variant="ghost"
                   size="sm"
                   color="fg.muted"

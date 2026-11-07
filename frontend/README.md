@@ -52,8 +52,24 @@ respostas `401` mantêm o encerramento de sessão existente.
 
 Os cards mostram nome, descrição e imagem, sem contagens fictícias. A visão geral
 usa também a data de criação retornada pela API. As demais seções de ambientes,
-itens, membros e atividades ainda usam seus mocks. Criação, edição e exclusão de
-espaços ainda não estão integradas no frontend.
+itens, membros e atividades ainda usam seus mocks. Edição e exclusão de espaços
+ainda não estão integradas no frontend.
+
+## Cadastro de espaços
+
+O modal “Novo espaço”, disponível na Home e em “Meus espaços”, envia
+`POST /api/spaces` por meio de `useCreateSpaceMutation`. Nome, descrição e URL da
+imagem são validados com Yup conforme os limites da API (100, 500 e 1000 caracteres).
+Campos opcionais vazios são enviados como `null`; o proprietário vem do token.
+
+Durante o envio, o formulário bloqueia novas submissões e o fechamento do modal.
+Em caso de erro, preserva os valores para correção e exibe feedback pelo Sonner.
+Após salvar, limpa e fecha o formulário, atualiza o cache e revalida a listagem.
+Cancelar também limpa o formulário.
+
+A imagem é cadastrada por URL. Upload de arquivos e personalização de ícones e
+cores ainda não são suportados pelo backend; os controles de ícones e cores
+ficam desabilitados e identificados como “em breve”.
 
 ## Login
 
@@ -107,7 +123,7 @@ os espaços, o usuário, a seleção atual e callbacks de navegação e criaçã
 
 A seleção acompanha o caminho da rota, sem query params, com suporte a voltar/avançar.
 Para abrir Minha Casa > Quarto, acesse `/espacos/casa/locais/quarto`.
-Os novos espaços ficam somente na memória da sessão.
+Os espaços cadastrados pelo modal são persistidos na API.
 A interface exibe somente a sidebar; as visualizações das seções serão adicionadas depois.
 O perfil na sidebar mostra o usuário autenticado. “Sair” limpa a sessão por
 `onSignOut` e redireciona para `/login`. Perfil e configurações continuam
