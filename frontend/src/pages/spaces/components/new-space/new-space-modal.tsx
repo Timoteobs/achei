@@ -20,15 +20,19 @@ import { Modal } from "../../../../components/modal/modal";
 import type { ModalProps } from "../../../../components/modal/modal";
 import { spaceColorsMock, spaceIconsMock } from "./new-space-mock";
 import { useCreateSpaceMutation } from "../../../../hooks/spaces/use-create-space-mutation";
+import { useUpdateSpaceMutation } from "../../../../hooks/spaces/use-update-space-mutation";
+import type { SpaceResponse } from "../../../../services/spaces";
 import { newSpaceSchema } from "./new-space-schema";
 import type { NewSpaceValues } from "./new-space-schema";
 
 export function NewSpaceModal({
   open,
   onOpenChange,
-}: Readonly<Pick<ModalProps, "open" | "onOpenChange">>) {
+  space,
+}: Readonly<Pick<ModalProps, "open" | "onOpenChange"> & { space?: SpaceResponse }>) {
   const formId = useId();
   const createSpaceMutation = useCreateSpaceMutation();
+  const updateSpaceMutation = useUpdateSpaceMutation();
   const {
     register,
     control,
@@ -37,41 +41,50 @@ export function NewSpaceModal({
     formState: { errors, isSubmitting },
   } = useForm<NewSpaceValues>({
     resolver: yupResolver(newSpaceSchema),
-    defaultValues: { name: "", description: "", imageUrl: "" },
+    defaultValues: {
+      name: space?.name ?? "",
+      description: space?.description ?? "",
+      imageUrl: space?.imageUrl ?? "",
+    },
     mode: "onTouched",
   });
   const description = useWatch({ control, name: "description" });
-  const isBusy = isSubmitting || createSpaceMutation.isPending;
+  const isBusy = isSubmitting || createSpaceMutation.isPending || updateSpaceMutation.isPending;
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (isBusy) return;
     if (!nextOpen) {
       reset();
       createSpaceMutation.reset();
+      updateSpaceMutation.reset();
     }
     onOpenChange(nextOpen);
   };
 
   const submit = (values: NewSpaceValues) => {
-    if (createSpaceMutation.isPending) return;
-    createSpaceMutation.mutate(
-      {
-        name: values.name,
-        description: values.description || null,
-        imageUrl: values.imageUrl || null,
+    if (createSpaceMutation.isPending || updateSpaceMutation.isPending) return;
+    const payload = {
+      name: values.name,
+      description: values.description || null,
+      imageUrl: values.imageUrl || null,
+    };
+    const options = {
+      onSuccess: () => {
+        reset();
+        onOpenChange(false);
       },
-      {
-        onSuccess: () => {
-          reset();
-          onOpenChange(false);
-        },
-      },
-    );
+    };
+
+    if (space) {
+      updateSpaceMutation.mutate({ id: space.id, values: payload }, options);
+    } else {
+      createSpaceMutation.mutate(payload, options);
+    }
   };
 
   return (
     <Modal
-      title="Novo espaço"
+      title={space ? "Editar espaço" : "Novo espaço"}
       size="lg"
       open={open}
       onOpenChange={handleOpenChange}
@@ -96,7 +109,7 @@ export function NewSpaceModal({
             loading={isBusy}
             loadingText="Salvando..."
           >
-            Salvar espaço
+            {space ? "Salvar alterações" : "Salvar espaço"}
           </Button>
         </>
       }
@@ -104,7 +117,7 @@ export function NewSpaceModal({
       <chakra.form
         id={formId}
         noValidate
-        aria-label="Cadastrar espaço"
+        aria-label={space ? "Editar espaço" : "Cadastrar espaço"}
         aria-busy={isBusy}
         display="flex"
         flexDirection="column"

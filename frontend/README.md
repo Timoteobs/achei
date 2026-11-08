@@ -52,8 +52,35 @@ respostas `401` mantêm o encerramento de sessão existente.
 
 Os cards mostram nome, descrição e imagem, sem contagens fictícias. A visão geral
 usa também a data de criação retornada pela API. As demais seções de ambientes,
-itens, membros e atividades ainda usam seus mocks. Edição e exclusão de espaços
-ainda não estão integradas no frontend.
+itens, membros e atividades ainda usam seus mocks.
+
+## Edição de espaços
+
+A opção “Editar” no menu dos cards da Home e de “Meus espaços” reutiliza o modal
+de cadastro, preenchido com nome, descrição e URL da imagem do espaço selecionado.
+O formulário mantém a validação com Yup e salva por `PUT /api/spaces/{id}`, usando
+`useUpdateSpaceMutation` e o token do Axios.
+
+Durante o envio, os campos e o fechamento ficam bloqueados. Em caso de erro,
+os valores digitados são preservados para nova tentativa. Após o sucesso, o modal
+fecha, os caches da lista e do detalhe são atualizados e o Sonner informa o resultado.
+
+## Exclusão de espaços
+
+Os cards da Home e de “Meus espaços” possuem um menu com a opção “Excluir”.
+O cabeçalho da visão geral também oferece “Excluir espaço”. Ambas as ações
+abrem uma confirmação com o nome do espaço antes de enviar `DELETE /api/spaces/{id}`
+pelo hook `useDeleteSpaceMutation`, usando o token do Axios.
+
+O componente reutilizável `src/components/confirmation-modal/confirmation-modal.tsx`
+aceita título, descrição, rótulos, ação de confirmação e estado de carregamento.
+O foco inicial fica em “Cancelar”; durante a requisição, novos envios e o
+fechamento ficam bloqueados. Falhas mantêm o modal aberto para nova tentativa.
+
+Após o sucesso, o cache da lista é atualizado e a consulta do detalhe é removida.
+Ao excluir pela visão geral, a aplicação volta para `/espacos`. O Sonner informa
+sucesso e erros, incluindo o bloqueio `409` quando existem registros vinculados
+ao espaço. A exclusão é permanente e depende das regras atuais do backend.
 
 ## Cadastro de espaços
 

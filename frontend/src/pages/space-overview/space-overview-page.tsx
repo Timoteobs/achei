@@ -1,13 +1,18 @@
 import { Box, Flex, Spinner, Text } from "@chakra-ui/react";
-import { Link, useParams } from "@tanstack/react-router";
+import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import { useState } from "react";
 import { isAxiosError } from "axios";
 import { Button } from "../../components/button/button";
 import { useSpaceQuery } from "../../hooks/spaces/use-space-query";
 import { SpaceOverviewHeader } from "./components/space-overview-header";
 import { SpaceSummary } from "./components/summary/space-summary";
 import { SpaceTabs } from "./components/space-tabs";
+import { DeleteSpaceModal } from "../spaces/components/delete-space/delete-space-modal";
+import type { SpaceResponse } from "../../services/spaces";
 
 export function SpaceOverviewPage() {
+  const navigate = useNavigate();
+  const [spaceToDelete, setSpaceToDelete] = useState<SpaceResponse | null>(null);
   const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
   const spaceQuery = useSpaceQuery(spaceId);
   const space = spaceQuery.data;
@@ -58,11 +63,17 @@ export function SpaceOverviewPage() {
             name={space.name}
             description={space.description}
             imageUrl={space.imageUrl}
+            onDelete={() => setSpaceToDelete(space)}
           />
           <SpaceSummary createdAt={space.createdAt} />
           <SpaceTabs key={space.id} />
         </>
       )}
+      <DeleteSpaceModal
+        space={spaceToDelete}
+        onClose={() => setSpaceToDelete(null)}
+        onDeleted={() => navigate({ to: "/espacos", replace: true })}
+      />
     </Box>
   );
 }

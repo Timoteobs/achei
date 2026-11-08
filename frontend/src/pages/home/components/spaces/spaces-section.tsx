@@ -1,10 +1,12 @@
 import { Box, Flex, Heading, Spinner, Text } from "@chakra-ui/react";
-import { Link } from "@tanstack/react-router";
-import { useId } from "react";
+import { useId, useState } from "react";
 import { NewSpaceCard } from "../../../../components/new-space-card/new-space-card";
 import { SpaceCard } from "../../../../components/space-card/space-card";
 import { Button } from "../../../../components/button/button";
 import { useSpacesQuery } from "../../../../hooks/spaces/use-spaces-query";
+import type { SpaceResponse } from "../../../../services/spaces";
+import { DeleteSpaceModal } from "../../../spaces/components/delete-space/delete-space-modal";
+import { NewSpaceModal } from "../../../spaces/components/new-space/new-space-modal";
 
 export function SpacesSection({
   showTitle = true,
@@ -14,6 +16,8 @@ export function SpacesSection({
   onNewSpaceClick?: () => void;
 }>) {
   const headingId = useId();
+  const [spaceToDelete, setSpaceToDelete] = useState<SpaceResponse | null>(null);
+  const [spaceToEdit, setSpaceToEdit] = useState<SpaceResponse | null>(null);
   const spacesQuery = useSpacesQuery();
   const spaces = spacesQuery.data ?? [];
 
@@ -85,18 +89,28 @@ export function SpacesSection({
         </Box>
         {spaces.map((space) => (
           <Box as="li" key={space.id} flexShrink="0">
-            <Box asChild display="block" h="full" borderRadius="md">
-              <Link to="/espacos/$spaceId" params={{ spaceId: String(space.id) }}>
-                <SpaceCard
-                  name={space.name}
-                  description={space.description}
-                  imageUrl={space.imageUrl}
-                />
-              </Link>
-            </Box>
+            <SpaceCard
+              id={String(space.id)}
+              name={space.name}
+              description={space.description}
+              imageUrl={space.imageUrl}
+              onDelete={() => setSpaceToDelete(space)}
+              onEdit={() => setSpaceToEdit(space)}
+            />
           </Box>
         ))}
       </Flex>
+      <DeleteSpaceModal space={spaceToDelete} onClose={() => setSpaceToDelete(null)} />
+      {spaceToEdit && (
+        <NewSpaceModal
+          key={spaceToEdit.id}
+          open
+          space={spaceToEdit}
+          onOpenChange={(open) => {
+            if (!open) setSpaceToEdit(null);
+          }}
+        />
+      )}
     </Box>
   );
 }

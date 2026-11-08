@@ -11,6 +11,8 @@ export interface ModalProps {
   size?: ModalSize;
   footer?: ReactNode;
   closeDisabled?: boolean;
+  role?: "dialog" | "alertdialog";
+  initialFocusEl?: () => HTMLElement | null;
   children: ReactNode;
 }
 
@@ -28,6 +30,8 @@ export function Modal({
   size = "md",
   footer,
   closeDisabled = false,
+  role = "dialog",
+  initialFocusEl,
   children,
 }: Readonly<ModalProps>) {
   return (
@@ -37,6 +41,8 @@ export function Modal({
       placement="center"
       closeOnEscape={!closeDisabled}
       closeOnInteractOutside={!closeDisabled}
+      role={role}
+      initialFocusEl={initialFocusEl}
     >
       <Portal>
         <Dialog.Backdrop bg="blackAlpha.500" backdropFilter="blur(4px)" />

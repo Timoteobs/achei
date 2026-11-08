@@ -1,6 +1,6 @@
 import { Box, Flex, Heading, Image, Text } from "@chakra-ui/react";
 import { useState } from "react";
-import { ChevronDown, House, Plus, UserRoundPlus } from "lucide-react";
+import { ChevronDown, House, Plus, Trash2, UserRoundPlus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "../../../components/button/button";
 
@@ -9,11 +9,13 @@ export function SpaceOverviewHeader({
   description,
   imageUrl,
   icon: Icon = House,
+  onDelete,
 }: Readonly<{
   name: string;
   description?: string | null;
   imageUrl?: string | null;
   icon?: LucideIcon;
+  onDelete: () => void;
 }>) {
   const [failedImage, setFailedImage] = useState<string | null>(null);
   return (
@@ -67,6 +69,19 @@ export function SpaceOverviewHeader({
         </Box>
       </Flex>
       <Flex gap="3" flex={{ base: "1 1 100%", md: "0 0 auto" }} flexWrap="wrap">
+        <Button
+          type="button"
+          variant="outline"
+          h="10"
+          px="4"
+          flex={{ base: "1 1 auto", md: "0 0 auto" }}
+          color="danger.700"
+          _hover={{ bg: "danger.50", borderColor: "danger.700" }}
+          onClick={onDelete}
+        >
+          <Trash2 size={16} strokeWidth={1.8} aria-hidden="true" />
+          Excluir espaço
+        </Button>
         <Button
           type="button"
           variant="link"
