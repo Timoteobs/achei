@@ -52,4 +52,21 @@ public class Location : BaseEntity
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = CreatedAt;
     }
+
+    public void UpdateDetails(string name, string? description, string? icon, string? color)
+    {
+        DomainValidator.Validator(
+            ValidationRule.Required(name, "Nome"),
+            ValidationRule.MaxLength(name, 100, "Nome"),
+            ValidationRule.MaxLength(description, 500, "Descrição"),
+            ValidationRule.MaxLength(icon, 100, "Ícone"),
+            ValidationRule.MaxLength(color, 20, "Cor")
+        );
+
+        Name = name.Trim();
+        Description = description?.Trim();
+        Icon = icon?.Trim();
+        Color = color?.Trim();
+        UpdatedAt = DateTime.UtcNow;
+    }
 }
