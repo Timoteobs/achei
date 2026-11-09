@@ -8,7 +8,7 @@ export type RoomCardVariant = ColorVariant;
 
 export interface RoomCardProps {
   name: string;
-  itemsCount: number;
+  itemsCount?: number;
   boxesCount?: number;
   icon: LucideIcon;
   variant?: RoomCardVariant;
@@ -25,6 +25,11 @@ export function RoomCard({
   variant = "teal",
   layout = "compact",
 }: Readonly<RoomCardProps>) {
+  const counts = [
+    itemsCount !== undefined ? `${itemsCount} ${itemsCount === 1 ? "item" : "itens"}` : null,
+    boxesCount !== undefined ? `${boxesCount} ${boxesCount === 1 ? "caixa" : "caixas"}` : null,
+  ].filter((count) => count !== null).join(" • ");
+
   if (layout === "detailed") {
     return (
       <Flex
@@ -74,9 +79,7 @@ export function RoomCard({
           </Flex>
           <Flex align="end" justify="space-between" gap="2">
             <Text color="fg.muted" fontSize="sm" truncate>
-              {itemsCount} {itemsCount === 1 ? "item" : "itens"}
-              {boxesCount !== undefined &&
-                ` • ${boxesCount} ${boxesCount === 1 ? "caixa" : "caixas"}`}
+              {counts}
             </Text>
             <Box color="fg.muted" flexShrink="0" aria-hidden="true">
               <ChevronRight size={18} strokeWidth={1.8} />
@@ -116,7 +119,7 @@ export function RoomCard({
         {name}
       </Heading>
       <Text color="fg.muted" fontSize="sm" mt="1">
-        {itemsCount} {itemsCount === 1 ? "item" : "itens"}
+        {counts}
       </Text>
     </Flex>
   );

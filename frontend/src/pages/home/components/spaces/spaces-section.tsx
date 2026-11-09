@@ -3,6 +3,7 @@ import { useId, useState } from "react";
 import { NewSpaceCard } from "../../../../components/new-space-card/new-space-card";
 import { SpaceCard } from "../../../../components/space-card/space-card";
 import { Button } from "../../../../components/button/button";
+import { EmptyState } from "../../../../components/empty-state/empty-state";
 import { useSpacesQuery } from "../../../../hooks/spaces/use-spaces-query";
 import type { SpaceResponse } from "../../../../services/spaces";
 import { DeleteSpaceModal } from "../../../spaces/components/delete-space/delete-space-modal";
@@ -67,11 +68,9 @@ export function SpacesSection({
         </Flex>
       )}
       {spacesQuery.isSuccess && spaces.length === 0 && (
-        <Text color="fg.muted" fontSize="sm" mb="4">
-          Você ainda não tem espaços cadastrados.
-        </Text>
+        <EmptyState action={onNewSpaceClick ? { label: "Novo espaço", onClick: onNewSpaceClick } : undefined} />
       )}
-      <Flex
+      {spaces.length > 0 && <Flex
         as="ul"
         aria-label="Lista de espaços"
         tabIndex={0}
@@ -99,7 +98,7 @@ export function SpacesSection({
             />
           </Box>
         ))}
-      </Flex>
+      </Flex>}
       <DeleteSpaceModal space={spaceToDelete} onClose={() => setSpaceToDelete(null)} />
       {spaceToEdit && (
         <NewSpaceModal

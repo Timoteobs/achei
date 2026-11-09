@@ -1,17 +1,24 @@
-import { Box, Flex, Grid, Heading, Text } from "@chakra-ui/react";
+import { Box, Flex, Grid, Heading, Text, useTabsContext } from "@chakra-ui/react";
+import { useParams } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import { useId } from "react";
+import { useId, useState } from "react";
 import { AddCard } from "../../../../components/add-card/add-card";
 import { Button } from "../../../../components/button/button";
 import { RoomCard } from "../../../../components/room-card/room-card";
-import { roomsMock } from "./rooms-mock";
-import { spaceSummaryMock } from "../summary/space-summary-mock";
+import { useRoomsQuery } from "../../../../hooks/rooms/use-rooms-query";
+import { getRoomCardProps } from "./room-card-props";
+import { RoomsQueryFeedback } from "./rooms-query-feedback";
+import { NewRoomModal } from "./new-room/new-room-modal";
 
 export function RoomsSection() {
   const headingId = useId();
+  const [isNewRoomOpen, setIsNewRoomOpen] = useState(false);
+  const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
+  const roomsQuery = useRoomsQuery(spaceId);
+  const tabs = useTabsContext();
 
   return (
-    <Box as="section" aria-labelledby={headingId} minW="0">
+    <Box as="section" aria-labelledby={headingId} minW="0" aria-busy={roomsQuery.isFetching}>
       <Grid
         templateColumns="minmax(0, 1fr) auto"
         alignItems="center"
@@ -28,8 +35,8 @@ export function RoomsSection() {
         >
           Ambientes
         </Heading>
-        <Button type="button" variant="link" gap="2">
-          Ver todos ({spaceSummaryMock.roomsCount})
+        <Button type="button" variant="link" gap="2" onClick={() => tabs.setValue("rooms")}>
+          Ver todos{roomsQuery.data ? ` (${roomsQuery.data.length})` : ""}
           <ArrowRight size={16} strokeWidth={1.8} aria-hidden="true" />
         </Button>
         <Text gridColumn="1 / -1" color="fg.muted" fontSize="sm">
@@ -37,7 +44,8 @@ export function RoomsSection() {
           facilmente.
         </Text>
       </Grid>
-      <Flex
+      <RoomsQueryFeedback query={roomsQuery} onNewRoomClick={() => setIsNewRoomOpen(true)} />
+      {!!roomsQuery.data?.length && <Flex
         as="ul"
         aria-label="Prévia dos ambientes"
         tabIndex={0}
@@ -49,15 +57,16 @@ export function RoomsSection() {
         p="1"
         borderRadius="md"
       >
-        {roomsMock.map(({ id, ...room }) => (
-          <Box as="li" key={id} flexShrink="0">
-            <RoomCard {...room} />
+        {roomsQuery.data?.map((room) => (
+          <Box as="li" key={room.id} flexShrink="0">
+            <RoomCard {...getRoomCardProps(room)} />
           </Box>
         ))}
         <Box as="li" flexShrink="0">
-          <AddCard label="Novo ambiente" size="sm" />
+          <AddCard label="Novo ambiente" size="sm" onClick={() => setIsNewRoomOpen(true)} />
         </Box>
-      </Flex>
+      </Flex>}
+      <NewRoomModal open={isNewRoomOpen} onOpenChange={setIsNewRoomOpen} />
     </Box>
   );
 }

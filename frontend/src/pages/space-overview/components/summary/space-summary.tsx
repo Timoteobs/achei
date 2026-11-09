@@ -1,11 +1,16 @@
 import { Avatar, AvatarGroup, Flex, Grid, Text } from "@chakra-ui/react";
+import { useParams } from "@tanstack/react-router";
 import { CalendarDays, LayoutGrid, Package, UsersRound } from "lucide-react";
 import { InfoCard } from "../../../../components/info-card/info-card";
 import { formatDate } from "../../../../utils/date";
 import { spaceSummaryMock } from "./space-summary-mock";
+import { useRoomsQuery } from "../../../../hooks/rooms/use-rooms-query";
 
 export function SpaceSummary({ createdAt }: Readonly<{ createdAt: string }>) {
-  const { members, itemsCount, roomsCount } = spaceSummaryMock;
+  const { members, itemsCount } = spaceSummaryMock;
+  const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
+  const roomsQuery = useRoomsQuery(spaceId);
+  const roomsCount = roomsQuery.data?.length;
 
   return (
     <Grid
@@ -62,7 +67,9 @@ export function SpaceSummary({ createdAt }: Readonly<{ createdAt: string }>) {
       />
       <InfoCard
         icon={<LayoutGrid size={18} strokeWidth={1.8} />}
-        value={`${roomsCount} ambientes`}
+        value={roomsCount !== undefined
+          ? `${roomsCount} ${roomsCount === 1 ? "ambiente" : "ambientes"}`
+          : roomsQuery.isPending ? "Carregando ambientes..." : "Ambientes indisponíveis"}
       />
       <InfoCard
         icon={<CalendarDays size={18} strokeWidth={1.8} />}

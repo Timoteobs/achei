@@ -51,8 +51,40 @@ tentativa e espaço inexistente/sem acesso. Erros das consultas usam o Sonner;
 respostas `401` mantêm o encerramento de sessão existente.
 
 Os cards mostram nome, descrição e imagem, sem contagens fictícias. A visão geral
-usa também a data de criação retornada pela API. As demais seções de ambientes,
-itens, membros e atividades ainda usam seus mocks.
+usa também a data de criação retornada pela API. Itens, membros e atividades
+ainda usam seus mocks.
+
+## Consulta de ambientes
+
+A aba Ambientes, a prévia da visão geral e o total de ambientes do resumo usam
+`GET /api/spaces/{spaceId}/rooms`, via `src/services/rooms.ts` e `useRoomsQuery`.
+A chamada utiliza o token Bearer do Axios, cancelamento por `AbortSignal` e cache
+compartilhado por usuário e espaço, com validade de 30 segundos.
+
+Os cards exibem o nome, o ícone, a cor e `boxesCount` retornados pela API. Ícones
+ou cores desconhecidos usam os padrões da interface. A contagem de itens fica
+oculta nos ambientes, pois esse dado ainda não faz parte da resposta.
+
+As listas tratam carregamento, resultado vazio e erro com opção de tentar
+novamente. Os erros também usam o feedback global do Sonner. O link “Ver todos”
+abre a aba Ambientes e mostra o total consultado. Cadastro, edição e exclusão
+de ambientes ainda não estão integrados; o formulário continua apenas validando
+os campos no frontend.
+
+## Estado vazio
+
+Use `src/components/empty-state/empty-state.tsx` quando uma consulta terminar
+com sucesso e retornar uma lista vazia. O componente inclui a ilustração de caixa
+aberta, título e descrição personalizáveis, além de uma ação opcional:
+
+```tsx
+<EmptyState action={{ label: "Novo ambiente", onClick: abrirModal }} />
+```
+
+O padrão está aplicado aos espaços na Home e em “Meus espaços”, e aos ambientes
+na visão geral e na aba Ambientes. O botão abre o modal de cadastro correspondente.
+As listas vazias não exibem também o card de adicionar; carregamento e erro
+continuam com seus próprios estados.
 
 ## Edição de espaços
 
