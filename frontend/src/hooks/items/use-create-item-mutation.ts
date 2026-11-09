@@ -18,9 +18,14 @@ export function useCreateItemMutation(spaceId: string) {
       const userId = context?.userId;
       if (!userId || useAuthStore.getState().session?.user.id !== userId) return;
       const boxesKey = ["spaces", userId, "boxes", spaceId, "list"];
-      await queryClient.cancelQueries({ queryKey: boxesKey, exact: true });
+      const itemsKey = ["spaces", userId, "items", spaceId, "list"];
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: boxesKey, exact: true }),
+        queryClient.cancelQueries({ queryKey: itemsKey }),
+      ]);
       if (useAuthStore.getState().session?.user.id !== userId) return;
       void queryClient.invalidateQueries({ queryKey: boxesKey, exact: true });
+      void queryClient.invalidateQueries({ queryKey: itemsKey });
       toast.success("Item cadastrado com sucesso!");
     },
     onError: (error) => {

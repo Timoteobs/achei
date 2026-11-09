@@ -11,7 +11,7 @@ import type { BoxResponse } from "../../../../services/boxes";
 import { DeleteBoxModal } from "./delete-box/delete-box-modal";
 import { NewBoxModal } from "./new-box/new-box-modal";
 
-export function BoxesGrid({ roomId, onNewBoxClick }: Readonly<{ roomId: number; onNewBoxClick: () => void }>) {
+export function BoxesGrid({ roomId, onNewBoxClick, onBoxClick }: Readonly<{ roomId: number; onNewBoxClick: () => void; onBoxClick: (boxId: number) => void }>) {
   const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
   const boxesQuery = useBoxesQuery(spaceId);
   const [boxToDelete, setBoxToDelete] = useState<BoxResponse | null>(null);
@@ -54,6 +54,7 @@ export function BoxesGrid({ roomId, onNewBoxClick }: Readonly<{ roomId: number; 
                 name={box.name}
                 roomName={box.roomName}
                 itemsCount={box.itemsCount}
+                onOpen={() => onBoxClick(box.id)}
                 onDelete={() => setBoxToDelete(box)}
                 onEdit={() => setBoxToEdit(box)}
               />

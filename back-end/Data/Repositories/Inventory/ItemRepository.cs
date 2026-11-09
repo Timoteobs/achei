@@ -17,6 +17,9 @@ public sealed class ItemRepository(AcheiContext context) : IItemRepository
                     where location.SpaceId == spaceId
                     select item;
 
+        if (request.LocationId is long locationId)
+            query = query.Where(item => item.LocationId == locationId);
+
         var search = request.Search?.Trim();
         if (!string.IsNullOrEmpty(search))
             query = query.Where(item => item.Name.Contains(search));

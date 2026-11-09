@@ -17,6 +17,13 @@ public sealed class ItemService(
         if (await spaces.GetByIdAndOwnerAsync(spaceId, userId, cancellationToken) is null)
             throw new SpaceNotFoundException();
 
+        if (request.LocationId is long locationId)
+        {
+            var location = await rooms.GetByIdAndSpaceAsync(locationId, spaceId, cancellationToken)
+                ?? await boxes.GetByIdAndSpaceAsync(locationId, spaceId, cancellationToken);
+            if (location is null) throw new ItemReferenceNotFoundException();
+        }
+
         return await items.ListBySpaceAsync(spaceId, request, cancellationToken);
     }
 

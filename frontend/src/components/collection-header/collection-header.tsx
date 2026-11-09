@@ -10,6 +10,15 @@ import {
 import { Button } from "../button/button";
 import { Input } from "../input/input";
 
+export type CollectionSort = "recent" | "oldest" | "name-asc" | "name-desc";
+
+const sortLabels: Record<CollectionSort, string> = {
+  recent: "Mais recentes",
+  oldest: "Mais antigos",
+  "name-asc": "Nome (A-Z)",
+  "name-desc": "Nome (Z-A)",
+};
+
 interface CollectionHeaderProps {
   title: string;
   description: string;
@@ -17,6 +26,12 @@ interface CollectionHeaderProps {
   searchLabel: string;
   showFilters?: boolean;
   onActionClick?: () => void;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
+  searchMaxLength?: number;
+  sortValue?: CollectionSort;
+  onSortChange?: (value: CollectionSort) => void;
+  showViewToggle?: boolean;
 }
 
 export function CollectionHeader({
@@ -26,6 +41,12 @@ export function CollectionHeader({
   searchLabel,
   showFilters = true,
   onActionClick,
+  searchValue,
+  onSearchChange,
+  searchMaxLength,
+  sortValue = "recent",
+  onSortChange,
+  showViewToggle = true,
 }: Readonly<CollectionHeaderProps>) {
   return (
     <Box as="header">
@@ -63,6 +84,9 @@ export function CollectionHeader({
           <Box w={{ base: "full", lg: "260px" }} minW="0">
             <Input
               type="search"
+              value={searchValue}
+              onChange={(event) => onSearchChange?.(event.target.value)}
+              maxLength={searchMaxLength}
               aria-label={searchLabel}
               placeholder={`${searchLabel}...`}
               startElement={<Search size={18} strokeWidth={1.8} />}
@@ -82,7 +106,7 @@ export function CollectionHeader({
               <Menu.Trigger asChild>
                 <chakra.button
                   type="button"
-                  aria-label="Ordenar por: Mais recentes"
+                  aria-label={`Ordenar por: ${sortLabels[sortValue]}`}
                   display="flex"
                   alignItems="center"
                   justifyContent="space-between"
@@ -104,7 +128,7 @@ export function CollectionHeader({
                       <ArrowUpDown size={16} strokeWidth={1.8} />
                     </Box>
                     <Text as="span" fontWeight="medium" whiteSpace="nowrap">
-                      Mais recentes
+                      {sortLabels[sortValue]}
                     </Text>
                   </Flex>
                   <Box color="fg.muted" aria-hidden="true">
@@ -122,23 +146,23 @@ export function CollectionHeader({
                   p="1"
                   boxShadow="md"
                 >
-                  <Menu.Item value="recent" fontSize="sm">
+                  <Menu.Item value="recent" fontSize="sm" onSelect={() => onSortChange?.("recent")} >
                     Mais recentes
                   </Menu.Item>
-                  <Menu.Item value="oldest" fontSize="sm">
+                  <Menu.Item value="oldest" fontSize="sm" onSelect={() => onSortChange?.("oldest")} >
                     Mais antigos
                   </Menu.Item>
-                  <Menu.Item value="name-asc" fontSize="sm">
+                  <Menu.Item value="name-asc" fontSize="sm" onSelect={() => onSortChange?.("name-asc")} >
                     Nome (A-Z)
                   </Menu.Item>
-                  <Menu.Item value="name-desc" fontSize="sm">
+                  <Menu.Item value="name-desc" fontSize="sm" onSelect={() => onSortChange?.("name-desc")} >
                     Nome (Z-A)
                   </Menu.Item>
                 </Menu.Content>
               </Menu.Positioner>
             </Menu.Root>
 
-            <Flex
+            {showViewToggle && <Flex
               flexShrink="0"
               h="10"
               borderWidth="1px"
@@ -177,7 +201,7 @@ export function CollectionHeader({
               >
                 <List size={18} strokeWidth={1.8} aria-hidden="true" />
               </chakra.button>
-            </Flex>
+            </Flex>}
           </Flex>
         </Flex>
       )}

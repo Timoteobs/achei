@@ -5,18 +5,24 @@ export interface PaginationProps {
   count: number;
   pageSize: number;
   defaultPage?: number;
+  page?: number;
+  onPageChange?: (page: number) => void;
 }
 
 export function Pagination({
   count,
   pageSize,
   defaultPage = 1,
+  page,
+  onPageChange,
 }: Readonly<PaginationProps>) {
   return (
     <ChakraPagination.Root
       count={count}
       pageSize={pageSize}
       defaultPage={defaultPage}
+      page={page}
+      onPageChange={({ page }) => onPageChange?.(page)}
       siblingCount={1}
     >
       <ButtonGroup size="sm" gap="2" variant="ghost">

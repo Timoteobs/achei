@@ -1,4 +1,4 @@
-import { Badge, Box, Flex, Heading, IconButton, Menu, Portal, Text } from "@chakra-ui/react";
+import { Badge, Box, Flex, Heading, IconButton, Menu, Portal, Text, chakra } from "@chakra-ui/react";
 import { ChevronRight, MapPin, MoreVertical, Package, Pencil, Trash2 } from "lucide-react";
 import { colorVariantStyles } from "../color-variants";
 import type { ColorVariant } from "../color-variants";
@@ -11,6 +11,7 @@ export interface BoxCardProps {
   variant?: ColorVariant;
   onDelete?: () => void;
   onEdit?: () => void;
+  onOpen?: () => void;
 }
 
 export function BoxCard({
@@ -21,12 +22,14 @@ export function BoxCard({
   variant = "blue",
   onDelete,
   onEdit,
+  onOpen,
 }: Readonly<BoxCardProps>) {
   const colors = colorVariantStyles[variant];
 
   return (
     <Flex
       as="article"
+      position="relative"
       align="center"
       gap="4"
       w="full"
@@ -37,6 +40,20 @@ export function BoxCard({
       borderColor="border.default"
       borderRadius="md"
     >
+      {onOpen && (
+        <chakra.button
+          type="button"
+          aria-label={`Ver itens de ${name}`}
+          position="absolute"
+          inset="0"
+          zIndex="1"
+          borderRadius="inherit"
+          cursor="pointer"
+          onClick={onOpen}
+          _hover={{ bg: "blackAlpha.50" }}
+          _focusVisible={{ outline: "2px solid", outlineColor: "brand.focusRing", outlineOffset: "2px" }}
+        />
+      )}
       <Flex
         {...colors}
         boxSize={{ base: "16", md: "20" }}
@@ -76,6 +93,8 @@ export function BoxCard({
                   size="xs"
                   color="fg.muted"
                   flexShrink="0"
+                  position="relative"
+                  zIndex="2"
                   _hover={{ bg: "bg.subtle", color: "fg.default" }}
                 >
                   <MoreVertical size={16} strokeWidth={1.8} aria-hidden="true" />

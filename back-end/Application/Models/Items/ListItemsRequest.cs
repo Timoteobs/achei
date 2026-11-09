@@ -14,6 +14,9 @@ public sealed class ListItemsRequest
     [RegularExpression("^(recent|oldest|name-asc|name-desc)$", ErrorMessage = "Ordenação inválida. Use recent, oldest, name-asc ou name-desc.")]
     public string Sort { get; init; } = "recent";
 
+    [Range(1, long.MaxValue, ErrorMessage = "Selecione um local válido.")]
+    public long? LocationId { get; init; }
+
     [MaxLength(150, ErrorMessage = "A busca deve ter no máximo 150 caracteres.")]
     public string? Search { get; init; }
 }

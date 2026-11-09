@@ -7,7 +7,7 @@ import { NewBoxModal } from "./new-box/new-box-modal";
 import { BoxesGrid } from "./boxes-grid";
 import { BoxesHeader } from "./boxes-header";
 
-export function BoxesTab({ room }: Readonly<{ room: RoomResponse }>) {
+export function BoxesTab({ room, onBoxClick }: Readonly<{ room: RoomResponse; onBoxClick: (boxId: number) => void }>) {
   const [isNewBoxOpen, setIsNewBoxOpen] = useState(false);
   const tabs = useTabsContext();
   return (
@@ -17,7 +17,7 @@ export function BoxesTab({ room }: Readonly<{ room: RoomResponse }>) {
         Voltar para Ambientes
       </Button>
       <BoxesHeader roomName={room.name} onNewBoxClick={() => setIsNewBoxOpen(true)} />
-      <BoxesGrid roomId={room.id} onNewBoxClick={() => setIsNewBoxOpen(true)} />
+      <BoxesGrid onBoxClick={onBoxClick} roomId={room.id} onNewBoxClick={() => setIsNewBoxOpen(true)} />
       {isNewBoxOpen && <NewBoxModal open initialRoomId={room.id} onOpenChange={setIsNewBoxOpen} />}
     </Stack>
   );
