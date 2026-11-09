@@ -1,286 +1,167 @@
-import {
-  Box,
-  Field,
-  Flex,
-  Grid,
-  Image,
-  NativeSelect,
-  Stack,
-  Text,
-  Textarea,
-  chakra,
-} from "@chakra-ui/react";
-import {
-  ChevronRight,
-  FileText,
-  House,
-  Image as ImageIcon,
-  Plus,
-} from "lucide-react";
-import type { ComponentProps } from "react";
+import { Field, Flex, Grid, NativeSelect, Stack, Text, Textarea, chakra } from "@chakra-ui/react";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useParams } from "@tanstack/react-router";
+import { Package } from "lucide-react";
+import { useId } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { Button } from "../../../../components/button/button";
 import { Input } from "../../../../components/input/input";
 import { Modal } from "../../../../components/modal/modal";
-import { categoryOptionsMock, newItemMock, photosMock } from "./new-item-mock";
+import type { ModalProps } from "../../../../components/modal/modal";
+import { useRoomsQuery } from "../../../../hooks/rooms/use-rooms-query";
+import { useBoxesQuery } from "../../../../hooks/boxes/use-boxes-query";
+import { useCreateItemMutation } from "../../../../hooks/items/use-create-item-mutation";
+import { newItemSchema } from "./new-item-schema";
+import type { NewItemValues } from "./new-item-schema";
 
 export interface ItemLocation {
   space: string;
   room: string;
   roomId: number;
   box?: string;
+  boxId?: number;
 }
 
-export function NewItemModal({
-  open,
-  onOpenChange,
-  location: initialLocation,
-}: Readonly<Pick<ComponentProps<typeof Modal>, "open" | "onOpenChange"> & { location?: ItemLocation }>) {
-  const { name, category, description } = newItemMock;
-  const location = initialLocation ?? newItemMock.location;
+const controlStyles = {
+  bg: "bg.surface",
+  color: "fg.default",
+  borderColor: "border.default",
+  borderRadius: "md",
+  fontSize: "sm",
+  px: "4",
+  _hover: { borderColor: "border.emphasized" },
+  _focusVisible: { borderColor: "brand.solid", outlineColor: "brand.focusRing", outlineWidth: "2px", outlineOffset: "2px" },
+};
+
+export function NewItemModal({ open, onOpenChange, location }: Readonly<
+  Pick<ModalProps, "open" | "onOpenChange"> & { location?: ItemLocation }
+>) {
+  const formId = useId();
+  const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
+  const roomsQuery = useRoomsQuery(spaceId);
+  const boxesQuery = useBoxesQuery(spaceId);
+  const createMutation = useCreateItemMutation(spaceId);
+  const { register, control, handleSubmit, reset, setValue, setError, formState: { errors, isSubmitting } } = useForm<NewItemValues>({
+    resolver: yupResolver(newItemSchema),
+    defaultValues: {
+      name: "", description: "", notes: "", quantity: 1,
+      roomId: location ? String(location.roomId) : "",
+      boxId: location?.boxId ? String(location.boxId) : "",
+    },
+    mode: "onSubmit",
+    reValidateMode: "onSubmit",
+  });
+  const [roomId, boxId] = useWatch({ control, name: ["roomId", "boxId"] });
+  const boxes = boxesQuery.data?.filter((box) => String(box.roomId) === roomId) ?? [];
+  const isBusy = isSubmitting || createMutation.isPending;
+  const canSave = roomsQuery.isSuccess && roomsQuery.data.length > 0 && (!boxId || boxesQuery.isSuccess);
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (isBusy) return;
+    if (!nextOpen) {
+      reset();
+      createMutation.reset();
+    }
+    onOpenChange(nextOpen);
+  };
+
+  const submit = (values: NewItemValues) => {
+    if (createMutation.isPending || !canSave) return;
+    const room = roomsQuery.data?.find(({ id }) => String(id) === values.roomId);
+    if (!room) {
+      setError("roomId", { message: "Selecione um ambiente disponível neste espaço." }, { shouldFocus: true });
+      return;
+    }
+    const box = boxesQuery.data?.find(({ id, roomId: parentId }) => String(id) === values.boxId && parentId === room.id);
+    if (values.boxId && !box) {
+      setError("boxId", { message: "Selecione uma caixa disponível neste ambiente." }, { shouldFocus: true });
+      return;
+    }
+    createMutation.mutate({
+      name: values.name,
+      description: values.description || null,
+      notes: values.notes || null,
+      quantity: values.quantity,
+      locationId: box?.id ?? room.id,
+      categoryId: null,
+    }, { onSuccess: () => { reset(); onOpenChange(false); } });
+  };
 
   return (
     <Modal
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleOpenChange}
       title="Novo item"
       size="lg"
+      closeDisabled={isBusy}
       footer={
         <>
-          <Button
-            type="button"
-            variant="outline"
-            w={{ base: "full", sm: "auto" }}
-            h="12"
-            px="6"
-            bg="bg.subtle"
-            color="fg.muted"
-            borderRadius="sm"
-            onClick={() => onOpenChange(false)}
-          >
-            Cancelar
-          </Button>
-          <Button
-            type="button"
-            w={{ base: "full", sm: "40" }}
-            h="12"
-            px="6"
-            borderRadius="sm"
-          >
-            Salvar item
-          </Button>
+          <Button type="button" variant="outline" px="6" disabled={isBusy} onClick={() => handleOpenChange(false)}>Cancelar</Button>
+          <Button type="submit" form={formId} w={{ base: "full", sm: "auto" }} px="6" loading={isBusy} loadingText="Salvando..." disabled={isBusy || !canSave}>Salvar item</Button>
         </>
       }
     >
-      <Grid
-        templateColumns={{
-          base: "minmax(0, 1fr)",
-          md: "minmax(0, 1fr) minmax(0, 2fr)",
-        }}
-        gap="6"
-      >
-        <Stack gap="3" minW="0">
-          <chakra.button
-            type="button"
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="center"
-            w="full"
-            minH={{ base: "40", md: "64" }}
-            p="4"
-            textAlign="center"
-            bg="bg.subtle"
-            borderWidth="1px"
-            borderStyle="dashed"
-            borderColor="border.default"
-            borderRadius="sm"
-            _hover={{ borderColor: "brand.solid" }}
-          >
-            <Flex
-              boxSize="12"
-              align="center"
-              justify="center"
-              borderRadius="full"
-              bg="brand.subtle"
-              color="brand.fg"
-              mb="3"
-              aria-hidden="true"
-            >
-              <ImageIcon size={28} strokeWidth={1.6} />
+      <chakra.form id={formId} aria-label="Cadastrar item" aria-busy={isBusy} noValidate onSubmit={(event) => { void handleSubmit(submit)(event); }}>
+        <Stack gap="5">
+          <Flex align="center" gap="4">
+            <Flex boxSize="14" flexShrink="0" align="center" justify="center" borderRadius="md" bg="brand.subtle" color="brand.fg" aria-hidden="true">
+              <Package size={28} strokeWidth={1.8} />
             </Flex>
-            <Text fontSize="sm" fontWeight="medium" color="fg.muted">
-              Adicionar foto
-            </Text>
-            <Text fontSize="xs" color="fg.muted" mt="1">
-              ou arraste uma imagem aqui
-            </Text>
-          </chakra.button>
-
-          <Grid templateColumns="repeat(3, minmax(0, 1fr))" gap="2">
-            {photosMock.map(({ label, src }) => (
-              <Image
-                key={label}
-                src={src}
-                alt={label}
-                w="full"
-                aspectRatio="square"
-                objectFit="cover"
-                bg="bg.subtle"
-                borderRadius="sm"
-                borderWidth="1px"
-                borderColor="border.default"
-              />
-            ))}
-            <chakra.button
-              type="button"
-              display="flex"
-              w="full"
-              aspectRatio="square"
-              alignItems="center"
-              justifyContent="center"
-              bg="bg.surface"
-              color="fg.muted"
-              borderWidth="1px"
-              borderColor="border.default"
-              borderRadius="sm"
-              _hover={{ bg: "bg.subtle" }}
-              aria-label="Adicionar outra foto"
-            >
-              <Plus size={28} strokeWidth={1.8} aria-hidden="true" />
-            </chakra.button>
+            <Text color="fg.muted" fontSize="sm">Cadastre o item e escolha onde ele será guardado.</Text>
+          </Flex>
+          <Grid templateColumns={{ base: "1fr", sm: "minmax(0, 1fr) 140px" }} gap="4">
+            <Input label="Nome do item" placeholder="Ex.: Furadeira Bosch" required maxLength={150} disabled={isBusy} {...register("name")} errorText={errors.name?.message} />
+            <Input label="Quantidade" type="number" min={1} max={2147483647} step={1} required disabled={isBusy} {...register("quantity", { valueAsNumber: true })} errorText={errors.quantity?.message} />
           </Grid>
-        </Stack>
-
-        <Stack gap="4" minW="0">
-          <Input
-            label="Nome do item"
-            required
-            defaultValue={name}
-            borderRadius="sm"
-          />
-
-          <Field.Root>
-            <Field.Label fontSize="sm" fontWeight="medium" mb="1">
-              Categoria
-            </Field.Label>
-            <Box position="relative" w="full">
-              <Box
-                position="absolute"
-                left="4"
-                top="50%"
-                transform="translateY(-50%)"
-                color="fg.muted"
-                pointerEvents="none"
-                zIndex="1"
-                aria-hidden="true"
-              >
-                <FileText size={18} strokeWidth={1.8} />
-              </Box>
+          <Field.Root invalid={!!errors.description} disabled={isBusy}>
+            <Field.Label fontSize="sm">Descrição (opcional)</Field.Label>
+            <Textarea {...controlStyles} {...register("description")} disabled={isBusy} maxLength={1000} minH="24" py="3" resize="vertical" placeholder="Descreva o item para encontrá-lo mais facilmente." />
+            <Field.ErrorText color="danger.700">{errors.description?.message}</Field.ErrorText>
+          </Field.Root>
+          <Grid templateColumns={{ base: "1fr", sm: "repeat(2, minmax(0, 1fr))" }} gap="4">
+            <Field.Root required invalid={!!errors.roomId} disabled={isBusy || !roomsQuery.isSuccess}>
+              <Field.Label fontSize="sm">Ambiente <Field.RequiredIndicator color="danger.500" /></Field.Label>
               <NativeSelect.Root>
-                <NativeSelect.Field
-                  defaultValue={category}
-                  ps="11"
-                  h="48px"
-                  borderRadius="sm"
-                  borderColor="border.default"
-                  bg="bg.surface"
-                  fontSize="sm"
-                  color="fg.default"
-                  _hover={{ borderColor: "border.emphasized" }}
-                  _focusVisible={{
-                    borderColor: "brand.solid",
-                    outlineColor: "brand.focusRing",
-                    outlineWidth: "2px",
-                    outlineOffset: "2px",
-                  }}
-                >
-                  {categoryOptionsMock.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
+                <NativeSelect.Field {...controlStyles} h="12" disabled={isBusy || !roomsQuery.isSuccess} {...register("roomId", { onChange: () => setValue("boxId", "", { shouldDirty: true }) })}>
+                  <option value="">{roomsQuery.isPending ? "Carregando ambientes..." : "Selecione um ambiente"}</option>
+                  {roomsQuery.data?.map((room) => <option key={room.id} value={String(room.id)}>{room.name}</option>)}
                 </NativeSelect.Field>
                 <NativeSelect.Indicator color="fg.muted" />
               </NativeSelect.Root>
-            </Box>
-          </Field.Root>
-
-          <Field.Root>
-            <Field.Label fontSize="sm" fontWeight="medium" mb="1">
-              Descrição (opcional)
-            </Field.Label>
-            <Textarea
-              defaultValue={description}
-              minH="20"
-              borderRadius="sm"
-              px="3"
-              py="3"
-              resize="vertical"
-              borderColor="border.default"
-              bg="bg.surface"
-              fontSize="sm"
-              color="fg.default"
-              _hover={{ borderColor: "border.emphasized" }}
-              _focusVisible={{
-                borderColor: "brand.solid",
-                outlineColor: "brand.focusRing",
-                outlineWidth: "2px",
-                outlineOffset: "2px",
-              }}
-            />
-          </Field.Root>
-
-          <Field.Root required>
-            <Field.Label fontSize="sm" fontWeight="medium" mb="1">
-              Local onde está guardado
-              <Field.RequiredIndicator color="danger.500" ms="1" />
-            </Field.Label>
-            <Flex
-              align="center"
-              justify="space-between"
-              gap="3"
-              flexWrap="wrap"
-              w="full"
-              minH="12"
-              bg="bg.subtle"
-              borderRadius="sm"
-              px="3"
-              py="1.5"
-            >
-              <Flex
-                align="center"
-                gap="1.5"
-                flexWrap="wrap"
-                color="fg.muted"
-                fontSize="sm"
-                minW="0"
-              >
-                <Box color="fg.muted" flexShrink="0" aria-hidden="true">
-                  <House size={16} strokeWidth={1.8} />
-                </Box>
-                <Text as="span" fontWeight="medium">
-                  {location.space}
-                </Text>
-                <Box color="fg.subtle" flexShrink="0" aria-hidden="true">
-                  <ChevronRight size={14} strokeWidth={1.8} />
-                </Box>
-                <Text as="span">{location.room}</Text>
-                {location.box && (
-                  <>
-                    <Box color="fg.subtle" flexShrink="0" aria-hidden="true">
-                      <ChevronRight size={14} strokeWidth={1.8} />
-                    </Box>
-                    <Text as="span">{location.box}</Text>
-                  </>
-                )}
-              </Flex>
-              <Button type="button" variant="link" flexShrink="0">
-                Alterar
-              </Button>
+              <Field.ErrorText color="danger.700">{errors.roomId?.message}</Field.ErrorText>
+            </Field.Root>
+            <Field.Root invalid={!!errors.boxId} disabled={isBusy || !roomId || !boxesQuery.isSuccess}>
+              <Field.Label fontSize="sm">Caixa (opcional)</Field.Label>
+              <NativeSelect.Root>
+                <NativeSelect.Field {...controlStyles} h="12" disabled={isBusy || !roomId || !boxesQuery.isSuccess} {...register("boxId")}>
+                  <option value="">{boxesQuery.isPending ? "Carregando caixas..." : "Diretamente no ambiente"}</option>
+                  {boxes.map((box) => <option key={box.id} value={String(box.id)}>{box.name}</option>)}
+                </NativeSelect.Field>
+                <NativeSelect.Indicator color="fg.muted" />
+              </NativeSelect.Root>
+              <Field.ErrorText color="danger.700">{errors.boxId?.message}</Field.ErrorText>
+            </Field.Root>
+          </Grid>
+          {roomsQuery.isError && (
+            <Flex align="center" gap="3" wrap="wrap">
+              <Text role="alert" fontSize="sm" color="fg.muted">Não foi possível carregar os ambientes.</Text>
+              <Button type="button" variant="outline" h="10" px="4" disabled={isBusy} loading={roomsQuery.isFetching} onClick={() => { void roomsQuery.refetch(); }}>Tentar novamente</Button>
             </Flex>
+          )}
+          {roomsQuery.isSuccess && roomsQuery.data.length === 0 && <Text role="status" fontSize="sm" color="fg.muted">Cadastre um ambiente antes de adicionar itens neste espaço.</Text>}
+          {boxesQuery.isError && (
+            <Flex align="center" gap="3" wrap="wrap">
+              <Text role="alert" fontSize="sm" color="fg.muted">Não foi possível carregar as caixas.</Text>
+              <Button type="button" variant="outline" h="10" px="4" disabled={isBusy} loading={boxesQuery.isFetching} onClick={() => { void boxesQuery.refetch(); }}>Tentar novamente</Button>
+            </Flex>
+          )}
+          <Field.Root invalid={!!errors.notes} disabled={isBusy}>
+            <Field.Label fontSize="sm">Observações (opcional)</Field.Label>
+            <Textarea {...controlStyles} {...register("notes")} disabled={isBusy} maxLength={1000} minH="20" py="3" resize="vertical" placeholder="Ex.: Guardar junto com as brocas." />
+            <Field.ErrorText color="danger.700">{errors.notes?.message}</Field.ErrorText>
           </Field.Root>
         </Stack>
-      </Grid>
+      </chakra.form>
     </Modal>
   );
 }

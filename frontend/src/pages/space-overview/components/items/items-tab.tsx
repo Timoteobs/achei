@@ -16,11 +16,11 @@ export function ItemsTab({ location }: Readonly<{ location?: ItemLocation }>) {
       ) : <SelectedBoxContext />}
       <ItemsHeader onNewItemClick={() => setIsNewItemModalOpen(true)} />
       <ItemsTable />
-      <NewItemModal
+      {isNewItemModalOpen && <NewItemModal
         location={location}
         open={isNewItemModalOpen}
         onOpenChange={setIsNewItemModalOpen}
-      />
+      />}
     </Stack>
   );
 }

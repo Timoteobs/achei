@@ -1,8 +1,9 @@
 import { Box, Flex, Heading, Image, Text } from "@chakra-ui/react";
 import { useState } from "react";
-import { ChevronDown, House, Plus, Trash2, UserRoundPlus } from "lucide-react";
+import { House, Plus, Trash2, UserRoundPlus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "../../../components/button/button";
+import { NewItemModal } from "./items/new-item-modal";
 
 export function SpaceOverviewHeader({
   name,
@@ -18,6 +19,7 @@ export function SpaceOverviewHeader({
   onDelete: () => void;
 }>) {
   const [failedImage, setFailedImage] = useState<string | null>(null);
+  const [isNewItemOpen, setIsNewItemOpen] = useState(false);
   return (
     <Flex
       as="header"
@@ -108,12 +110,13 @@ export function SpaceOverviewHeader({
           flex={{ base: "1 1 auto", md: "0 0 auto" }}
           borderRadius="sm"
           fontWeight="medium"
+          onClick={() => setIsNewItemOpen(true)}
         >
           <Plus size={16} strokeWidth={1.8} aria-hidden="true" />
           Novo item
-          <ChevronDown size={16} strokeWidth={1.8} aria-hidden="true" />
         </Button>
       </Flex>
+      {isNewItemOpen && <NewItemModal open onOpenChange={setIsNewItemOpen} />}
     </Flex>
   );
 }
