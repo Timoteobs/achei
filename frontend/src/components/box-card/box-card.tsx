@@ -1,5 +1,5 @@
-import { Badge, Box, Flex, Heading, IconButton, Text } from "@chakra-ui/react";
-import { ChevronRight, MapPin, MoreVertical, Package } from "lucide-react";
+import { Badge, Box, Flex, Heading, IconButton, Menu, Portal, Text } from "@chakra-ui/react";
+import { ChevronRight, MapPin, MoreVertical, Package, Trash2 } from "lucide-react";
 import { colorVariantStyles } from "../color-variants";
 import type { ColorVariant } from "../color-variants";
 
@@ -9,6 +9,7 @@ export interface BoxCardProps {
   roomName: string;
   category?: string;
   variant?: ColorVariant;
+  onDelete?: () => void;
 }
 
 export function BoxCard({
@@ -17,6 +18,7 @@ export function BoxCard({
   roomName,
   category,
   variant = "blue",
+  onDelete,
 }: Readonly<BoxCardProps>) {
   const colors = colorVariantStyles[variant];
 
@@ -62,16 +64,39 @@ export function BoxCard({
           >
             {name}
           </Heading>
-          <IconButton
-            aria-label={`Mais opções de ${name}`}
-            variant="ghost"
-            size="xs"
-            color="fg.muted"
-            flexShrink="0"
-            _hover={{ bg: "bg.subtle" }}
-          >
-            <MoreVertical size={16} strokeWidth={1.8} />
-          </IconButton>
+          {onDelete && (
+            <Menu.Root positioning={{ placement: "bottom-end" }}>
+              <Menu.Trigger asChild>
+                <IconButton
+                  type="button"
+                  aria-label={`Ações de ${name}`}
+                  variant="ghost"
+                  size="xs"
+                  color="fg.muted"
+                  flexShrink="0"
+                  _hover={{ bg: "bg.subtle", color: "fg.default" }}
+                >
+                  <MoreVertical size={16} strokeWidth={1.8} aria-hidden="true" />
+                </IconButton>
+              </Menu.Trigger>
+              <Portal>
+                <Menu.Positioner>
+                  <Menu.Content bg="bg.surface" borderColor="border.default" borderWidth="1px">
+                    <Menu.Item
+                      value="delete"
+                      color="danger.700"
+                      gap="2"
+                      onSelect={onDelete}
+                      _highlighted={{ bg: "danger.50", color: "danger.700" }}
+                    >
+                      <Trash2 size={16} aria-hidden="true" />
+                      Excluir
+                    </Menu.Item>
+                  </Menu.Content>
+                </Menu.Positioner>
+              </Portal>
+            </Menu.Root>
+          )}
         </Flex>
 
         <Box minW="0">

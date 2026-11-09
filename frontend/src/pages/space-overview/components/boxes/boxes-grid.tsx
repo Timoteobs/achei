@@ -1,15 +1,19 @@
 import { Box, Flex, SimpleGrid, Spinner, Text } from "@chakra-ui/react";
 import { useParams } from "@tanstack/react-router";
 import { isAxiosError } from "axios";
+import { useState } from "react";
 import { AddCard } from "../../../../components/add-card/add-card";
 import { BoxCard } from "../../../../components/box-card/box-card";
 import { Button } from "../../../../components/button/button";
 import { EmptyState } from "../../../../components/empty-state/empty-state";
 import { useBoxesQuery } from "../../../../hooks/boxes/use-boxes-query";
+import type { BoxResponse } from "../../../../services/boxes";
+import { DeleteBoxModal } from "./delete-box/delete-box-modal";
 
 export function BoxesGrid({ roomId, onNewBoxClick }: Readonly<{ roomId: number; onNewBoxClick: () => void }>) {
   const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
   const boxesQuery = useBoxesQuery(spaceId);
+  const [boxToDelete, setBoxToDelete] = useState<BoxResponse | null>(null);
   const boxes = boxesQuery.data?.filter((box) => box.roomId === roomId) ?? [];
   const notFound = isAxiosError(boxesQuery.error) && boxesQuery.error.response?.status === 404;
 
@@ -44,7 +48,12 @@ export function BoxesGrid({ roomId, onNewBoxClick }: Readonly<{ roomId: number; 
         >
           {boxes.map((box) => (
             <Box as="li" key={box.id} minW="0">
-              <BoxCard name={box.name} roomName={box.roomName} itemsCount={box.itemsCount} />
+              <BoxCard
+                name={box.name}
+                roomName={box.roomName}
+                itemsCount={box.itemsCount}
+                onDelete={() => setBoxToDelete(box)}
+              />
             </Box>
           ))}
           <Box as="li" minW="0">
@@ -52,6 +61,7 @@ export function BoxesGrid({ roomId, onNewBoxClick }: Readonly<{ roomId: number; 
           </Box>
         </SimpleGrid>
       )}
+      <DeleteBoxModal spaceId={spaceId} box={boxToDelete} onClose={() => setBoxToDelete(null)} />
     </Box>
   );
 }

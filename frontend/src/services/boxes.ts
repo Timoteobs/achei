@@ -33,3 +33,7 @@ export async function createBox(spaceId: string, values: CreateBoxRequest) {
   );
   return data;
 }
+
+export async function deleteBox(spaceId: string, boxId: number) {
+  await api.delete(`/spaces/${encodeURIComponent(spaceId)}/boxes/${boxId}`);
+}
