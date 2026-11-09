@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, IconButton, Menu, Portal, Text } from "@chakra-ui/react";
+import { Box, Flex, Heading, IconButton, Menu, Portal, Text, chakra } from "@chakra-ui/react";
 import { ChevronRight, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { colorVariantStyles } from "../color-variants";
@@ -15,6 +15,7 @@ export interface RoomCardProps {
   layout?: "compact" | "detailed";
   onDelete?: () => void;
   onEdit?: () => void;
+  onOpen?: () => void;
 }
 
 const variantStyles = colorVariantStyles;
@@ -28,11 +29,27 @@ export function RoomCard({
   layout = "compact",
   onDelete,
   onEdit,
+  onOpen,
 }: Readonly<RoomCardProps>) {
   const counts = [
     itemsCount !== undefined ? `${itemsCount} ${itemsCount === 1 ? "item" : "itens"}` : null,
     boxesCount !== undefined ? `${boxesCount} ${boxesCount === 1 ? "caixa" : "caixas"}` : null,
   ].filter((count) => count !== null).join(" • ");
+
+  const openButton = onOpen && (
+    <chakra.button
+      type="button"
+      aria-label={`Ver caixas de ${name}`}
+      position="absolute"
+      inset="0"
+      zIndex="1"
+      borderRadius="inherit"
+      cursor="pointer"
+      onClick={onOpen}
+      _hover={{ bg: "blackAlpha.50" }}
+      _focusVisible={{ outline: "2px solid", outlineColor: "brand.focusRing", outlineOffset: "2px" }}
+    />
+  );
 
   const actions = (onEdit || onDelete) && (
     <Menu.Root positioning={{ placement: "bottom-end" }}>
@@ -44,6 +61,8 @@ export function RoomCard({
           size="xs"
           color="fg.muted"
           flexShrink="0"
+          position="relative"
+          zIndex="2"
           _hover={{ bg: "bg.subtle", color: "fg.default" }}
         >
           <MoreVertical size={16} strokeWidth={1.8} aria-hidden="true" />
@@ -86,6 +105,7 @@ export function RoomCard({
     return (
       <Flex
         as="article"
+        position="relative"
         align="center"
         gap="4"
         w="full"
@@ -96,6 +116,7 @@ export function RoomCard({
         borderColor="border.default"
         borderRadius="md"
       >
+        {openButton}
         <Flex
           {...variantStyles[variant]}
           boxSize={{ base: "16", md: "20" }}
@@ -150,6 +171,7 @@ export function RoomCard({
       borderRadius="md"
       textAlign="center"
     >
+      {openButton}
       {actions && <Box position="absolute" top="1" right="1">{actions}</Box>}
       <Box mb="3" aria-hidden="true">
         <Icon size={28} strokeWidth={1.8} />

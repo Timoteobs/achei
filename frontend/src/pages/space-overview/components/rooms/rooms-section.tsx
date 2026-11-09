@@ -12,7 +12,7 @@ import { NewRoomModal } from "./new-room/new-room-modal";
 import { DeleteRoomModal } from "./delete-room/delete-room-modal";
 import type { RoomResponse } from "../../../../services/rooms";
 
-export function RoomsSection() {
+export function RoomsSection({ onRoomClick }: Readonly<{ onRoomClick: (roomId: number) => void }>) {
   const headingId = useId();
   const [isNewRoomOpen, setIsNewRoomOpen] = useState(false);
   const [roomToDelete, setRoomToDelete] = useState<RoomResponse | null>(null);
@@ -65,6 +65,7 @@ export function RoomsSection() {
           <Box as="li" key={room.id} flexShrink="0">
             <RoomCard
               {...getRoomCardProps(room)}
+              onOpen={() => onRoomClick(room.id)}
               onDelete={() => setRoomToDelete(room)}
               onEdit={() => setRoomToEdit(room)}
             />

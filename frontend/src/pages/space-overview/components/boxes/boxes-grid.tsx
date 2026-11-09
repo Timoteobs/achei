@@ -7,9 +7,10 @@ import { Button } from "../../../../components/button/button";
 import { EmptyState } from "../../../../components/empty-state/empty-state";
 import { useBoxesQuery } from "../../../../hooks/boxes/use-boxes-query";
 
-export function BoxesGrid({ onNewBoxClick }: Readonly<{ onNewBoxClick: () => void }>) {
+export function BoxesGrid({ roomId, onNewBoxClick }: Readonly<{ roomId: number; onNewBoxClick: () => void }>) {
   const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
   const boxesQuery = useBoxesQuery(spaceId);
+  const boxes = boxesQuery.data?.filter((box) => box.roomId === roomId) ?? [];
   const notFound = isAxiosError(boxesQuery.error) && boxesQuery.error.response?.status === 404;
 
   return (
@@ -28,10 +29,10 @@ export function BoxesGrid({ onNewBoxClick }: Readonly<{ onNewBoxClick: () => voi
           <Button type="button" variant="outline" h="10" px="4" loading={boxesQuery.isFetching} onClick={() => { void boxesQuery.refetch(); }}>Tentar novamente</Button>
         </Flex>
       )}
-      {boxesQuery.isSuccess && boxesQuery.data.length === 0 && (
+      {boxesQuery.isSuccess && boxes.length === 0 && (
         <EmptyState action={{ label: "Nova caixa", onClick: onNewBoxClick }} />
       )}
-      {!!boxesQuery.data?.length && (
+      {boxes.length > 0 && (
         <SimpleGrid
           as="ul"
           aria-label="Lista de caixas"
@@ -41,7 +42,7 @@ export function BoxesGrid({ onNewBoxClick }: Readonly<{ onNewBoxClick: () => voi
           m="0"
           p="0"
         >
-          {boxesQuery.data?.map((box) => (
+          {boxes.map((box) => (
             <Box as="li" key={box.id} minW="0">
               <BoxCard name={box.name} roomName={box.roomName} itemsCount={box.itemsCount} />
             </Box>

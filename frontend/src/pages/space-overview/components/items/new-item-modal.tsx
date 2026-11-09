@@ -23,11 +23,20 @@ import { Input } from "../../../../components/input/input";
 import { Modal } from "../../../../components/modal/modal";
 import { categoryOptionsMock, newItemMock, photosMock } from "./new-item-mock";
 
+export interface ItemLocation {
+  space: string;
+  room: string;
+  roomId: number;
+  box?: string;
+}
+
 export function NewItemModal({
   open,
   onOpenChange,
-}: Readonly<Pick<ComponentProps<typeof Modal>, "open" | "onOpenChange">>) {
-  const { name, category, description, location } = newItemMock;
+  location: initialLocation,
+}: Readonly<Pick<ComponentProps<typeof Modal>, "open" | "onOpenChange"> & { location?: ItemLocation }>) {
+  const { name, category, description } = newItemMock;
+  const location = initialLocation ?? newItemMock.location;
 
   return (
     <Modal
@@ -256,10 +265,14 @@ export function NewItemModal({
                   <ChevronRight size={14} strokeWidth={1.8} />
                 </Box>
                 <Text as="span">{location.room}</Text>
-                <Box color="fg.subtle" flexShrink="0" aria-hidden="true">
-                  <ChevronRight size={14} strokeWidth={1.8} />
-                </Box>
-                <Text as="span">{location.box}</Text>
+                {location.box && (
+                  <>
+                    <Box color="fg.subtle" flexShrink="0" aria-hidden="true">
+                      <ChevronRight size={14} strokeWidth={1.8} />
+                    </Box>
+                    <Text as="span">{location.box}</Text>
+                  </>
+                )}
               </Flex>
               <Button type="button" variant="link" flexShrink="0">
                 Alterar

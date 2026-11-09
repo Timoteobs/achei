@@ -1,20 +1,50 @@
 import { Tabs } from "@chakra-ui/react";
+import { useParams } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
+import { useRoomsQuery } from "../../../hooks/rooms/use-rooms-query";
 import { BoxesTab } from "./boxes/boxes-tab";
 import { ItemsTab } from "./items/items-tab";
 import { OverviewTab } from "./overview/overview-tab";
 import { RoomsTab } from "./rooms/rooms-tab";
 
 const tabs = [
-  { value: "overview", label: "Visão geral", Content: OverviewTab },
-  { value: "rooms", label: "Ambientes", Content: RoomsTab },
-  { value: "boxes", label: "Caixas", Content: BoxesTab },
-  { value: "items", label: "Itens", Content: ItemsTab },
+  { value: "overview", label: "Visão geral" },
+  { value: "rooms", label: "Ambientes" },
+  { value: "boxes", label: "Caixas" },
+  { value: "items", label: "Itens" },
 ];
 
-export function SpaceTabs() {
+export function SpaceTabs({ spaceName }: Readonly<{ spaceName: string }>) {
+  const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
+  const roomsQuery = useRoomsQuery(spaceId);
+  const [activeTab, setActiveTab] = useState("overview");
+  const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
+  const boxesTriggerRef = useRef<HTMLButtonElement>(null);
+  const shouldFocusBoxes = useRef(false);
+  const selectedRoom = roomsQuery.data?.find((room) => room.id === selectedRoomId);
+  const visibleTabs = tabs.filter((tab) => tab.value !== "boxes" || selectedRoom);
+
+  const openRoom = (roomId: number) => {
+    shouldFocusBoxes.current = true;
+    setSelectedRoomId(roomId);
+    setActiveTab("boxes");
+  };
+
+  useEffect(() => {
+    if (activeTab === "boxes" && selectedRoom && shouldFocusBoxes.current) {
+      boxesTriggerRef.current?.focus();
+      shouldFocusBoxes.current = false;
+    }
+  }, [activeTab, selectedRoom]);
+
+  const itemLocation = selectedRoom
+    ? { space: spaceName, room: selectedRoom.name, roomId: selectedRoom.id }
+    : undefined;
+
   return (
     <Tabs.Root
-      defaultValue="overview"
+      value={activeTab === "boxes" && !selectedRoom ? "rooms" : activeTab}
+      onValueChange={({ value }) => setActiveTab(value)}
       variant="line"
       colorPalette="brand"
       mt="6"
@@ -28,9 +58,10 @@ export function SpaceTabs() {
         scrollbarWidth="none"
         borderColor="border.default"
       >
-        {tabs.map(({ value, label }) => (
+        {visibleTabs.map(({ value, label }) => (
           <Tabs.Trigger
             key={value}
+            ref={value === "boxes" ? boxesTriggerRef : undefined}
             value={value}
             h="12"
             px="4"
@@ -58,11 +89,20 @@ export function SpaceTabs() {
           </Tabs.Trigger>
         ))}
       </Tabs.List>
-      {tabs.map(({ value, Content }) => (
-        <Tabs.Content key={value} value={value} pt="6">
-          <Content />
+      <Tabs.Content value="overview" pt="6">
+        <OverviewTab onRoomClick={openRoom} />
+      </Tabs.Content>
+      <Tabs.Content value="rooms" pt="6">
+        <RoomsTab onRoomClick={openRoom} />
+      </Tabs.Content>
+      {selectedRoom && (
+        <Tabs.Content value="boxes" pt="6">
+          <BoxesTab key={selectedRoom.id} room={selectedRoom} />
         </Tabs.Content>
-      ))}
+      )}
+      <Tabs.Content value="items" pt="6">
+        <ItemsTab key={selectedRoom?.id ?? "all"} location={itemLocation} />
+      </Tabs.Content>
     </Tabs.Root>
   );
 }

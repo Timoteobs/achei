@@ -66,7 +66,7 @@ export function SpaceOverviewPage() {
             onDelete={() => setSpaceToDelete(space)}
           />
           <SpaceSummary createdAt={space.createdAt} />
-          <SpaceTabs key={space.id} />
+          <SpaceTabs key={space.id} spaceName={space.name} />
         </>
       )}
       <DeleteSpaceModal

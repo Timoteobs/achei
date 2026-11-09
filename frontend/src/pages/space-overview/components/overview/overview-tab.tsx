@@ -3,10 +3,10 @@ import { RecentItemsSection } from "./recent-items-section";
 import { RoomsSection } from "../rooms/rooms-section";
 import { SpaceActivitySection } from "./space-activity-section";
 
-export function OverviewTab() {
+export function OverviewTab({ onRoomClick }: Readonly<{ onRoomClick: (roomId: number) => void }>) {
   return (
     <Stack gap="6" minW="0">
-      <RoomsSection />
+      <RoomsSection onRoomClick={onRoomClick} />
       <SimpleGrid columns={{ base: 1, lg: 2 }} gap="6" minW="0">
         <RecentItemsSection />
         <SpaceActivitySection />

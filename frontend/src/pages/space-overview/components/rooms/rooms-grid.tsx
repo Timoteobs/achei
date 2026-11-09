@@ -10,7 +10,10 @@ import { DeleteRoomModal } from "./delete-room/delete-room-modal";
 import { NewRoomModal } from "./new-room/new-room-modal";
 import type { RoomResponse } from "../../../../services/rooms";
 
-export function RoomsGrid({ onNewRoomClick }: Readonly<{ onNewRoomClick: () => void }>) {
+export function RoomsGrid({ onNewRoomClick, onRoomClick }: Readonly<{
+  onNewRoomClick: () => void;
+  onRoomClick: (roomId: number) => void;
+}>) {
   const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
   const roomsQuery = useRoomsQuery(spaceId);
   const [roomToDelete, setRoomToDelete] = useState<RoomResponse | null>(null);
@@ -25,6 +28,7 @@ export function RoomsGrid({ onNewRoomClick }: Readonly<{ onNewRoomClick: () => v
             <RoomCard
               {...getRoomCardProps(room)}
               layout="detailed"
+              onOpen={() => onRoomClick(room.id)}
               onDelete={() => setRoomToDelete(room)}
               onEdit={() => setRoomToEdit(room)}
             />

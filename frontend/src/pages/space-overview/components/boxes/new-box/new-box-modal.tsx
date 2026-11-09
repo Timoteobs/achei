@@ -13,7 +13,9 @@ import { useCreateBoxMutation } from "../../../../../hooks/boxes/use-create-box-
 import { newBoxSchema } from "./new-box-schema";
 import type { NewBoxValues } from "./new-box-schema";
 
-export function NewBoxModal({ open, onOpenChange }: Readonly<Pick<ModalProps, "open" | "onOpenChange">>) {
+export function NewBoxModal({ open, onOpenChange, initialRoomId }: Readonly<
+  Pick<ModalProps, "open" | "onOpenChange"> & { initialRoomId: number }
+>) {
   const formId = useId();
   const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
   const tabs = useTabsContext();
@@ -21,7 +23,7 @@ export function NewBoxModal({ open, onOpenChange }: Readonly<Pick<ModalProps, "o
   const createMutation = useCreateBoxMutation(spaceId);
   const { register, control, handleSubmit, reset, setError, formState: { errors, isSubmitting } } = useForm<NewBoxValues>({
     resolver: yupResolver(newBoxSchema),
-    defaultValues: { name: "", description: "", roomId: "" },
+    defaultValues: { name: "", description: "", roomId: String(initialRoomId) },
     mode: "onSubmit",
     reValidateMode: "onSubmit",
   });
