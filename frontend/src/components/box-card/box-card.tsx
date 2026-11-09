@@ -7,7 +7,7 @@ export interface BoxCardProps {
   name: string;
   itemsCount: number;
   roomName: string;
-  category: string;
+  category?: string;
   variant?: ColorVariant;
 }
 
@@ -87,7 +87,7 @@ export function BoxCard({
         </Box>
 
         <Flex align="center" justify="space-between" gap="2">
-          <Badge
+          {category && <Badge
             {...colors}
             borderRadius="full"
             px="2.5"
@@ -96,7 +96,7 @@ export function BoxCard({
             fontWeight="medium"
           >
             {category}
-          </Badge>
+          </Badge>}
           <Box color="fg.muted" flexShrink="0" aria-hidden="true">
             <ChevronRight size={18} strokeWidth={1.8} />
           </Box>

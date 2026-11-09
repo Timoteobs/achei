@@ -26,6 +26,7 @@ export function useUpdateRoomMutation(spaceId: string) {
         previous?.map((item) => item.id === room.id ? room : item),
       );
       void queryClient.invalidateQueries({ queryKey: listKey, exact: true });
+      void queryClient.invalidateQueries({ queryKey: ["spaces", userId, "boxes", spaceId, "list"], exact: true });
       toast.success("Ambiente atualizado com sucesso!");
     },
     onError: (error) => {

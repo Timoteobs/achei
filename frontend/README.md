@@ -106,6 +106,29 @@ estado vazio é exibido. Durante o envio, a confirmação bloqueia novos envios 
 o fechamento. Erros mantêm o modal aberto e são informados pelo Sonner, incluindo
 o bloqueio `409` para ambientes com caixas, itens ou outros registros vinculados.
 
+## Cadastro e consulta de caixas
+
+A aba Caixas usa `GET /api/spaces/{spaceId}/boxes` e o modal “Nova caixa” envia
+`POST /api/spaces/{spaceId}/boxes`, com o token Bearer do Axios. O formulário pede
+nome (obrigatório, até 100 caracteres), ambiente (obrigatório) e descrição
+(opcional, até 500 caracteres), com validação Yup apenas ao salvar.
+
+Os ambientes do seletor vêm da consulta do espaço atual. Sem ambientes, o modal
+oferece acesso à aba Ambientes e não permite salvar. Durante a requisição, novos
+envios e o fechamento ficam bloqueados; falhas preservam os dados preenchidos.
+
+Após o cadastro, a lista de caixas é atualizada e as consultas de caixas e
+ambientes são revalidadas, atualizando `boxesCount`. A listagem trata carregamento,
+erro com nova tentativa e estado vazio com ação de cadastro. Categorias fictícias
+não são exibidas; `itemsCount` corresponde ao número de registros de itens na caixa.
+
+O backend persiste na `tbl_location` com `type = BOX` e `parent_location_id`
+apontando para um ambiente `ROOM` do mesmo espaço. O proprietário é verificado
+pelo token em ambas as rotas. Espaço ou ambiente inexistente/sem acesso retorna
+404, dados inválidos retornam 400. Esta etapa cobre caixas diretamente dentro
+de ambientes. Não exige migração. Exemplos estão em `back-end/Presentation/Boxes.http`.
+Reinicie o backend após recompilar para disponibilizar as novas rotas.
+
 ## Estado vazio
 
 Use `src/components/empty-state/empty-state.tsx` quando uma consulta terminar

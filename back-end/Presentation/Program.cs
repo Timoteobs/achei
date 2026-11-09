@@ -4,6 +4,7 @@ using Application.Interfaces.Services;
 using Application.Services.Auth;
 using Application.Services.Spaces;
 using Application.Services.Rooms;
+using Application.Services.Boxes;
 using Achei.Configurations;
 using Achei.ExceptionHandling;
 using Crosscutting.Common.Core.Security;
@@ -37,6 +38,8 @@ builder.Services.AddScoped<ISpaceRepository, SpaceRepository>();
 builder.Services.AddScoped<ISpaceService, SpaceService>();
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
 builder.Services.AddScoped<IRoomService, RoomService>();
+builder.Services.AddScoped<IBoxRepository, BoxRepository>();
+builder.Services.AddScoped<IBoxService, BoxService>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 

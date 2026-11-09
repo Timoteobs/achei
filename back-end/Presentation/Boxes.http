@@ -1,0 +1,18 @@
+@baseUrl = https://localhost:7092
+@token = COLE_SEU_TOKEN
+@spaceId = 1
+
+### Listar caixas do espaço
+GET {{baseUrl}}/api/spaces/{{spaceId}}/boxes
+Authorization: Bearer {{token}}
+
+### Cadastrar caixa em um ambiente do mesmo espaço
+POST {{baseUrl}}/api/spaces/{{spaceId}}/boxes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Caixa de ferramentas",
+  "description": "Ferramentas para pequenos reparos.",
+  "roomId": 1
+}
