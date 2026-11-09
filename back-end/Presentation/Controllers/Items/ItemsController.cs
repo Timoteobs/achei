@@ -15,6 +15,12 @@ namespace Achei.Controllers.Items;
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
 public sealed class ItemsController(IItemService items) : ControllerBase
 {
+    [HttpGet]
+    [ProducesResponseType<ItemsPageResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ItemsPageResponse>> List(long spaceId, [FromQuery] ListItemsRequest request, CancellationToken cancellationToken) =>
+        Ok(await items.ListAsync(spaceId, GetUserId(), request, cancellationToken));
+
     [HttpPost]
     [ProducesResponseType<ItemResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]

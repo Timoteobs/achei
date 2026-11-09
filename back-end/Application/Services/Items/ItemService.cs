@@ -12,6 +12,14 @@ public sealed class ItemService(
     IBoxRepository boxes,
     ISpaceRepository spaces) : IItemService
 {
+    public async Task<ItemsPageResponse> ListAsync(long spaceId, long userId, ListItemsRequest request, CancellationToken cancellationToken = default)
+    {
+        if (await spaces.GetByIdAndOwnerAsync(spaceId, userId, cancellationToken) is null)
+            throw new SpaceNotFoundException();
+
+        return await items.ListBySpaceAsync(spaceId, request, cancellationToken);
+    }
+
     public async Task<ItemResponse> CreateAsync(long spaceId, long userId, CreateItemRequest request, CancellationToken cancellationToken = default)
     {
         if (await spaces.GetByIdAndOwnerAsync(spaceId, userId, cancellationToken) is null)
