@@ -1,5 +1,5 @@
 import { Badge, Box, Flex, Heading, IconButton, Menu, Portal, Text } from "@chakra-ui/react";
-import { ChevronRight, MapPin, MoreVertical, Package, Trash2 } from "lucide-react";
+import { ChevronRight, MapPin, MoreVertical, Package, Pencil, Trash2 } from "lucide-react";
 import { colorVariantStyles } from "../color-variants";
 import type { ColorVariant } from "../color-variants";
 
@@ -10,6 +10,7 @@ export interface BoxCardProps {
   category?: string;
   variant?: ColorVariant;
   onDelete?: () => void;
+  onEdit?: () => void;
 }
 
 export function BoxCard({
@@ -19,6 +20,7 @@ export function BoxCard({
   category,
   variant = "blue",
   onDelete,
+  onEdit,
 }: Readonly<BoxCardProps>) {
   const colors = colorVariantStyles[variant];
 
@@ -64,7 +66,7 @@ export function BoxCard({
           >
             {name}
           </Heading>
-          {onDelete && (
+          {(onEdit || onDelete) && (
             <Menu.Root positioning={{ placement: "bottom-end" }}>
               <Menu.Trigger asChild>
                 <IconButton
@@ -82,7 +84,19 @@ export function BoxCard({
               <Portal>
                 <Menu.Positioner>
                   <Menu.Content bg="bg.surface" borderColor="border.default" borderWidth="1px">
-                    <Menu.Item
+                    {onEdit && (
+                      <Menu.Item
+                        value="edit"
+                        color="fg.default"
+                        gap="2"
+                        onSelect={onEdit}
+                        _highlighted={{ bg: "bg.subtle", color: "fg.default" }}
+                      >
+                        <Pencil size={16} aria-hidden="true" />
+                        Editar
+                      </Menu.Item>
+                    )}
+                    {onDelete && <Menu.Item
                       value="delete"
                       color="danger.700"
                       gap="2"
@@ -91,7 +105,7 @@ export function BoxCard({
                     >
                       <Trash2 size={16} aria-hidden="true" />
                       Excluir
-                    </Menu.Item>
+                    </Menu.Item>}
                   </Menu.Content>
                 </Menu.Positioner>
               </Portal>

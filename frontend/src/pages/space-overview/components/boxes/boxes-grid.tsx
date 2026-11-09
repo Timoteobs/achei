@@ -9,11 +9,13 @@ import { EmptyState } from "../../../../components/empty-state/empty-state";
 import { useBoxesQuery } from "../../../../hooks/boxes/use-boxes-query";
 import type { BoxResponse } from "../../../../services/boxes";
 import { DeleteBoxModal } from "./delete-box/delete-box-modal";
+import { NewBoxModal } from "./new-box/new-box-modal";
 
 export function BoxesGrid({ roomId, onNewBoxClick }: Readonly<{ roomId: number; onNewBoxClick: () => void }>) {
   const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
   const boxesQuery = useBoxesQuery(spaceId);
   const [boxToDelete, setBoxToDelete] = useState<BoxResponse | null>(null);
+  const [boxToEdit, setBoxToEdit] = useState<BoxResponse | null>(null);
   const boxes = boxesQuery.data?.filter((box) => box.roomId === roomId) ?? [];
   const notFound = isAxiosError(boxesQuery.error) && boxesQuery.error.response?.status === 404;
 
@@ -53,6 +55,7 @@ export function BoxesGrid({ roomId, onNewBoxClick }: Readonly<{ roomId: number; 
                 roomName={box.roomName}
                 itemsCount={box.itemsCount}
                 onDelete={() => setBoxToDelete(box)}
+                onEdit={() => setBoxToEdit(box)}
               />
             </Box>
           ))}
@@ -62,6 +65,17 @@ export function BoxesGrid({ roomId, onNewBoxClick }: Readonly<{ roomId: number; 
         </SimpleGrid>
       )}
       <DeleteBoxModal spaceId={spaceId} box={boxToDelete} onClose={() => setBoxToDelete(null)} />
+      {boxToEdit && (
+        <NewBoxModal
+          key={boxToEdit.id}
+          open
+          box={boxToEdit}
+          initialRoomId={roomId}
+          onOpenChange={(open) => {
+            if (!open) setBoxToEdit(null);
+          }}
+        />
+      )}
     </Box>
   );
 }

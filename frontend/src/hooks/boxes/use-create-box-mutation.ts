@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { toast } from "sonner";
 import { createBox } from "../../services/boxes";
-import type { BoxResponse, CreateBoxRequest } from "../../services/boxes";
+import type { BoxResponse, SaveBoxRequest } from "../../services/boxes";
 import { useAuthStore } from "../../stores/auth-store";
 
 export function useCreateBoxMutation(spaceId: string) {
@@ -10,7 +10,7 @@ export function useCreateBoxMutation(spaceId: string) {
 
   return useMutation({
     mutationKey: ["spaces", "boxes", spaceId, "create"],
-    mutationFn: (values: CreateBoxRequest) => createBox(spaceId, values),
+    mutationFn: (values: SaveBoxRequest) => createBox(spaceId, values),
     retry: false,
     networkMode: "always",
     onMutate: () => ({ userId: useAuthStore.getState().session?.user.id }),
