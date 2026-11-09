@@ -53,6 +53,13 @@ public class Location : BaseEntity
         UpdatedAt = CreatedAt;
     }
 
+    public void UpdateBoxDetails(string name, string? description, long roomId)
+    {
+        DomainValidator.Validator(ValidationRule.Positive(roomId, "Ambiente"));
+        UpdateDetails(name, description, Icon, Color);
+        ParentLocationId = roomId;
+    }
+
     public void UpdateDetails(string name, string? description, string? icon, string? color)
     {
         DomainValidator.Validator(

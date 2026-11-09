@@ -12,6 +12,8 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
 
         var (status, title, detail) = exception switch
         {
+            BoxNotFoundException => (StatusCodes.Status404NotFound, "Caixa não encontrada.", exception.Message),
+            BoxHasDependenciesException => (StatusCodes.Status409Conflict, "Não foi possível excluir a caixa.", exception.Message),
             RoomNotFoundException => (StatusCodes.Status404NotFound, "Ambiente não encontrado.", exception.Message),
             RoomHasDependenciesException => (StatusCodes.Status409Conflict, "Não foi possível excluir o ambiente.", exception.Message),
             SpaceNotFoundException => (StatusCodes.Status404NotFound, "Espaço não encontrado.", exception.Message),
