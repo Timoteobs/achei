@@ -67,9 +67,21 @@ oculta nos ambientes, pois esse dado ainda não faz parte da resposta.
 
 As listas tratam carregamento, resultado vazio e erro com opção de tentar
 novamente. Os erros também usam o feedback global do Sonner. O link “Ver todos”
-abre a aba Ambientes e mostra o total consultado. Cadastro, edição e exclusão
-de ambientes ainda não estão integrados; o formulário continua apenas validando
-os campos no frontend.
+abre a aba Ambientes e mostra o total consultado. Edição e exclusão de ambientes
+ainda não estão integradas.
+
+## Cadastro de ambientes
+
+O modal “Novo ambiente”, disponível na aba Ambientes e na visão geral, envia
+`POST /api/spaces/{spaceId}/rooms` via `useCreateRoomMutation`. O espaço vem da
+rota atual e o token Bearer é enviado pelo Axios. Nome, descrição, ícone e cor
+usam a validação com Yup somente ao salvar; a descrição vazia é enviada como `null`.
+
+Durante o envio, os campos, os novos envios e o fechamento ficam bloqueados.
+Após o sucesso, o modal é limpo e fechado, a lista compartilhada é atualizada e
+reconsultada, atualizando também a prévia e o total de ambientes no resumo.
+O cache respeita o usuário que iniciou a operação. O Sonner informa sucesso ou
+falha; erros mantêm o formulário preenchido para nova tentativa.
 
 ## Estado vazio
 

@@ -1,14 +1,15 @@
 import { Field, Flex, Grid, Text, Textarea, chakra } from "@chakra-ui/react";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useParams } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 import { useId } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { toast } from "sonner";
 import { Button } from "../../../../../components/button/button";
 import { colorVariantStyles } from "../../../../../components/color-variants";
 import { Input } from "../../../../../components/input/input";
 import { Modal } from "../../../../../components/modal/modal";
 import type { ModalProps } from "../../../../../components/modal/modal";
+import { useCreateRoomMutation } from "../../../../../hooks/rooms/use-create-room-mutation";
 import { roomColorOptions, roomIconOptions } from "./new-room-options";
 import { newRoomSchema } from "./new-room-schema";
 import type { NewRoomValues } from "./new-room-schema";
@@ -18,6 +19,8 @@ export function NewRoomModal({
   onOpenChange,
 }: Readonly<Pick<ModalProps, "open" | "onOpenChange">>) {
   const formId = useId();
+  const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
+  const createRoomMutation = useCreateRoomMutation(spaceId);
   const {
     register, control, handleSubmit, reset,
     formState: { errors, isSubmitting },
@@ -30,11 +33,33 @@ export function NewRoomModal({
   const [description, icon, color] = useWatch({ control, name: ["description", "icon", "color"] });
   const selectedIcon = roomIconOptions.find((option) => option.value === icon) ?? roomIconOptions[0];
   const PreviewIcon = selectedIcon.icon;
+  const isBusy = isSubmitting || createRoomMutation.isPending;
 
   const handleOpenChange = (nextOpen: boolean) => {
-    if (isSubmitting) return;
-    if (!nextOpen) reset();
+    if (isBusy) return;
+    if (!nextOpen) {
+      reset();
+      createRoomMutation.reset();
+    }
     onOpenChange(nextOpen);
+  };
+
+  const submit = (values: NewRoomValues) => {
+    if (createRoomMutation.isPending) return;
+    createRoomMutation.mutate(
+      {
+        name: values.name,
+        description: values.description || null,
+        icon: values.icon,
+        color: values.color,
+      },
+      {
+        onSuccess: () => {
+          reset();
+          onOpenChange(false);
+        },
+      },
+    );
   };
 
   return (
@@ -43,13 +68,13 @@ export function NewRoomModal({
       onOpenChange={handleOpenChange}
       title="Novo ambiente"
       size="md"
-      closeDisabled={isSubmitting}
+      closeDisabled={isBusy}
       footer={
         <>
-          <Button type="button" variant="outline" px="6" disabled={isSubmitting} onClick={() => handleOpenChange(false)}>
+          <Button type="button" variant="outline" px="6" disabled={isBusy} onClick={() => handleOpenChange(false)}>
             Cancelar
           </Button>
-          <Button type="submit" form={formId} px="6" w={{ base: "full", sm: "auto" }} loading={isSubmitting}>
+          <Button type="submit" form={formId} px="6" w={{ base: "full", sm: "auto" }} loading={isBusy} disabled={isBusy} loadingText="Salvando...">
             Salvar ambiente
           </Button>
         </>
@@ -58,14 +83,13 @@ export function NewRoomModal({
       <chakra.form
         id={formId}
         aria-label="Cadastrar ambiente"
+        aria-busy={isBusy}
         noValidate
         display="flex"
         flexDirection="column"
         gap="5"
         onSubmit={(event) => {
-          void handleSubmit(() => {
-            toast.info("Dados validados. O ambiente ainda não foi salvo; o cadastro estará disponível em breve.");
-          })(event);
+          void handleSubmit(submit)(event);
         }}
       >
         <Flex align="center" gap="4">
@@ -81,11 +105,13 @@ export function NewRoomModal({
           maxLength={100}
           {...register("name")}
           errorText={errors.name?.message}
+          disabled={isBusy}
         />
-        <Field.Root invalid={!!errors.description}>
+        <Field.Root invalid={!!errors.description} disabled={isBusy}>
           <Field.Label fontSize="sm" fontWeight="medium" mb="1">Descrição (opcional)</Field.Label>
           <Textarea
             {...register("description")}
+            disabled={isBusy}
             placeholder="Ex.: Ambiente para guardar livros e eletrônicos."
             maxLength={500}
             minH="24"
@@ -104,7 +130,7 @@ export function NewRoomModal({
           <Field.HelperText alignSelf="flex-end" color="fg.muted">{description.length}/500</Field.HelperText>
           <Field.ErrorText color="danger.700">{errors.description?.message}</Field.ErrorText>
         </Field.Root>
-        <chakra.fieldset minW="0" aria-describedby={errors.icon ? `${formId}-icon-error` : undefined}>
+        <chakra.fieldset minW="0" disabled={isBusy} aria-describedby={errors.icon ? `${formId}-icon-error` : undefined}>
           <chakra.legend fontSize="sm" fontWeight="semibold" color="fg.default" mb="3">Ícone do ambiente</chakra.legend>
           <Grid templateColumns="repeat(4, minmax(0, 1fr))" gap="2">
             {roomIconOptions.map(({ value, label, icon: Icon }) => (
@@ -145,7 +171,7 @@ export function NewRoomModal({
           </Grid>
           {errors.icon && <Text id={`${formId}-icon-error`} color="danger.700" fontSize="sm" mt="2">{errors.icon.message}</Text>}
         </chakra.fieldset>
-        <chakra.fieldset minW="0" aria-describedby={errors.color ? `${formId}-color-error` : undefined}>
+        <chakra.fieldset minW="0" disabled={isBusy} aria-describedby={errors.color ? `${formId}-color-error` : undefined}>
           <chakra.legend fontSize="sm" fontWeight="semibold" color="fg.default" mb="3">Cor do ambiente</chakra.legend>
           <Flex gap="3" wrap="wrap">
             {roomColorOptions.map(({ value, label }) => (
@@ -182,7 +208,6 @@ export function NewRoomModal({
           </Flex>
           {errors.color && <Text id={`${formId}-color-error`} color="danger.700" fontSize="sm" mt="2">{errors.color.message}</Text>}
         </chakra.fieldset>
-        <Text fontSize="xs" color="fg.muted">Prévia do cadastro: os dados ainda não serão salvos.</Text>
       </chakra.form>
     </Modal>
   );
