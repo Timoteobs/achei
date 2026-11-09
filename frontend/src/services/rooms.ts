@@ -34,3 +34,15 @@ export async function getRooms(spaceId: string, signal?: AbortSignal) {
   );
   return data;
 }
+
+export async function deleteRoom(spaceId: string, roomId: number) {
+  await api.delete(`/spaces/${encodeURIComponent(spaceId)}/rooms/${roomId}`);
+}
+
+export async function updateRoom(spaceId: string, roomId: number, values: SaveRoomRequest) {
+  const { data } = await api.put<RoomResponse>(
+    `/spaces/${encodeURIComponent(spaceId)}/rooms/${roomId}`,
+    values,
+  );
+  return data;
+}

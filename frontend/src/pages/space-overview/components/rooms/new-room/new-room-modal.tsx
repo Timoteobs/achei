@@ -10,6 +10,8 @@ import { Input } from "../../../../../components/input/input";
 import { Modal } from "../../../../../components/modal/modal";
 import type { ModalProps } from "../../../../../components/modal/modal";
 import { useCreateRoomMutation } from "../../../../../hooks/rooms/use-create-room-mutation";
+import { useUpdateRoomMutation } from "../../../../../hooks/rooms/use-update-room-mutation";
+import type { RoomResponse } from "../../../../../services/rooms";
 import { roomColorOptions, roomIconOptions } from "./new-room-options";
 import { newRoomSchema } from "./new-room-schema";
 import type { NewRoomValues } from "./new-room-schema";
@@ -17,56 +19,68 @@ import type { NewRoomValues } from "./new-room-schema";
 export function NewRoomModal({
   open,
   onOpenChange,
-}: Readonly<Pick<ModalProps, "open" | "onOpenChange">>) {
+  room,
+}: Readonly<Pick<ModalProps, "open" | "onOpenChange"> & { room?: RoomResponse }>) {
   const formId = useId();
   const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
   const createRoomMutation = useCreateRoomMutation(spaceId);
+  const updateRoomMutation = useUpdateRoomMutation(spaceId);
   const {
     register, control, handleSubmit, reset,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, dirtyFields },
   } = useForm<NewRoomValues>({
     resolver: yupResolver(newRoomSchema),
-    defaultValues: { name: "", description: "", icon: "armchair", color: "teal" },
+    defaultValues: {
+      name: room?.name ?? "",
+      description: room?.description ?? "",
+      icon: roomIconOptions.find(({ value }) => value === room?.icon)?.value ?? (room ? "door-open" : "armchair"),
+      color: roomColorOptions.find(({ value }) => value === room?.color)?.value ?? "teal",
+    },
     mode: "onSubmit",
     reValidateMode: "onSubmit",
   });
   const [description, icon, color] = useWatch({ control, name: ["description", "icon", "color"] });
   const selectedIcon = roomIconOptions.find((option) => option.value === icon) ?? roomIconOptions[0];
   const PreviewIcon = selectedIcon.icon;
-  const isBusy = isSubmitting || createRoomMutation.isPending;
+  const isBusy = isSubmitting || createRoomMutation.isPending || updateRoomMutation.isPending;
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (isBusy) return;
     if (!nextOpen) {
       reset();
       createRoomMutation.reset();
+      updateRoomMutation.reset();
     }
     onOpenChange(nextOpen);
   };
 
   const submit = (values: NewRoomValues) => {
-    if (createRoomMutation.isPending) return;
-    createRoomMutation.mutate(
-      {
-        name: values.name,
-        description: values.description || null,
-        icon: values.icon,
-        color: values.color,
+    if (createRoomMutation.isPending || updateRoomMutation.isPending) return;
+    const payload = {
+      name: values.name,
+      description: values.description || null,
+      // Preserve optional or custom values when only other fields were edited.
+      icon: room && !dirtyFields.icon ? room.icon : values.icon,
+      color: room && !dirtyFields.color ? room.color : values.color,
+    };
+    const options = {
+      onSuccess: () => {
+        reset();
+        onOpenChange(false);
       },
-      {
-        onSuccess: () => {
-          reset();
-          onOpenChange(false);
-        },
-      },
-    );
+    };
+    if (room) {
+      updateRoomMutation.mutate({ id: room.id, values: payload }, options);
+    } else {
+      createRoomMutation.mutate(payload, options);
+    }
   };
 
   return (
     <Modal
       open={open}
       onOpenChange={handleOpenChange}
-      title="Novo ambiente"
+      title={room ? "Editar ambiente" : "Novo ambiente"}
       size="md"
       closeDisabled={isBusy}
       footer={
@@ -75,14 +89,14 @@ export function NewRoomModal({
             Cancelar
           </Button>
           <Button type="submit" form={formId} px="6" w={{ base: "full", sm: "auto" }} loading={isBusy} disabled={isBusy} loadingText="Salvando...">
-            Salvar ambiente
+            {room ? "Salvar alterações" : "Salvar ambiente"}
           </Button>
         </>
       }
     >
       <chakra.form
         id={formId}
-        aria-label="Cadastrar ambiente"
+        aria-label={room ? "Editar ambiente" : "Cadastrar ambiente"}
         aria-busy={isBusy}
         noValidate
         display="flex"
@@ -96,7 +110,9 @@ export function NewRoomModal({
           <Flex boxSize="16" flexShrink="0" align="center" justify="center" borderRadius="md" {...colorVariantStyles[color]} aria-hidden="true">
             <PreviewIcon size={30} strokeWidth={1.8} />
           </Flex>
-          <Text fontSize="sm" color="fg.muted">Crie um ambiente para organizar os itens deste espaço.</Text>
+          <Text fontSize="sm" color="fg.muted">
+            {room ? "Atualize as informações deste ambiente." : "Crie um ambiente para organizar os itens deste espaço."}
+          </Text>
         </Flex>
         <Input
           label="Nome do ambiente"

@@ -67,8 +67,7 @@ oculta nos ambientes, pois esse dado ainda não faz parte da resposta.
 
 As listas tratam carregamento, resultado vazio e erro com opção de tentar
 novamente. Os erros também usam o feedback global do Sonner. O link “Ver todos”
-abre a aba Ambientes e mostra o total consultado. Edição e exclusão de ambientes
-ainda não estão integradas.
+abre a aba Ambientes e mostra o total consultado.
 
 ## Cadastro de ambientes
 
@@ -82,6 +81,30 @@ Após o sucesso, o modal é limpo e fechado, a lista compartilhada é atualizada
 reconsultada, atualizando também a prévia e o total de ambientes no resumo.
 O cache respeita o usuário que iniciou a operação. O Sonner informa sucesso ou
 falha; erros mantêm o formulário preenchido para nova tentativa.
+
+## Edição de ambientes
+
+O menu dos cards na aba Ambientes e na visão geral oferece “Editar”. A opção
+abre o mesmo formulário de cadastro preenchido com nome, descrição, ícone e cor.
+O salvamento usa `PUT /api/spaces/{spaceId}/rooms/{id}` via `useUpdateRoomMutation`.
+
+A validação continua somente ao salvar. Durante a requisição, os campos e o
+fechamento ficam bloqueados. Após o sucesso, o modal fecha e o cache compartilhado
+é atualizado e reconsultado, refletindo as alterações nos cards. Falhas mantêm os
+dados digitados para nova tentativa e exibem feedback pelo Sonner.
+
+## Exclusão de ambientes
+
+Os cards na aba Ambientes e na visão geral possuem um menu “Excluir”. A ação
+abre o `ConfirmationModal` com o nome do ambiente e só envia
+`DELETE /api/spaces/{spaceId}/rooms/{id}` após a confirmação.
+
+O hook `useDeleteRoomMutation` utiliza o Axios autenticado, bloqueia tentativas
+automáticas e atualiza o cache compartilhado após o sucesso. A lista, a prévia e
+o total de ambientes acompanham a exclusão; ao remover o último ambiente, o
+estado vazio é exibido. Durante o envio, a confirmação bloqueia novos envios e
+o fechamento. Erros mantêm o modal aberto e são informados pelo Sonner, incluindo
+o bloqueio `409` para ambientes com caixas, itens ou outros registros vinculados.
 
 ## Estado vazio
 

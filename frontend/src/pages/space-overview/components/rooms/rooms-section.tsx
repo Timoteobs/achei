@@ -9,10 +9,14 @@ import { useRoomsQuery } from "../../../../hooks/rooms/use-rooms-query";
 import { getRoomCardProps } from "./room-card-props";
 import { RoomsQueryFeedback } from "./rooms-query-feedback";
 import { NewRoomModal } from "./new-room/new-room-modal";
+import { DeleteRoomModal } from "./delete-room/delete-room-modal";
+import type { RoomResponse } from "../../../../services/rooms";
 
 export function RoomsSection() {
   const headingId = useId();
   const [isNewRoomOpen, setIsNewRoomOpen] = useState(false);
+  const [roomToDelete, setRoomToDelete] = useState<RoomResponse | null>(null);
+  const [roomToEdit, setRoomToEdit] = useState<RoomResponse | null>(null);
   const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
   const roomsQuery = useRoomsQuery(spaceId);
   const tabs = useTabsContext();
@@ -59,7 +63,11 @@ export function RoomsSection() {
       >
         {roomsQuery.data?.map((room) => (
           <Box as="li" key={room.id} flexShrink="0">
-            <RoomCard {...getRoomCardProps(room)} />
+            <RoomCard
+              {...getRoomCardProps(room)}
+              onDelete={() => setRoomToDelete(room)}
+              onEdit={() => setRoomToEdit(room)}
+            />
           </Box>
         ))}
         <Box as="li" flexShrink="0">
@@ -67,6 +75,17 @@ export function RoomsSection() {
         </Box>
       </Flex>}
       <NewRoomModal open={isNewRoomOpen} onOpenChange={setIsNewRoomOpen} />
+      <DeleteRoomModal spaceId={spaceId} room={roomToDelete} onClose={() => setRoomToDelete(null)} />
+      {roomToEdit && (
+        <NewRoomModal
+          key={roomToEdit.id}
+          open
+          room={roomToEdit}
+          onOpenChange={(open) => {
+            if (!open) setRoomToEdit(null);
+          }}
+        />
+      )}
     </Box>
   );
 }
