@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Achei — Resumo do projeto</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172033;
+      --muted: #637083;
+      --surface: #ffffff;
+      --canvas: #f3f6fa;
+      --line: #dce3ec;
+      --brand: #4f46e5;
+      --brand-soft: #eef2ff;
+      --success: #08775f;
+      --success-soft: #e8f7f2;
+      --warning: #9a5b08;
+      --warning-soft: #fff6df;
+      --danger: #b42318;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font: 16px/1.6 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    main {
+      width: min(1120px, calc(100% - 32px));
+      margin: 32px auto 64px;
+    }
+
+    header {
+      padding: 40px;
+      border-radius: 24px;
+      color: white;
+      background: linear-gradient(135deg, #312e81, #4f46e5 55%, #2563eb);
+      box-shadow: 0 18px 50px rgb(49 46 129 / 18%);
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 8px; font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.1; }
+    h2 { margin-bottom: 20px; font-size: 1.55rem; }
+    h3 { margin-bottom: 8px; font-size: 1.05rem; }
+    header p { margin: 0; color: #e0e7ff; }
+
+    section {
+      margin-top: 24px;
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--surface);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fbfcfe;
+    }
+
+    .metric {
+      display: block;
+      margin-bottom: 2px;
+      color: var(--brand);
+      font-size: 2rem;
+      font-weight: 750;
+      line-height: 1.2;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+    }
+
+    .done { color: var(--success); background: var(--success-soft); }
+    .pending { color: var(--warning); background: var(--warning-soft); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th { color: var(--muted); font-size: .85rem; text-transform: uppercase; }
+    tr:last-child td { border-bottom: 0; }
+    ul, ol { margin: 8px 0 0; padding-left: 22px; }
+    li + li { margin-top: 6px; }
+
+    code {
+      padding: 2px 6px;
+      border-radius: 6px;
+      color: #3730a3;
+      background: var(--brand-soft);
+      font: .9em ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    pre {
+      overflow-x: auto;
+      padding: 16px;
+      border-radius: 12px;
+      color: #e2e8f0;
+      background: #111827;
+    }
+
+    pre code { padding: 0; color: inherit; background: transparent; }
+
+    .callout {
+      padding: 18px;
+      border-left: 4px solid var(--warning);
+      border-radius: 10px;
+      background: var(--warning-soft);
+    }
+
+    .timeline {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: phase;
+    }
+
+    .timeline li {
+      position: relative;
+      margin: 0 0 16px 16px;
+      padding: 0 0 18px 36px;
+      border-left: 2px solid var(--line);
+      counter-increment: phase;
+    }
+
+    .timeline li::before {
+      content: counter(phase);
+      position: absolute;
+      top: 0;
+      left: -17px;
+      display: grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      border-radius: 50%;
+      color: white;
+      background: var(--brand);
+      font-weight: 700;
+    }
+
+    .timeline li:last-child { margin-bottom: 0; padding-bottom: 0; border-left-color: transparent; }
+    .muted { color: var(--muted); }
+    footer { margin-top: 24px; color: var(--muted); text-align: center; font-size: .9rem; }
+
+    @media (max-width: 640px) {
+      main { width: min(100% - 20px, 1120px); margin-top: 10px; }
+      header, section { padding: 22px; border-radius: 14px; }
+      .table-wrap { overflow-x: auto; }
+    }
+
+    @media print {
+      body { background: white; }
+      main { width: 100%; margin: 0; }
+      header { box-shadow: none; }
+      section { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Projeto Achei</h1>
+      <p>Resumo técnico, estado atual e próximos passos — 11 de outubro de 2026</p>
+    </header>
+
+    <section aria-labelledby="visao-geral">
+      <h2 id="visao-geral">Visão geral</h2>
+      <div class="grid">
+        <article class="card">
+          <span class="metric">13</span>
+          <strong>entidades de domínio</strong>
+          <p class="muted">Organizadas em quatro módulos.</p>
+        </article>
+        <article class="card">
+          <span class="metric">13</span>
+          <strong>mappings do EF Core</strong>
+          <p class="muted">Um mapping explícito por entidade.</p>
+        </article>
+        <article class="card">
+          <span class="metric">21</span>
+          <strong>relacionamentos</strong>
+          <p class="muted">Foreign keys validadas no modelo relacional.</p>
+        </article>
+        <article class="card">
+          <span class="metric">0</span>
+          <strong>erros e avisos</strong>
+          <p class="muted">Build final da solução concluído com sucesso.</p>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="concluido">
+      <h2 id="concluido">O que foi concluído</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Área</th><th>Implementação</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Domínio</td>
+              <td><code>BaseEntity</code> com <code>Id</code>, validação por DataAnnotations e acesso aos resultados.</td>
+              <td><span class="badge done">Concluído</span></td>
+            </tr>
+            <tr>
+              <td>Regras de negócio</td>
+              <td><code>DomainValidator</code> e validações de obrigatoriedade, tamanho, e-mail, IDs, datas, valores e formato Argon2id.</td>
+              <td><span class="badge done">Concluído</span></td>
+            </tr>
+            <tr>
+              <td>Entidades</td>
+              <td>Estado encapsulado, construtores de domínio, normalização de texto e timestamps UTC.</td>
+              <td><span class="badge done">Concluído</span></td>
+            </tr>
+            <tr>
+              <td>Criptografia</td>
+              <td>AES-GCM versionado, com nonce e tag de autenticação; chave recebida pela configuração da API.</td>
+              <td><span class="badge done">Concluído</span></td>
+            </tr>
+            <tr>
+              <td>Hash</td>
+              <td>Argon2id com salt aleatório e comparação em tempo constante.</td>
+              <td><span class="badge done">Concluído</span></td>
+            </tr>
+            <tr>
+              <td>Persistência</td>
+              <td><code>AcheiContext</code>, SQL Server, retry resiliente e descoberta automática dos mappings.</td>
+              <td><span class="badge done">Concluído</span></td>
+            </tr>
+            <tr>
+              <td>Mappings</td>
+              <td>Colunas, tamanhos, defaults, índices, FKs e chaves compostas alinhados ao diagrama.</td>
+              <td><span class="badge done">Concluído</span></td>
+            </tr>
+            <tr>
+              <td>JWT</td>
+              <td>Geração HMAC-SHA256 e validação de assinatura, issuer, audience, expiração e claims.</td>
+              <td><span class="badge done">Infraestrutura pronta</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section aria-labelledby="modulos">
+      <h2 id="modulos">Organização do domínio</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Identity</h3>
+          <p><code>User</code></p>
+        </article>
+        <article class="card">
+          <h3>Spaces</h3>
+          <p><code>Space</code>, <code>Member</code>, <code>Invitation</code></p>
+        </article>
+        <article class="card">
+          <h3>Inventory</h3>
+          <p><code>Location</code>, <code>LocationImage</code>, <code>Category</code>, <code>Item</code>, <code>ItemImage</code>, <code>Tag</code>, <code>ItemTag</code>, <code>Favorite</code></p>
+        </article>
+        <article class="card">
+          <h3>Audit</h3>
+          <p><code>Activity</code></p>
+        </article>
+      </div>
+      <p class="muted">A separação é modular no código. O banco permanece em um único schema físico, usando o schema padrão do SQL Server.</p>
+    </section>
+
+    <section aria-labelledby="decisoes">
+      <h2 id="decisoes">Decisões arquiteturais registradas</h2>
+      <ul>
+        <li>O projeto segue a divisão <code>Presentation</code>, <code>Application</code>, <code>Domain</code>, <code>Data</code> e <code>Crosscutting</code>.</li>
+        <li>Contratos de segurança ficam na Application; implementações criptográficas ficam em Crosscutting.</li>
+        <li>A Presentation é a raiz de composição e registra banco, criptografia, hash e JWT.</li>
+        <li>Relacionamentos do EF usam <code>DeleteBehavior.NoAction</code> para evitar exclusões em cascata e múltiplos caminhos no SQL Server.</li>
+        <li><code>ItemTag</code> e <code>Favorite</code> herdam <code>BaseEntity</code>, mas o mapping ignora <code>Id</code> e mantém as chaves primárias compostas do modelo.</li>
+        <li>Segredos não são versionados em <code>appsettings.json</code>; desenvolvimento usa User Secrets e produção deve usar um cofre ou variáveis injetadas.</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="configuracao">
+      <h2 id="configuracao">Configuração atual</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Chave AES</h3>
+          <span class="badge done">Configurada</span>
+          <p class="muted">Confirmada via User Secrets durante o trabalho.</p>
+        </article>
+        <article class="card">
+          <h3>Chave JWT</h3>
+          <span class="badge pending">Pendente de confirmação</span>
+          <p class="muted">Deve ser uma chave Base64 própria, com pelo menos 32 bytes, diferente da chave AES.</p>
+        </article>
+        <article class="card">
+          <h3>Conexão SQL Server</h3>
+          <span class="badge pending">Pendente de confirmação</span>
+          <p class="muted">Esperada em <code>ConnectionStrings:DefaultConnection</code>.</p>
+        </article>
+        <article class="card">
+          <h3>JWT público</h3>
+          <span class="badge done">Configurado</span>
+          <p class="muted">Issuer e audience: <code>Achei</code>. Expiração: 60 minutos.</p>
+        </article>
+      </div>
+
+      <h3 style="margin-top: 24px">Comandos necessários, se ainda não executados</h3>
+      <pre><code>dotnet user-secrets set "Jwt:Key" "CHAVE_JWT_BASE64" --project ".\Presentation\Achei.csproj"
+
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "SUA_CONNECTION_STRING" --project ".\Presentation\Achei.csproj"</code></pre>
+    </section>
+
+    <section aria-labelledby="estado">
+      <h2 id="estado">Onde estamos</h2>
+      <p>A fundação técnica está pronta: domínio, validação, segurança, contexto e mappings compilam e foram validados. O projeto ainda não possui casos de uso, repositórios específicos, endpoints funcionais do produto, migration inicial nem banco criado.</p>
+      <div class="callout">
+        <strong>Ponto de decisão:</strong> a entidade <code>User</code> ainda não possui <code>PasswordHash</code>. Portanto, a API sabe gerar e validar JWT, mas ainda não existe um processo que autentique uma pessoa e autorize a emissão do token.
+      </div>
+    </section>
+
+    <section aria-labelledby="proximos-passos">
+      <h2 id="proximos-passos">Próximos passos recomendados</h2>
+      <ol class="timeline">
+        <li>
+          <h3>Finalizar as configurações locais</h3>
+          <p>Confirmar <code>Jwt:Key</code> e <code>ConnectionStrings:DefaultConnection</code> nos User Secrets.</p>
+        </li>
+        <li>
+          <h3>Definir o método de autenticação</h3>
+          <p>Escolher entre e-mail/senha, provedor externo ou acesso sem senha. Para e-mail/senha, adicionar <code>password_hash</code> ao modelo, entidade e mapping.</p>
+        </li>
+        <li>
+          <h3>Criar a migration inicial</h3>
+          <p>Gerar a migration, revisar o SQL produzido — especialmente chaves compostas, índices e FKs — e só então aplicar no banco.</p>
+          <pre><code>dotnet ef migrations add InitialCreate --project Data --startup-project Presentation
+dotnet ef database update --project Data --startup-project Presentation</code></pre>
+        </li>
+        <li>
+          <h3>Implementar acesso a dados e casos de uso</h3>
+          <p>Criar repositórios necessários e começar pelos fluxos de cadastro, autenticação, criação de espaço e gestão de membros.</p>
+        </li>
+        <li>
+          <h3>Expor endpoints da API</h3>
+          <p>Adicionar controllers e modelos de entrada/saída. Usar <code>[Authorize]</code> nas rotas protegidas e validar acesso por membro e papel no espaço.</p>
+        </li>
+        <li>
+          <h3>Completar o ciclo de autenticação</h3>
+          <p>Depois do login básico, avaliar refresh token, revogação, recuperação de senha e confirmação de e-mail.</p>
+        </li>
+        <li>
+          <h3>Adicionar testes automatizados</h3>
+          <p>Cobrir regras do domínio, mappings, autenticação e autorização; incluir testes de integração com SQL Server.</p>
+        </li>
+        <li>
+          <h3>Limpeza e operação</h3>
+          <p>Remover classes placeholder restantes, decidir o papel de <code>Crosscutting.IOC</code>, configurar logs, health checks e pipeline de CI.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section aria-labelledby="validacoes">
+      <h2 id="validacoes">Verificações executadas</h2>
+      <ul>
+        <li>Build completo da solução: <strong>0 erros e 0 avisos</strong>.</li>
+        <li>Modelo relacional: <strong>13 entidades e 21 foreign keys</strong>.</li>
+        <li>Chaves compostas de <code>ItemTag</code> e <code>Favorite</code> verificadas.</li>
+        <li>AES-GCM: criptografia e descriptografia verificadas.</li>
+        <li>Argon2id: hash correto aceito e senha incorreta rejeitada.</li>
+        <li>JWT: token válido aceito e assinatura com chave incorreta rejeitada.</li>
+      </ul>
+    </section>
+
+    <footer>Documento gerado a partir do estado atual da solução Achei.</footer>
+  </main>
+</body>
+</html>

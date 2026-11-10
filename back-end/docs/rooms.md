@@ -52,5 +52,4 @@ Exemplo de resposta:
 - Um espaço acessível sem ambientes retorna uma lista vazia.
 
 A exclusão é permanente e não remove registros dependentes em cascata.
-Exemplos manuais estão em `Presentation/Rooms.http`.
 O formulário frontend ainda não está integrado a essas rotas.

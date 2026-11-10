@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Achei — Guia do ambiente de desenvolvimento</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --surface: #ffffff;
+      --surface-alt: #f8fafc;
+      --text: #172033;
+      --muted: #667085;
+      --border: #dce3ec;
+      --primary: #4338ca;
+      --primary-soft: #eef2ff;
+      --success: #08775f;
+      --success-soft: #e8f7f2;
+      --warning: #9a5b08;
+      --warning-soft: #fff6df;
+      --danger: #b42318;
+      --danger-soft: #fff0ee;
+      --code: #111827;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 900px);
+      gap: 32px;
+      width: min(1240px, calc(100% - 32px));
+      margin: 32px auto 72px;
+      justify-content: center;
+    }
+
+    nav {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--surface);
+    }
+
+    nav strong { display: block; margin-bottom: 10px; }
+    nav ol { margin: 0; padding-left: 22px; }
+    nav li + li { margin-top: 6px; }
+    nav a { color: var(--muted); text-decoration: none; }
+    nav a:hover { color: var(--primary); text-decoration: underline; }
+
+    main { min-width: 0; }
+
+    header {
+      padding: 38px;
+      border-radius: 22px;
+      color: white;
+      background: linear-gradient(135deg, #312e81, #4f46e5 58%, #2563eb);
+      box-shadow: 0 18px 50px rgb(49 46 129 / 18%);
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 10px; font-size: clamp(2rem, 6vw, 3.2rem); line-height: 1.08; }
+    h2 { margin-bottom: 18px; font-size: 1.55rem; }
+    h3 { margin: 26px 0 8px; font-size: 1.08rem; }
+    header p { margin: 0; color: #e0e7ff; }
+
+    section {
+      margin-top: 24px;
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--surface);
+    }
+
+    ol, ul { padding-left: 24px; }
+    li + li { margin-top: 7px; }
+
+    code {
+      padding: 2px 6px;
+      border-radius: 6px;
+      color: #3730a3;
+      background: var(--primary-soft);
+      font: .9em ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    pre {
+      overflow-x: auto;
+      margin: 12px 0 18px;
+      padding: 17px;
+      border-radius: 12px;
+      color: #e5e7eb;
+      background: var(--code);
+      tab-size: 2;
+    }
+
+    pre code { padding: 0; color: inherit; background: transparent; }
+
+    .callout {
+      margin: 16px 0;
+      padding: 16px 18px;
+      border-left: 4px solid var(--primary);
+      border-radius: 10px;
+      background: var(--primary-soft);
+    }
+
+    .warning { border-left-color: var(--warning); background: var(--warning-soft); }
+    .danger { border-left-color: var(--danger); background: var(--danger-soft); }
+    .success { border-left-color: var(--success); background: var(--success-soft); }
+
+    .checklist {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .card {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-alt);
+    }
+
+    .card strong { display: block; margin-bottom: 4px; }
+    .muted { color: var(--muted); }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 11px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+    th { color: var(--muted); font-size: .84rem; text-transform: uppercase; }
+    tr:last-child td { border-bottom: 0; }
+
+    footer { padding: 26px; color: var(--muted); text-align: center; }
+
+    @media (max-width: 860px) {
+      .layout { display: block; width: min(100% - 20px, 900px); margin-top: 10px; }
+      nav { position: static; margin-bottom: 18px; }
+      header, section { padding: 22px; border-radius: 14px; }
+      .table-wrap { overflow-x: auto; }
+    }
+
+    @media print {
+      body { background: white; }
+      .layout { display: block; width: 100%; margin: 0; }
+      nav { display: none; }
+      header { box-shadow: none; }
+      section { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <nav aria-label="Sumário">
+      <strong>Configuração local</strong>
+      <ol>
+        <li><a href="#prerequisitos">Pré-requisitos</a></li>
+        <li><a href="#codigo">Preparar o código</a></li>
+        <li><a href="#banco">Criar o banco</a></li>
+        <li><a href="#usuario-sql">Criar o usuário SQL</a></li>
+        <li><a href="#secrets">Configurar secrets</a></li>
+        <li><a href="#executar">Executar a API</a></li>
+        <li><a href="#validar">Validar no Postman</a></li>
+        <li><a href="#migrations">Atualizar o banco</a></li>
+        <li><a href="#problemas">Problemas comuns</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <header>
+        <h1>Achei</h1>
+        <p>Guia para replicar a API e o banco SQL Server em um ambiente de desenvolvimento local.</p>
+      </header>
+
+      <section aria-labelledby="objetivo">
+        <h2 id="objetivo">Objetivo</h2>
+        <p>Ao concluir este guia, o desenvolvedor terá o banco <code>Achei</code>, os segredos locais e a API HTTPS funcionando, sem gravar credenciais no repositório.</p>
+        <div class="checklist">
+          <div class="card"><strong>Banco</strong><span class="muted">SQL Server com tabelas <code>tbl_*</code>.</span></div>
+          <div class="card"><strong>Segurança</strong><span class="muted">Chaves AES e JWT distintas.</span></div>
+          <div class="card"><strong>API</strong><span class="muted">Cadastro, login e JWT disponíveis.</span></div>
+        </div>
+      </section>
+
+      <section aria-labelledby="prerequisitos">
+        <h2 id="prerequisitos">1. Pré-requisitos</h2>
+        <ul>
+          <li>.NET SDK 9.</li>
+          <li>Visual Studio 2022 atualizado, ou editor compatível com .NET 9.</li>
+          <li>SQL Server local e SQL Server Management Studio (SSMS).</li>
+          <li>Postman para testar a API.</li>
+          <li>Acesso ao repositório do Achei.</li>
+        </ul>
+        <pre><code>dotnet --version
+dotnet --list-sdks</code></pre>
+      </section>
+
+      <section aria-labelledby="codigo">
+        <h2 id="codigo">2. Preparar o código</h2>
+        <p>Depois de clonar o repositório, abra um terminal na raiz e entre no backend:</p>
+        <pre><code>cd .\achei\back-end
+dotnet restore Achei.API.sln
+dotnet build Achei.API.sln</code></pre>
+        <p>Os avisos <code>NU1900</code> indicam que o NuGet não conseguiu consultar dados de vulnerabilidade. Eles não impedem a compilação quando os pacotes necessários já estão disponíveis.</p>
+      </section>
+
+      <section aria-labelledby="banco">
+        <h2 id="banco">3. Criar o banco</h2>
+        <ol>
+          <li>Abra o SSMS e conecte-se à instância local com uma conta autorizada a criar bancos.</li>
+          <li>Abra <code>achei\back-end\Data\Scripts\CreateDatabase.sql</code>.</li>
+          <li>Execute o arquivo completo.</li>
+          <li>Atualize a pasta <strong>Databases</strong> e confirme a existência do banco <code>Achei</code>.</li>
+        </ol>
+        <div class="callout success">
+          <strong>O script é idempotente.</strong> Ele cria o banco quando necessário e aplica somente migrations ainda não registradas em <code>__EFMigrationsHistory</code>.
+        </div>
+        <p>As tabelas de negócio devem terminar com nomes como:</p>
+        <pre><code>dbo.tbl_user
+dbo.tbl_space
+dbo.tbl_location
+dbo.tbl_item</code></pre>
+      </section>
+
+      <section aria-labelledby="usuario-sql">
+        <h2 id="usuario-sql">4. Criar um usuário SQL para a aplicação</h2>
+        <p>Não utilize o login <code>sa</code> na connection string. Conectado ao SSMS com uma conta administrativa, escolha uma senha local forte e execute:</p>
+        <pre><code>USE [master];
+GO
+
+CREATE LOGIN [achei_app]
+WITH PASSWORD = 'SUBSTITUA_POR_UMA_SENHA_FORTE',
+     CHECK_POLICY = ON;
+GO
+
+USE [Achei];
+GO
+
+CREATE USER [achei_app] FOR LOGIN [achei_app];
+GO
+
+ALTER ROLE [db_owner] ADD MEMBER [achei_app];
+GO</code></pre>
+        <div class="callout warning">
+          <strong>Apenas para desenvolvimento:</strong> <code>db_owner</code> simplifica migrations locais. Em produção, use permissões mínimas e uma identidade gerenciada pelo ambiente.
+        </div>
+        <p>Se o login ou usuário já existir, não recrie. Apenas confirme que ele possui acesso ao banco correto.</p>
+      </section>
+
+      <section aria-labelledby="secrets">
+        <h2 id="secrets">5. Configurar User Secrets</h2>
+        <p>O projeto <code>Presentation</code> já possui <code>UserSecretsId</code>. Não execute <code>user-secrets init</code> e não grave chaves ou senhas no <code>appsettings.json</code>.</p>
+
+        <h3>Gerar duas chaves aleatórias</h3>
+        <p>Execute no PowerShell, dentro de <code>achei\back-end</code>:</p>
+        <pre><code>function New-SecretKey {
+    $bytes = New-Object byte[] 32
+    [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+    [Convert]::ToBase64String($bytes)
+}
+
+$encryptionKey = New-SecretKey
+$jwtKey = New-SecretKey
+
+dotnet user-secrets set "Encryption:Key" $encryptionKey --project Presentation/Achei.csproj
+dotnet user-secrets set "Jwt:Key" $jwtKey --project Presentation/Achei.csproj</code></pre>
+        <div class="callout danger">
+          <strong>Obrigatório:</strong> AES e JWT devem usar chaves diferentes. Nunca publique essas chaves em commits, tickets, prints ou mensagens.
+        </div>
+
+        <h3>Configurar a conexão com SQL Authentication</h3>
+        <pre><code>dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=SEU_SERVIDOR;Database=Achei;User Id=achei_app;Password=SUA_SENHA;Encrypt=False;TrustServerCertificate=True;" --project Presentation/Achei.csproj</code></pre>
+        <p>Substitua <code>SEU_SERVIDOR</code> pelo mesmo nome usado no SSMS, por exemplo <code>localhost</code>, <code>.\SQLEXPRESS</code> ou o nome da máquina.</p>
+
+        <h3>Alternativa com Windows Authentication</h3>
+        <pre><code>dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=SEU_SERVIDOR;Database=Achei;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True;" --project Presentation/Achei.csproj</code></pre>
+
+        <div class="callout">
+          Use <code>Encrypt=True</code> quando a instância local estiver preparada para TLS. Se ocorrer “requires encryption but this machine does not support it”, mantenha <code>Encrypt=False</code> somente no desenvolvimento local. Produção deve usar conexão criptografada.
+        </div>
+
+        <h3>Regras para ambientes compartilhados</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Cenário</th><th>AES</th><th>JWT</th></tr></thead>
+            <tbody>
+              <tr><td>Banco e API locais por desenvolvedor</td><td>Pode ser exclusiva.</td><td>Pode ser exclusiva.</td></tr>
+              <tr><td>Banco compartilhado</td><td>Deve ser compartilhada para descriptografar os mesmos dados.</td><td>Pode ser exclusiva se os tokens não circularem entre APIs.</td></tr>
+              <tr><td>Várias instâncias da mesma API</td><td>Deve ser compartilhada.</td><td>Deve ser compartilhada para validar os mesmos tokens.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-labelledby="executar">
+        <h2 id="executar">6. Executar a API</h2>
+        <h3>Pelo Visual Studio</h3>
+        <ol>
+          <li>Defina o projeto <strong>Achei / Presentation</strong> como Startup Project.</li>
+          <li>Na lista ao lado do botão verde, selecione o perfil <strong>https</strong>.</li>
+          <li>Não selecione <strong>Container (Dockerfile)</strong>, a menos que o Docker Desktop esteja instalado.</li>
+          <li>Pressione <code>F5</code> ou <code>Ctrl+F5</code>.</li>
+          <li>Quando solicitado, confie no certificado HTTPS de desenvolvimento para <code>localhost</code>.</li>
+        </ol>
+
+        <h3>Pelo terminal</h3>
+        <pre><code>dotnet run --project Presentation --launch-profile https</code></pre>
+
+        <p>Endereços padrão:</p>
+        <pre><code>https://localhost:7092
+http://localhost:5022
+https://localhost:7092/openapi/v1.json</code></pre>
+        <p>Receber <code>404</code> na raiz <code>/</code> é esperado: a API não possui página inicial nem Swagger UI.</p>
+      </section>
+
+      <section aria-labelledby="validar">
+        <h2 id="validar">7. Validar no Postman</h2>
+        <h3>Cadastrar um usuário</h3>
+        <pre><code>POST https://localhost:7092/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Usuário Teste",
+  "email": "teste.achei@local.dev",
+  "password": "Teste@123456",
+  "confirmPassword": "Teste@123456"
+}</code></pre>
+        <p>Resultado esperado: <code>201 Created</code>, dados do usuário e <code>accessToken</code>.</p>
+
+        <h3>Efetuar login</h3>
+        <pre><code>POST https://localhost:7092/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "teste.achei@local.dev",
+  "password": "Teste@123456"
+}</code></pre>
+        <p>Resultado esperado: <code>200 OK</code> e um JWT com três partes separadas por pontos.</p>
+
+        <h3>Validar senha incorreta</h3>
+        <p>Repita o login com outra senha. O resultado esperado é <code>401 Unauthorized</code> em formato <code>application/problem+json</code>.</p>
+
+        <h3>Conferir o hash no banco</h3>
+        <pre><code>USE [Achei];
+
+SELECT [id], [name], [email], [password_hash], [active]
+FROM [dbo].[tbl_user]
+WHERE [email] = 'teste.achei@local.dev';</code></pre>
+        <p>O valor deve começar com <code>$argon2id$</code> e nunca ser igual à senha informada.</p>
+      </section>
+
+      <section aria-labelledby="migrations">
+        <h2 id="migrations">8. Atualizar um banco existente</h2>
+        <p>Para um banco criado anteriormente, execute novamente o arquivo atualizado <code>Data\Scripts\CreateDatabase.sql</code>. O histórico impede a reaplicação de migrations concluídas.</p>
+        <p>Quem trabalha diretamente com migrations pode instalar a ferramenta compatível e atualizar o banco:</p>
+        <pre><code>dotnet tool install --global dotnet-ef --version 9.0.20
+
+dotnet ef database update --project Data --startup-project Presentation</code></pre>
+        <p>Antes de criar uma nova migration, atualize o código e confirme que a última migration do repositório já foi aplicada.</p>
+      </section>
+
+      <section aria-labelledby="problemas">
+        <h2 id="problemas">9. Problemas comuns</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Sintoma</th><th>Causa provável</th><th>Ação</th></tr></thead>
+            <tbody>
+              <tr><td><code>CTC1002</code></td><td>Perfil de container selecionado sem Docker Desktop.</td><td>Selecione o perfil <strong>https</strong>.</td></tr>
+              <tr><td><code>NU1900</code></td><td>NuGet inacessível para consultar vulnerabilidades.</td><td>Verifique internet/proxy; se o build concluiu, o aviso não bloqueia a execução.</td></tr>
+              <tr><td>Connection string não encontrada</td><td><code>DefaultConnection</code> ausente.</td><td>Configure o User Secret exatamente como neste guia.</td></tr>
+              <tr><td>Login failed for user</td><td>Senha, login ou permissão SQL incorretos.</td><td>Valide o login no SSMS e o usuário dentro do banco <code>Achei</code>.</td></tr>
+              <tr><td>Erro de encryption/TLS</td><td>Instância local sem negociação TLS compatível.</td><td>Use <code>Encrypt=False</code> somente no ambiente local.</td></tr>
+              <tr><td>Invalid object name</td><td>Script não executado, banco incorreto ou migration pendente.</td><td>Confirme <code>Database=Achei</code> e execute o script atualizado.</td></tr>
+              <tr><td><code>409 Conflict</code> no cadastro</td><td>E-mail já cadastrado.</td><td>Use outro e-mail ou trate como validação esperada.</td></tr>
+              <tr><td><code>401 Unauthorized</code> no login</td><td>E-mail, senha ou usuário ativo inválidos.</td><td>Confira os dados; a mensagem genérica é intencional.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-labelledby="check-final">
+        <h2 id="check-final">Checklist final</h2>
+        <ul>
+          <li>O build conclui sem erros.</li>
+          <li>O banco <code>Achei</code> existe e contém tabelas <code>tbl_*</code>.</li>
+          <li><code>Encryption:Key</code> e <code>Jwt:Key</code> existem, são Base64 de 32 bytes e são diferentes.</li>
+          <li><code>ConnectionStrings:DefaultConnection</code> aponta para o banco correto.</li>
+          <li>A API inicia pelo perfil <code>https</code>.</li>
+          <li>Cadastro retorna <code>201</code> e login retorna <code>200</code>.</li>
+          <li>A senha está armazenada como hash Argon2id.</li>
+        </ul>
+      </section>
+
+      <footer>Guia operacional do projeto Achei — atualizado em 3 de novembro de 2026.</footer>
+    </main>
+  </div>
+</body>
+</html>

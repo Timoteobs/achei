@@ -15,8 +15,7 @@ public class Category : BaseEntity
 
     private Category() { }
 
-    public Category(string name, long? spaceId = null, string? icon = null,
-        string? color = null, int position = 0)
+    public Category(string name, long? spaceId = null, string? icon = null, string? color = null, int position = 0)
     {
         DomainValidator.Validator(
             ValidationRule.PositiveWhenProvided(spaceId, "Espaço"),

@@ -15,8 +15,7 @@ public class Activity : BaseEntity
 
     private Activity() { }
 
-    public Activity(long spaceId, string action, string entityType, long? userId = null,
-        long? entityId = null, string? metadata = null)
+    public Activity(long spaceId, string action, string entityType, long? userId = null, long? entityId = null, string? metadata = null)
     {
         DomainValidator.Validator(
             ValidationRule.Positive(spaceId, "Espaço"),

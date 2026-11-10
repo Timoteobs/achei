@@ -5,9 +5,7 @@ namespace Achei.Configurations;
 
 public static class DbContextConfig
 {
-    public static IServiceCollection AddDbContextConfig(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddDbContextConfig(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<AcheiContext>(options =>
             options.UseSqlServer(
@@ -24,8 +22,8 @@ public static class DbContextConfig
         return services;
     }
 
-    private static string GetConnectionString(IConfiguration configuration) =>
-        configuration.GetConnectionString("DefaultConnection")
-        ?? throw new InvalidOperationException(
-            "Connection string 'DefaultConnection' não encontrada.");
+    private static string GetConnectionString(IConfiguration configuration)
+    {
+        return configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' não encontrada.");
+    }
 }

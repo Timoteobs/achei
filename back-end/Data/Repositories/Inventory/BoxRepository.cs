@@ -1,6 +1,5 @@
 using Application.Common.Exceptions;
 using Application.Interfaces.Repositories;
-using Application.Models.Boxes;
 using Data.Context;
 using Domain.Modules.Inventory;
 using Domain.Modules.Inventory.Entities;
@@ -11,34 +10,34 @@ namespace Data.Repositories.Inventory;
 
 public sealed class BoxRepository(AcheiContext context) : IBoxRepository
 {
-    private IQueryable<Location> Boxes(long spaceId) =>
-        from box in context.Locations
-        join room in context.Locations on box.ParentLocationId equals (long?)room.Id
-        where box.SpaceId == spaceId && box.Type == LocationTypes.Box
-            && room.SpaceId == spaceId && room.Type == LocationTypes.Room
-            && room.ParentLocationId == null
-        select box;
+    private IQueryable<Location> Boxes(long spaceId)
+    {
+        return from box in context.Locations
+               join room in context.Locations on box.ParentLocationId equals (long?)room.Id
+               where box.SpaceId == spaceId && box.Type == LocationTypes.Box &&
+               room.SpaceId == spaceId && room.Type == LocationTypes.Room && room.ParentLocationId == null
+               select box;
+    }
 
-    private IQueryable<BoxResponse> WithRoomAndItemsCount(IQueryable<Location> boxes) =>
-        from box in boxes
-        join room in context.Locations.AsNoTracking() on box.ParentLocationId equals (long?)room.Id
-        orderby box.CreatedAt descending, box.Id descending
-        select new BoxResponse(
-            box.Id, box.SpaceId, room.Id, room.Name, box.Name, box.Description,
-            context.Items.Count(item => item.LocationId == box.Id),
-            DateTime.SpecifyKind(box.CreatedAt, DateTimeKind.Utc),
-            DateTime.SpecifyKind(box.UpdatedAt, DateTimeKind.Utc));
+    public async Task<IReadOnlyList<Location>> ListBySpaceAsync(long spaceId, CancellationToken cancellationToken = default)
+    {
+        return await Boxes(spaceId).AsNoTracking().OrderByDescending(box => box.CreatedAt).ThenByDescending(box => box.Id).ToListAsync(cancellationToken);
+    }
 
-    public async Task<IReadOnlyList<BoxResponse>> ListBySpaceAsync(long spaceId, CancellationToken cancellationToken = default) =>
-        await WithRoomAndItemsCount(Boxes(spaceId).AsNoTracking())
-            .ToListAsync(cancellationToken);
+    public async Task<IReadOnlyDictionary<long, int>> CountByRoomIdsAsync(IReadOnlyCollection<long> roomIds, CancellationToken cancellationToken = default)
+    {
+        if (roomIds.Count == 0)
+        {
+            return new Dictionary<long, int>();
+        }
 
-    public Task<BoxResponse?> GetResponseAsync(long id, long spaceId, CancellationToken cancellationToken = default) =>
-        WithRoomAndItemsCount(Boxes(spaceId).AsNoTracking().Where(box => box.Id == id))
-            .SingleOrDefaultAsync(cancellationToken);
+        return await context.Locations.AsNoTracking().Where(box => box.Type == LocationTypes.Box && box.ParentLocationId.HasValue && roomIds.Contains(box.ParentLocationId.Value)).GroupBy(box => box.ParentLocationId!.Value).ToDictionaryAsync(group => group.Key, group => group.Count(), cancellationToken);
+    }
 
-    public Task<Location?> GetByIdAndSpaceAsync(long id, long spaceId, CancellationToken cancellationToken = default) =>
-        Boxes(spaceId).SingleOrDefaultAsync(box => box.Id == id, cancellationToken);
+    public Task<Location?> GetByIdAndSpaceAsync(long id, long spaceId, CancellationToken cancellationToken = default)
+    {
+        return Boxes(spaceId).SingleOrDefaultAsync(box => box.Id == id, cancellationToken);
+    }
 
     public async Task AddAsync(Location box, CancellationToken cancellationToken = default)
     {
@@ -61,7 +60,7 @@ public sealed class BoxRepository(AcheiContext context) : IBoxRepository
         }
         catch (DbUpdateException exception) when (exception.InnerException is SqlException { Number: 547 })
         {
-            throw new BoxHasDependenciesException(exception);
+            throw InventoryExceptions.BoxHasDependencies(exception);
         }
     }
 
@@ -73,8 +72,7 @@ public sealed class BoxRepository(AcheiContext context) : IBoxRepository
         }
         catch (DbUpdateException exception) when (exception.InnerException is SqlException { Number: 547 })
         {
-            // The parent may have been removed after the service validated it.
-            throw new RoomNotFoundException();
+            throw InventoryExceptions.ReferenceNotFound(exception);
         }
     }
 
@@ -84,9 +82,9 @@ public sealed class BoxRepository(AcheiContext context) : IBoxRepository
         {
             await context.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateConcurrencyException)
+        catch (DbUpdateConcurrencyException exception)
         {
-            throw new BoxNotFoundException();
+            throw InventoryExceptions.BoxNotFound(exception);
         }
     }
 }

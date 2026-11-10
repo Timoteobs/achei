@@ -9,17 +9,15 @@ namespace Data.Repositories.Spaces;
 
 public sealed class SpaceRepository(AcheiContext context) : ISpaceRepository
 {
-    public async Task<IReadOnlyList<Space>> ListByOwnerAsync(long ownerUserId, CancellationToken cancellationToken = default) =>
-        await context.Spaces
-            .AsNoTracking()
-            .Where(space => space.OwnerUserId == ownerUserId)
-            .OrderByDescending(space => space.CreatedAt)
-            .ThenByDescending(space => space.Id)
-            .ToListAsync(cancellationToken);
+    public async Task<IReadOnlyList<Space>> ListByOwnerAsync(long ownerUserId, CancellationToken cancellationToken = default)
+    {
+        return await context.Spaces.AsNoTracking().Where(space => space.OwnerUserId == ownerUserId).OrderByDescending(space => space.CreatedAt).ThenByDescending(space => space.Id).ToListAsync(cancellationToken);
+    }
 
-    public Task<Space?> GetByIdAndOwnerAsync(long id, long ownerUserId, CancellationToken cancellationToken = default) =>
-        context.Spaces.SingleOrDefaultAsync(
-            space => space.Id == id && space.OwnerUserId == ownerUserId, cancellationToken);
+    public Task<Space?> GetByIdAndOwnerAsync(long id, long ownerUserId, CancellationToken cancellationToken = default)
+    {
+        return context.Spaces.SingleOrDefaultAsync(space => space.Id == id && space.OwnerUserId == ownerUserId, cancellationToken);
+    }
 
     public async Task AddAsync(Space space, CancellationToken cancellationToken = default)
     {
@@ -42,7 +40,7 @@ public sealed class SpaceRepository(AcheiContext context) : ISpaceRepository
         }
         catch (DbUpdateException exception) when (exception.InnerException is SqlException { Number: 547 })
         {
-            throw new SpaceHasDependenciesException(exception);
+            throw SpacesExceptions.SpaceHasDependencies(exception);
         }
     }
 
@@ -52,9 +50,9 @@ public sealed class SpaceRepository(AcheiContext context) : ISpaceRepository
         {
             await context.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateConcurrencyException)
+        catch (DbUpdateConcurrencyException exception)
         {
-            throw new SpaceNotFoundException();
+            throw SpacesExceptions.SpaceNotFound(exception);
         }
     }
 }

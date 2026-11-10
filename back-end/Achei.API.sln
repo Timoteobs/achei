@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "Data\Data.csproj", "{49D2EB73-692C-42DB-9A16-0E0BCACFF86B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crosscutting.Common", "Crosscutting.Commons\Crosscutting.Common.csproj", "{D5D6DA5D-864B-40C0-938C-590D848DD488}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crosscutting.Common", "Crosscutting.Common\Crosscutting.Common.csproj", "{D5D6DA5D-864B-40C0-938C-590D848DD488}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crosscutting.IOC", "Crosscutting.IOC\Crosscutting.IOC.csproj", "{323E06AB-CE3C-467B-ADBA-B6093DC4B491}"
 EndProject

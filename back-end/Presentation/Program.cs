@@ -1,21 +1,19 @@
 using Application.Interfaces.Security;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Services;
-using Application.Services.Auth;
-using Application.Services.Spaces;
-using Application.Services.Rooms;
-using Application.Services.Boxes;
-using Application.Services.Items;
+using Application.Interfaces.Services.Identity;
+using Application.Interfaces.Services.Inventory;
+using Application.Interfaces.Services.Spaces;
 using Achei.Configurations;
 using Achei.ExceptionHandling;
 using Crosscutting.Common.Core.Security;
 using Data.Repositories.Identity;
 using Data.Repositories.Spaces;
 using Data.Repositories.Inventory;
+using Application.Services.Identity;
+using Application.Services.Inventory;
+using Application.Services.Spaces;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
@@ -28,7 +26,9 @@ builder.Services.AddSingleton<IEncryptionService>(provider =>
     var keyBase64 = configuration["Encryption:Key"];
 
     if (string.IsNullOrWhiteSpace(keyBase64))
+    {
         throw new InvalidOperationException("Chave de criptografia não configurada.");
+    }
 
     return new AesEncryption(Convert.FromBase64String(keyBase64));
 });
@@ -43,14 +43,12 @@ builder.Services.AddScoped<IBoxRepository, BoxRepository>();
 builder.Services.AddScoped<IBoxService, BoxService>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.AddScoped<IItemService, ItemService>();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
 app.UseExceptionHandler();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

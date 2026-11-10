@@ -14,8 +14,7 @@ public class Space : BaseEntity
 
     private Space() { }
 
-    public Space(long ownerUserId, string name, string? description = null,
-        string? imageUrl = null)
+    public Space(long ownerUserId, string name, string? description = null, string? imageUrl = null)
     {
         DomainValidator.Validator(ValidationRule.Positive(ownerUserId, "Usuário proprietário"));
         OwnerUserId = ownerUserId;

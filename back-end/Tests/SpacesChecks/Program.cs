@@ -9,7 +9,7 @@ using Achei.ExceptionHandling;
 using Application.Common.Exceptions;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Security;
-using Application.Interfaces.Services;
+using Application.Interfaces.Services.Spaces;
 using Application.Models.Spaces;
 using Application.Services.Spaces;
 using Domain.Common;
@@ -77,7 +77,9 @@ try
         await Send(HttpMethod.Get, "/api/spaces", HttpStatusCode.OK, otherToken), JsonSerializerOptions.Web)!;
     Check(otherList.Length == 0, "Listagem não deve expor espaços de outro usuário.");
     foreach (var method in new[] { HttpMethod.Get, HttpMethod.Put, HttpMethod.Delete })
+    {
         await Send(method, pathById, HttpStatusCode.NotFound, otherToken, method == HttpMethod.Put ? request : null);
+    }
 
     await Send(HttpMethod.Post, "/api/spaces", HttpStatusCode.BadRequest, ownerToken, new { name = " " });
     await Send(HttpMethod.Put, pathById, HttpStatusCode.BadRequest, ownerToken, new { name = new string('x', 101) });
@@ -100,20 +102,31 @@ try
     repository.BlockDeletion = false;
     await Send(HttpMethod.Delete, pathById, HttpStatusCode.NoContent, ownerToken);
     foreach (var method in new[] { HttpMethod.Get, HttpMethod.Put, HttpMethod.Delete })
+    {
         await Send(method, pathById, HttpStatusCode.NotFound, ownerToken, method == HttpMethod.Put ? request : null);
+    }
 
     Console.WriteLine("OK: JWT obrigatório, token inválido, isolamento entre usuários, CRUD, validação e conflito de exclusão.");
 
     async Task<string> Send(HttpMethod method, string path, HttpStatusCode expected, string? token = null, object? body = null)
     {
         using var message = new HttpRequestMessage(method, path);
-        if (token is not null) message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        if (body is not null) message.Content = JsonContent.Create(body);
+        if (token is not null)
+        {
+            message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+
+        if (body is not null)
+        {
+            message.Content = JsonContent.Create(body);
+        }
         using var response = await client.SendAsync(message);
         var content = await response.Content.ReadAsStringAsync();
         Check(response.StatusCode == expected, $"{method} {path}: esperado {(int)expected}, recebido {(int)response.StatusCode}. {content}");
         if (response.StatusCode == HttpStatusCode.Created)
+        {
             Check(response.Headers.Location?.ToString().Contains("/api/spaces/") == true, "Criação deve retornar Location.");
+        }
         return content;
     }
 }
@@ -124,7 +137,10 @@ finally
 
 static void Check(bool condition, string message)
 {
-    if (!condition) throw new InvalidOperationException(message);
+    if (!condition)
+    {
+        throw new InvalidOperationException(message);
+    }
 }
 
 sealed class MemorySpaceRepository : ISpaceRepository
@@ -133,11 +149,15 @@ sealed class MemorySpaceRepository : ISpaceRepository
     private long nextId;
     public bool BlockDeletion { get; set; }
 
-    public Task<IReadOnlyList<Space>> ListByOwnerAsync(long ownerUserId, CancellationToken cancellationToken = default) =>
-        Task.FromResult<IReadOnlyList<Space>>(spaces.Values.Where(space => space.OwnerUserId == ownerUserId).ToArray());
+    public Task<IReadOnlyList<Space>> ListByOwnerAsync(long ownerUserId, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult<IReadOnlyList<Space>>(spaces.Values.Where(space => space.OwnerUserId == ownerUserId).ToArray());
+    }
 
-    public Task<Space?> GetByIdAndOwnerAsync(long id, long ownerUserId, CancellationToken cancellationToken = default) =>
-        Task.FromResult(spaces.GetValueOrDefault(id) is { } space && space.OwnerUserId == ownerUserId ? space : null);
+    public Task<Space?> GetByIdAndOwnerAsync(long id, long ownerUserId, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(spaces.GetValueOrDefault(id) is { } space && space.OwnerUserId == ownerUserId ? space : null);
+    }
 
     public Task AddAsync(Space space, CancellationToken cancellationToken = default)
     {
@@ -146,11 +166,17 @@ sealed class MemorySpaceRepository : ISpaceRepository
         return Task.CompletedTask;
     }
 
-    public Task UpdateAsync(Space space, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task UpdateAsync(Space space, CancellationToken cancellationToken = default)
+    {
+        return Task.CompletedTask;
+    }
 
     public Task DeleteAsync(Space space, CancellationToken cancellationToken = default)
     {
-        if (BlockDeletion) throw new SpaceHasDependenciesException();
+        if (BlockDeletion)
+        {
+            throw SpacesExceptions.SpaceHasDependencies();
+        }
         spaces.Remove(space.Id);
         return Task.CompletedTask;
     }

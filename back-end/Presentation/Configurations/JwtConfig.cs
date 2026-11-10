@@ -16,29 +16,32 @@ public static class JwtConfig
         var expirationMinutes = configuration.GetValue<int>("Jwt:ExpirationMinutes");
 
         if (expirationMinutes <= 0)
+        {
             throw new InvalidOperationException("Configuração 'Jwt:ExpirationMinutes' deve ser maior que zero.");
+        }
 
         var signingKey = new SymmetricSecurityKey(key);
 
         services.AddSingleton<IJwtTokenService>(new JwtTokenService(key, issuer, audience, expirationMinutes));
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {
-                options.MapInboundClaims = false;
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = issuer,
-                    ValidateAudience = true,
-                    ValidAudience = audience,
-                    ValidateLifetime = true,
-                    RequireExpirationTime = true,
-                    RequireSignedTokens = true,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = signingKey,
-                    NameClaimType = JwtRegisteredClaimNames.Name,
-                    ClockSkew = TimeSpan.FromSeconds(30)
-                };
-            });
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+        {
+            options.MapInboundClaims = false;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = issuer,
+                ValidateAudience = true,
+                ValidAudience = audience,
+                ValidateLifetime = true,
+                RequireExpirationTime = true,
+                RequireSignedTokens = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = signingKey,
+                NameClaimType = JwtRegisteredClaimNames.Name,
+                ClockSkew = TimeSpan.FromSeconds(30)
+            };
+        });
 
         services.AddAuthorization();
         return services;
@@ -53,7 +56,9 @@ public static class JwtConfig
             var key = Convert.FromBase64String(keyBase64);
 
             if (key.Length < 32)
+            {
                 throw new InvalidOperationException("A configuração 'Jwt:Key' deve possuir pelo menos 32 bytes.");
+            }
 
             return key;
         }
@@ -63,5 +68,8 @@ public static class JwtConfig
         }
     }
 
-    private static string GetRequiredValue(IConfiguration configuration, string key) => configuration[key] ?? throw new InvalidOperationException($"Configuração '{key}' não encontrada.");
+    private static string GetRequiredValue(IConfiguration configuration, string key)
+    {
+        return configuration[key] ?? throw new InvalidOperationException($"Configuração '{key}' não encontrada.");
+    }
 }

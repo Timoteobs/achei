@@ -17,9 +17,7 @@ public class Item : BaseEntity
 
     private Item() { }
 
-    public Item(long locationId, string name, long? categoryId = null,
-        long? createdByUserId = null, string? description = null, int quantity = 1,
-        string? notes = null)
+    public Item(long locationId, string name, long? categoryId = null, long? createdByUserId = null, string? description = null, int quantity = 1, string? notes = null)
     {
         DomainValidator.Validator(
             ValidationRule.Positive(locationId, "Local"),
@@ -43,8 +41,7 @@ public class Item : BaseEntity
         UpdatedAt = CreatedAt;
     }
 
-    public void UpdateDetails(long locationId, string name, long? categoryId,
-        string? description, int quantity, string? notes)
+    public void UpdateDetails(long locationId, string name, long? categoryId, string? description, int quantity, string? notes)
     {
         DomainValidator.Validator(
             ValidationRule.Positive(locationId, "Local"),

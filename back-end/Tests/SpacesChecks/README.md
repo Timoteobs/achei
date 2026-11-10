@@ -15,4 +15,4 @@ Verifica autenticação obrigatória nos cinco endpoints, token inválido, propr
 derivado do token, isolamento entre dois usuários, validação, criação, leitura,
 edição, exclusão e respostas 404/409. A verificação de conflito usa uma exceção
 simulada; as constraints e a persistência SQL devem ser validadas com o banco
-de desenvolvimento usando `Presentation/Spaces.http`.
+de desenvolvimento.

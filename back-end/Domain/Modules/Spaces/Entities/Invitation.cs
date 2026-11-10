@@ -18,8 +18,7 @@ public class Invitation : BaseEntity
 
     private Invitation() { }
 
-    public Invitation(long spaceId, long invitedByUserId, string? email, string token,
-        string role, DateTime expiresAt)
+    public Invitation(long spaceId, long invitedByUserId, string? email, string token, string role, DateTime expiresAt)
     {
         DomainValidator.Validator(
             ValidationRule.Positive(spaceId, "Espaço"),
