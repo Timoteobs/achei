@@ -37,7 +37,7 @@ export function DataTable<T>({
   );
   const actionColumn = columns.find((column) => column.kind === "action");
   const metaColumns = columns.filter(
-    (column) => column !== primaryColumn && column.kind !== "selection",
+    (column) => column !== primaryColumn && column.kind !== "selection" && column.kind !== "action",
   );
 
   return (

@@ -5,15 +5,17 @@ import { Button } from "../../../../components/button/button";
 import { EmptyState } from "../../../../components/empty-state/empty-state";
 import { useItemsQuery } from "../../../../hooks/items/use-items-query";
 import type { BoxResponse } from "../../../../services/boxes";
-import type { ItemSort } from "../../../../services/items";
+import type { ItemResponse, ItemSort } from "../../../../services/items";
 import { SelectedBoxContext } from "./selected-box-context";
 import { ItemsHeader } from "./items-header";
 import { ItemsTable } from "./items-table";
+import { DeleteItemModal } from "./delete-item/delete-item-modal";
 import { NewItemModal } from "./new-item-modal";
 
 export function ItemsTab({ box, spaceName }: Readonly<{ box: BoxResponse; spaceName: string }>) {
   const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
   const [isNewItemModalOpen, setIsNewItemModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<ItemResponse | null>(null);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<{ page: number; sort: ItemSort; search: string }>({
     page: 1, sort: "recent", search: "",
@@ -57,7 +59,7 @@ export function ItemsTab({ box, spaceName }: Readonly<{ box: BoxResponse; spaceN
             <Button type="button" variant="outline" h="10" px="4" loading={query.isFetching} onClick={() => { void query.refetch(); }}>Tentar novamente</Button>
           </Flex>
         ) : query.data.items.length > 0 ? (
-          <ItemsTable data={query.data} onPageChange={(page) => setFilters((previous) => ({ ...previous, page }))} />
+          <ItemsTable onDelete={setItemToDelete} data={query.data} onPageChange={(page) => setFilters((previous) => ({ ...previous, page }))} />
         ) : (
           <EmptyState
             title={filters.search ? "Nenhum item encontrado" : undefined}
@@ -66,6 +68,7 @@ export function ItemsTab({ box, spaceName }: Readonly<{ box: BoxResponse; spaceN
           />
         )}
       </Box>
+      <DeleteItemModal spaceId={spaceId} item={itemToDelete} onClose={() => setItemToDelete(null)} />
       {isNewItemModalOpen && (
         <NewItemModal
           open

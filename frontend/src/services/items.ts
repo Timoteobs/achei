@@ -50,3 +50,7 @@ export async function createItem(spaceId: string, values: CreateItemRequest) {
   );
   return data;
 }
+
+export async function deleteItem(spaceId: string, itemId: number) {
+  await api.delete(`/spaces/${encodeURIComponent(spaceId)}/items/${itemId}`);
+}

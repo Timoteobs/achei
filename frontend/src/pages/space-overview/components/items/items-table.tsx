@@ -4,6 +4,7 @@ import { DataTable } from "../../../../components/data-table/data-table";
 import type { DataTableColumn } from "../../../../components/data-table/data-table";
 import { Pagination } from "../../../../components/pagination/pagination";
 import type { ItemResponse, ItemsPageResponse } from "../../../../services/items";
+import { ItemActionsMenu } from "./item-actions-menu";
 import { formatDate } from "../../../../utils/date";
 
 const columns: DataTableColumn<ItemResponse>[] = [
@@ -42,12 +43,26 @@ const columns: DataTableColumn<ItemResponse>[] = [
   },
 ];
 
-export function ItemsTable({ data, onPageChange }: Readonly<{ data: ItemsPageResponse; onPageChange: (page: number) => void }>) {
+export function ItemsTable({ data, onPageChange, onDelete }: Readonly<{
+  data: ItemsPageResponse;
+  onPageChange: (page: number) => void;
+  onDelete: (item: ItemResponse) => void;
+}>) {
+  const tableColumns: DataTableColumn<ItemResponse>[] = [
+    ...columns,
+    {
+      id: "actions",
+      kind: "action",
+      align: "end",
+      header: "Ações",
+      cell: (item) => <ItemActionsMenu name={item.name} onDelete={() => onDelete(item)} />,
+    },
+  ];
   const first = (data.page - 1) * data.pageSize + 1;
   const last = first + data.items.length - 1;
   return (
     <Box>
-      <DataTable data={data.items} columns={columns} getRowId={(item) => String(item.id)} />
+      <DataTable data={data.items} columns={tableColumns} getRowId={(item) => String(item.id)} />
       <Flex align="center" justify="space-between" flexWrap="wrap" gap="3" mt="4">
         <Text color="fg.muted" fontSize="sm">Mostrando {first}–{last} de {data.totalCount} itens</Text>
         <Pagination count={data.totalCount} pageSize={data.pageSize} page={data.page} onPageChange={onPageChange} />
