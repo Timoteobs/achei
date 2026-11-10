@@ -72,7 +72,7 @@ export function NewItemModal({ open, onOpenChange, location, item }: Readonly<
     onOpenChange(nextOpen);
   };
 
-  const submit = (values: NewItemValues) => {
+  const submit = (values: NewItemValues, addMore = false) => {
     if (createMutation.isPending || updateMutation.isPending || !canSave) return;
     const room = roomsQuery.data?.find(({ id }) => String(id) === values.roomId);
     if (!room) {
@@ -93,7 +93,23 @@ export function NewItemModal({ open, onOpenChange, location, item }: Readonly<
       // Category selection is not available yet; preserve the existing category when editing.
       categoryId: item?.categoryId ?? null,
     };
-    const options = { onSuccess: () => { reset(); onOpenChange(false); } };
+    const options = {
+      onSuccess: () => {
+        if (addMore && !item) {
+          reset({
+            name: "",
+            description: "",
+            notes: "",
+            quantity: 1,
+            roomId: values.roomId,
+            boxId: values.boxId,
+          });
+          return;
+        }
+        reset();
+        onOpenChange(false);
+      },
+    };
     if (item) {
       updateMutation.mutate({ id: item.id, values: payload }, options);
     } else {
@@ -111,11 +127,23 @@ export function NewItemModal({ open, onOpenChange, location, item }: Readonly<
       footer={
         <>
           <Button type="button" variant="outline" px="6" disabled={isBusy} onClick={() => handleOpenChange(false)}>Cancelar</Button>
+          {!item && (
+            <Button
+              type="button"
+              variant="outline"
+              w={{ base: "full", sm: "auto" }}
+              px="6"
+              disabled={isBusy || !canSave}
+              onClick={() => { void handleSubmit((values) => submit(values, true))(); }}
+            >
+              Salvar e adicionar mais
+            </Button>
+          )}
           <Button type="submit" form={formId} w={{ base: "full", sm: "auto" }} px="6" loading={isBusy} loadingText="Salvando..." disabled={isBusy || !canSave}>{item ? "Salvar alterações" : "Salvar item"}</Button>
         </>
       }
     >
-      <chakra.form id={formId} aria-label={item ? "Editar item" : "Cadastrar item"} aria-busy={isBusy} noValidate onSubmit={(event) => { void handleSubmit(submit)(event); }}>
+      <chakra.form id={formId} aria-label={item ? "Editar item" : "Cadastrar item"} aria-busy={isBusy} noValidate onSubmit={(event) => { void handleSubmit((values) => submit(values))(event); }}>
         <Stack gap="5">
           <Flex align="center" gap="4">
             <Flex boxSize="14" flexShrink="0" align="center" justify="center" borderRadius="md" bg="brand.subtle" color="brand.fg" aria-hidden="true">
