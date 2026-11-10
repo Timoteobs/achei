@@ -45,9 +45,43 @@ public sealed class ItemService(
             description: request.Description, quantity: request.Quantity, notes: request.Notes);
         await items.AddAsync(item, cancellationToken);
 
-        return new ItemResponse(item.Id, spaceId, item.LocationId, item.CategoryId, item.CreatedByUserId,
+        return ToResponse(item, spaceId);
+    }
+
+    public async Task<ItemResponse> UpdateAsync(long id, long spaceId, long userId, UpdateItemRequest request, CancellationToken cancellationToken = default)
+    {
+        if (await spaces.GetByIdAndOwnerAsync(spaceId, userId, cancellationToken) is null)
+            throw new SpaceNotFoundException();
+
+        var item = await items.GetByIdAndSpaceAsync(id, spaceId, cancellationToken)
+            ?? throw new ItemNotFoundException();
+        var location = await rooms.GetByIdAndSpaceAsync(request.LocationId, spaceId, cancellationToken)
+            ?? await boxes.GetByIdAndSpaceAsync(request.LocationId, spaceId, cancellationToken)
+            ?? throw new ItemReferenceNotFoundException();
+
+        if (request.CategoryId is long categoryId &&
+            !await items.IsCategoryAvailableAsync(categoryId, spaceId, cancellationToken))
+            throw new ItemReferenceNotFoundException();
+
+        item.UpdateDetails(location.Id, request.Name, request.CategoryId,
+            request.Description, request.Quantity, request.Notes);
+        await items.UpdateAsync(item, cancellationToken);
+        return ToResponse(item, spaceId);
+    }
+
+    public async Task DeleteAsync(long id, long spaceId, long userId, CancellationToken cancellationToken = default)
+    {
+        if (await spaces.GetByIdAndOwnerAsync(spaceId, userId, cancellationToken) is null)
+            throw new SpaceNotFoundException();
+
+        var item = await items.GetByIdAndSpaceAsync(id, spaceId, cancellationToken)
+            ?? throw new ItemNotFoundException();
+        await items.DeleteAsync(item, cancellationToken);
+    }
+
+    private static ItemResponse ToResponse(Item item, long spaceId) =>
+        new(item.Id, spaceId, item.LocationId, item.CategoryId, item.CreatedByUserId,
             item.Name, item.Description, item.Quantity, item.Notes,
             DateTime.SpecifyKind(item.CreatedAt, DateTimeKind.Utc),
             DateTime.SpecifyKind(item.UpdatedAt, DateTimeKind.Utc));
-    }
 }

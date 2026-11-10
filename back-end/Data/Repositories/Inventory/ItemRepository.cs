@@ -55,17 +55,59 @@ public sealed class ItemRepository(AcheiContext context) : IItemRepository
         context.Categories.AnyAsync(category => category.Id == categoryId &&
             (category.SpaceId == null || category.SpaceId == spaceId), cancellationToken);
 
+    public Task<Item?> GetByIdAndSpaceAsync(long id, long spaceId, CancellationToken cancellationToken = default) =>
+        (from item in context.Items
+         join location in context.Locations on item.LocationId equals location.Id
+         where item.Id == id && location.SpaceId == spaceId
+         select item).SingleOrDefaultAsync(cancellationToken);
+
+    public async Task UpdateAsync(Item item, CancellationToken cancellationToken = default)
+    {
+        context.Items.Update(item);
+        await SaveItemAsync(cancellationToken);
+    }
+
+    public async Task DeleteAsync(Item item, CancellationToken cancellationToken = default)
+    {
+        context.Items.Remove(item);
+        try
+        {
+            await SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException exception) when (exception.InnerException is SqlException { Number: 547 })
+        {
+            throw new ItemHasDependenciesException(exception);
+        }
+    }
+
     public async Task AddAsync(Item item, CancellationToken cancellationToken = default)
     {
         await context.Items.AddAsync(item, cancellationToken);
+        await SaveItemAsync(cancellationToken);
+    }
+
+    private async Task SaveItemAsync(CancellationToken cancellationToken)
+    {
         try
         {
-            await context.SaveChangesAsync(cancellationToken);
+            await SaveChangesAsync(cancellationToken);
         }
         catch (DbUpdateException exception) when (exception.InnerException is SqlException { Number: 547 })
         {
             // A referenced record may have been removed after validation.
             throw new ItemReferenceNotFoundException();
+        }
+    }
+
+    private async Task SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new ItemNotFoundException();
         }
     }
 }

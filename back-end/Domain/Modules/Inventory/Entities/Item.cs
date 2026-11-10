@@ -42,4 +42,26 @@ public class Item : BaseEntity
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = CreatedAt;
     }
+
+    public void UpdateDetails(long locationId, string name, long? categoryId,
+        string? description, int quantity, string? notes)
+    {
+        DomainValidator.Validator(
+            ValidationRule.Positive(locationId, "Local"),
+            ValidationRule.PositiveWhenProvided(categoryId, "Categoria"),
+            ValidationRule.Required(name, "Nome"),
+            ValidationRule.MaxLength(name, 150, "Nome"),
+            ValidationRule.MaxLength(description, 1000, "Descrição"),
+            ValidationRule.Positive(quantity, "Quantidade"),
+            ValidationRule.MaxLength(notes, 1000, "Observações")
+        );
+
+        LocationId = locationId;
+        CategoryId = categoryId;
+        Name = name.Trim();
+        Description = description?.Trim();
+        Quantity = quantity;
+        Notes = notes?.Trim();
+        UpdatedAt = DateTime.UtcNow;
+    }
 }
