@@ -11,6 +11,8 @@ import type { ModalProps } from "../../../../components/modal/modal";
 import { useRoomsQuery } from "../../../../hooks/rooms/use-rooms-query";
 import { useBoxesQuery } from "../../../../hooks/boxes/use-boxes-query";
 import { useCreateItemMutation } from "../../../../hooks/items/use-create-item-mutation";
+import { useUpdateItemMutation } from "../../../../hooks/items/use-update-item-mutation";
+import type { ItemResponse } from "../../../../services/items";
 import { newItemSchema } from "./new-item-schema";
 import type { NewItemValues } from "./new-item-schema";
 
@@ -33,18 +35,22 @@ const controlStyles = {
   _focusVisible: { borderColor: "brand.solid", outlineColor: "brand.focusRing", outlineWidth: "2px", outlineOffset: "2px" },
 };
 
-export function NewItemModal({ open, onOpenChange, location }: Readonly<
-  Pick<ModalProps, "open" | "onOpenChange"> & { location?: ItemLocation }
+export function NewItemModal({ open, onOpenChange, location, item }: Readonly<
+  Pick<ModalProps, "open" | "onOpenChange"> & { location?: ItemLocation; item?: ItemResponse }
 >) {
   const formId = useId();
   const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
   const roomsQuery = useRoomsQuery(spaceId);
   const boxesQuery = useBoxesQuery(spaceId);
   const createMutation = useCreateItemMutation(spaceId);
+  const updateMutation = useUpdateItemMutation(spaceId);
   const { register, control, handleSubmit, reset, setValue, setError, formState: { errors, isSubmitting } } = useForm<NewItemValues>({
     resolver: yupResolver(newItemSchema),
     defaultValues: {
-      name: "", description: "", notes: "", quantity: 1,
+      name: item?.name ?? "",
+      description: item?.description ?? "",
+      notes: item?.notes ?? "",
+      quantity: item?.quantity ?? 1,
       roomId: location ? String(location.roomId) : "",
       boxId: location?.boxId ? String(location.boxId) : "",
     },
@@ -53,7 +59,7 @@ export function NewItemModal({ open, onOpenChange, location }: Readonly<
   });
   const [roomId, boxId] = useWatch({ control, name: ["roomId", "boxId"] });
   const boxes = boxesQuery.data?.filter((box) => String(box.roomId) === roomId) ?? [];
-  const isBusy = isSubmitting || createMutation.isPending;
+  const isBusy = isSubmitting || createMutation.isPending || updateMutation.isPending;
   const canSave = roomsQuery.isSuccess && roomsQuery.data.length > 0 && (!boxId || boxesQuery.isSuccess);
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -61,12 +67,13 @@ export function NewItemModal({ open, onOpenChange, location }: Readonly<
     if (!nextOpen) {
       reset();
       createMutation.reset();
+      updateMutation.reset();
     }
     onOpenChange(nextOpen);
   };
 
   const submit = (values: NewItemValues) => {
-    if (createMutation.isPending || !canSave) return;
+    if (createMutation.isPending || updateMutation.isPending || !canSave) return;
     const room = roomsQuery.data?.find(({ id }) => String(id) === values.roomId);
     if (!room) {
       setError("roomId", { message: "Selecione um ambiente disponível neste espaço." }, { shouldFocus: true });
@@ -77,37 +84,44 @@ export function NewItemModal({ open, onOpenChange, location }: Readonly<
       setError("boxId", { message: "Selecione uma caixa disponível neste ambiente." }, { shouldFocus: true });
       return;
     }
-    createMutation.mutate({
+    const payload = {
       name: values.name,
       description: values.description || null,
       notes: values.notes || null,
       quantity: values.quantity,
       locationId: box?.id ?? room.id,
-      categoryId: null,
-    }, { onSuccess: () => { reset(); onOpenChange(false); } });
+      // Category selection is not available yet; preserve the existing category when editing.
+      categoryId: item?.categoryId ?? null,
+    };
+    const options = { onSuccess: () => { reset(); onOpenChange(false); } };
+    if (item) {
+      updateMutation.mutate({ id: item.id, values: payload }, options);
+    } else {
+      createMutation.mutate(payload, options);
+    }
   };
 
   return (
     <Modal
       open={open}
       onOpenChange={handleOpenChange}
-      title="Novo item"
+      title={item ? "Editar item" : "Novo item"}
       size="lg"
       closeDisabled={isBusy}
       footer={
         <>
           <Button type="button" variant="outline" px="6" disabled={isBusy} onClick={() => handleOpenChange(false)}>Cancelar</Button>
-          <Button type="submit" form={formId} w={{ base: "full", sm: "auto" }} px="6" loading={isBusy} loadingText="Salvando..." disabled={isBusy || !canSave}>Salvar item</Button>
+          <Button type="submit" form={formId} w={{ base: "full", sm: "auto" }} px="6" loading={isBusy} loadingText="Salvando..." disabled={isBusy || !canSave}>{item ? "Salvar alterações" : "Salvar item"}</Button>
         </>
       }
     >
-      <chakra.form id={formId} aria-label="Cadastrar item" aria-busy={isBusy} noValidate onSubmit={(event) => { void handleSubmit(submit)(event); }}>
+      <chakra.form id={formId} aria-label={item ? "Editar item" : "Cadastrar item"} aria-busy={isBusy} noValidate onSubmit={(event) => { void handleSubmit(submit)(event); }}>
         <Stack gap="5">
           <Flex align="center" gap="4">
             <Flex boxSize="14" flexShrink="0" align="center" justify="center" borderRadius="md" bg="brand.subtle" color="brand.fg" aria-hidden="true">
               <Package size={28} strokeWidth={1.8} />
             </Flex>
-            <Text color="fg.muted" fontSize="sm">Cadastre o item e escolha onde ele será guardado.</Text>
+            <Text color="fg.muted" fontSize="sm">{item ? "Atualize as informações do item e onde ele está guardado." : "Cadastre o item e escolha onde ele será guardado."}</Text>
           </Flex>
           <Grid templateColumns={{ base: "1fr", sm: "minmax(0, 1fr) 140px" }} gap="4">
             <Input label="Nome do item" placeholder="Ex.: Furadeira Bosch" required maxLength={150} disabled={isBusy} {...register("name")} errorText={errors.name?.message} />

@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { toast } from "sonner";
 import { createItem } from "../../services/items";
-import type { CreateItemRequest } from "../../services/items";
+import type { SaveItemRequest } from "../../services/items";
 import { useAuthStore } from "../../stores/auth-store";
 
 export function useCreateItemMutation(spaceId: string) {
@@ -10,7 +10,7 @@ export function useCreateItemMutation(spaceId: string) {
 
   return useMutation({
     mutationKey: ["spaces", "items", spaceId, "create"],
-    mutationFn: (values: CreateItemRequest) => createItem(spaceId, values),
+    mutationFn: (values: SaveItemRequest) => createItem(spaceId, values),
     retry: false,
     networkMode: "always",
     onMutate: () => ({ userId: useAuthStore.getState().session?.user.id }),

@@ -10,12 +10,15 @@ import { SelectedBoxContext } from "./selected-box-context";
 import { ItemsHeader } from "./items-header";
 import { ItemsTable } from "./items-table";
 import { DeleteItemModal } from "./delete-item/delete-item-modal";
+import { MoveItemModal } from "./move-item/move-item-modal";
 import { NewItemModal } from "./new-item-modal";
 
 export function ItemsTab({ box, spaceName }: Readonly<{ box: BoxResponse; spaceName: string }>) {
   const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
   const [isNewItemModalOpen, setIsNewItemModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<ItemResponse | null>(null);
+  const [itemToEdit, setItemToEdit] = useState<ItemResponse | null>(null);
+  const [itemToMove, setItemToMove] = useState<ItemResponse | null>(null);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<{ page: number; sort: ItemSort; search: string }>({
     page: 1, sort: "recent", search: "",
@@ -59,7 +62,7 @@ export function ItemsTab({ box, spaceName }: Readonly<{ box: BoxResponse; spaceN
             <Button type="button" variant="outline" h="10" px="4" loading={query.isFetching} onClick={() => { void query.refetch(); }}>Tentar novamente</Button>
           </Flex>
         ) : query.data.items.length > 0 ? (
-          <ItemsTable onDelete={setItemToDelete} data={query.data} onPageChange={(page) => setFilters((previous) => ({ ...previous, page }))} />
+          <ItemsTable onMove={setItemToMove} onEdit={setItemToEdit} onDelete={setItemToDelete} data={query.data} onPageChange={(page) => setFilters((previous) => ({ ...previous, page }))} />
         ) : (
           <EmptyState
             title={filters.search ? "Nenhum item encontrado" : undefined}
@@ -69,6 +72,26 @@ export function ItemsTab({ box, spaceName }: Readonly<{ box: BoxResponse; spaceN
         )}
       </Box>
       <DeleteItemModal spaceId={spaceId} item={itemToDelete} onClose={() => setItemToDelete(null)} />
+      {itemToMove && (
+        <MoveItemModal
+          key={itemToMove.id}
+          spaceId={spaceId}
+          item={itemToMove}
+          initialRoomId={box.roomId}
+          onClose={() => setItemToMove(null)}
+        />
+      )}
+      {itemToEdit && (
+        <NewItemModal
+          key={itemToEdit.id}
+          open
+          item={itemToEdit}
+          location={{ space: spaceName, room: box.roomName, roomId: box.roomId, box: box.name, boxId: box.id }}
+          onOpenChange={(open) => {
+            if (!open) setItemToEdit(null);
+          }}
+        />
+      )}
       {isNewItemModalOpen && (
         <NewItemModal
           open

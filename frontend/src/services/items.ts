@@ -1,6 +1,6 @@
 import { api } from "./api";
 
-export interface CreateItemRequest {
+export interface SaveItemRequest {
   locationId: number;
   name: string;
   description: string | null;
@@ -9,7 +9,7 @@ export interface CreateItemRequest {
   categoryId: number | null;
 }
 
-export interface ItemResponse extends CreateItemRequest {
+export interface ItemResponse extends SaveItemRequest {
   id: number;
   spaceId: number;
   createdByUserId: number | null;
@@ -43,7 +43,7 @@ export async function getItems(spaceId: string, params: ListItemsRequest, signal
   return data;
 }
 
-export async function createItem(spaceId: string, values: CreateItemRequest) {
+export async function createItem(spaceId: string, values: SaveItemRequest) {
   const { data } = await api.post<ItemResponse>(
     `/spaces/${encodeURIComponent(spaceId)}/items`,
     values,
@@ -53,4 +53,12 @@ export async function createItem(spaceId: string, values: CreateItemRequest) {
 
 export async function deleteItem(spaceId: string, itemId: number) {
   await api.delete(`/spaces/${encodeURIComponent(spaceId)}/items/${itemId}`);
+}
+
+export async function updateItem(spaceId: string, itemId: number, values: SaveItemRequest) {
+  const { data } = await api.put<ItemResponse>(
+    `/spaces/${encodeURIComponent(spaceId)}/items/${itemId}`,
+    values,
+  );
+  return data;
 }

@@ -43,10 +43,12 @@ const columns: DataTableColumn<ItemResponse>[] = [
   },
 ];
 
-export function ItemsTable({ data, onPageChange, onDelete }: Readonly<{
+export function ItemsTable({ data, onPageChange, onDelete, onEdit, onMove }: Readonly<{
   data: ItemsPageResponse;
   onPageChange: (page: number) => void;
   onDelete: (item: ItemResponse) => void;
+  onEdit: (item: ItemResponse) => void;
+  onMove: (item: ItemResponse) => void;
 }>) {
   const tableColumns: DataTableColumn<ItemResponse>[] = [
     ...columns,
@@ -55,7 +57,7 @@ export function ItemsTable({ data, onPageChange, onDelete }: Readonly<{
       kind: "action",
       align: "end",
       header: "Ações",
-      cell: (item) => <ItemActionsMenu name={item.name} onDelete={() => onDelete(item)} />,
+      cell: (item) => <ItemActionsMenu onMove={() => onMove(item)} onEdit={() => onEdit(item)} name={item.name} onDelete={() => onDelete(item)} />,
     },
   ];
   const first = (data.page - 1) * data.pageSize + 1;
