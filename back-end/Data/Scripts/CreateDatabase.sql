@@ -1,13 +1,4 @@
-﻿IF DB_ID(N'Achei') IS NULL
-BEGIN
-    CREATE DATABASE [Achei];
-END;
-GO
-
-USE [Achei];
-GO
-
-IF OBJECT_ID(N'[__EFMigrationsHistory]') IS NULL
+﻿IF OBJECT_ID(N'[__EFMigrationsHistory]') IS NULL
 BEGIN
     CREATE TABLE [__EFMigrationsHistory] (
         [MigrationId] nvarchar(150) NOT NULL,
@@ -1327,6 +1318,82 @@ IF NOT EXISTS (
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
     VALUES (N'20261103203024_AddTablePrefix', N'9.0.20');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111172501_UpdateActivityDeleteBehavior'
+)
+BEGIN
+    ALTER TABLE [tbl_activity] DROP CONSTRAINT [FK_tbl_activity_tbl_space_space_id];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111172501_UpdateActivityDeleteBehavior'
+)
+BEGIN
+    ALTER TABLE [tbl_activity] DROP CONSTRAINT [FK_tbl_activity_tbl_user_user_id];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111172501_UpdateActivityDeleteBehavior'
+)
+BEGIN
+    ALTER TABLE [tbl_activity] ADD CONSTRAINT [FK_tbl_activity_tbl_space_space_id] FOREIGN KEY ([space_id]) REFERENCES [tbl_space] ([id]) ON DELETE CASCADE;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111172501_UpdateActivityDeleteBehavior'
+)
+BEGIN
+    ALTER TABLE [tbl_activity] ADD CONSTRAINT [FK_tbl_activity_tbl_user_user_id] FOREIGN KEY ([user_id]) REFERENCES [tbl_user] ([id]) ON DELETE SET NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111172501_UpdateActivityDeleteBehavior'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261111172501_UpdateActivityDeleteBehavior', N'9.0.20');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111183511_AddSystemLogs'
+)
+BEGIN
+    CREATE TABLE [tbl_system_log] (
+        [id] bigint NOT NULL IDENTITY,
+        [level] varchar(20) NOT NULL,
+        [category] nvarchar(256) NOT NULL,
+        [event_id] int NOT NULL,
+        [message] nvarchar(4000) NOT NULL,
+        [exception] nvarchar(max) NULL,
+        [trace_id] varchar(32) NULL,
+        [created_at] datetime2 NOT NULL,
+        CONSTRAINT [PK_tbl_system_log] PRIMARY KEY ([id])
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111183511_AddSystemLogs'
+)
+BEGIN
+    CREATE INDEX [IX_tbl_system_log_created_at] ON [tbl_system_log] ([created_at]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111183511_AddSystemLogs'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261111183511_AddSystemLogs', N'9.0.20');
 END;
 
 COMMIT;

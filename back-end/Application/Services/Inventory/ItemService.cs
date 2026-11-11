@@ -1,12 +1,15 @@
 using Application.Common.Exceptions;
+using Application.Interfaces.Persistence;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Services.Audit;
 using Application.Interfaces.Services.Inventory;
 using Application.Models.Items;
+using Domain.Modules.Audit;
 using Domain.Modules.Inventory.Entities;
 
 namespace Application.Services.Inventory;
 
-public sealed class ItemService(IItemRepository items, IRoomRepository rooms, IBoxRepository boxes, ISpaceRepository spaces) : IItemService
+public sealed class ItemService(IItemRepository items, IRoomRepository rooms, IBoxRepository boxes, ISpaceRepository spaces, IActivityService activities, IUnitOfWork unitOfWork) : IItemService
 {
     #region Service Methods
 
@@ -50,7 +53,11 @@ public sealed class ItemService(IItemRepository items, IRoomRepository rooms, IB
         }
 
         var item = new Item(location.Id, request.Name, categoryId: request.CategoryId, createdByUserId: userId, description: request.Description, quantity: request.Quantity, notes: request.Notes);
-        await items.AddAsync(item, cancellationToken);
+        await unitOfWork.ExecuteAsync(async transactionCancellationToken =>
+        {
+            await items.AddAsync(item, transactionCancellationToken);
+            await activities.LogAsync(spaceId, userId, ActivityActions.Created, ActivityEntityTypes.Item, item.Id, new { item.Name, item.LocationId, item.CategoryId, item.Quantity }, transactionCancellationToken);
+        }, cancellationToken);
 
         return ToResponse(item, spaceId);
     }
@@ -69,7 +76,11 @@ public sealed class ItemService(IItemRepository items, IRoomRepository rooms, IB
         }
 
         item.UpdateDetails(location.Id, request.Name, request.CategoryId, request.Description, request.Quantity, request.Notes);
-        await items.UpdateAsync(item, cancellationToken);
+        await unitOfWork.ExecuteAsync(async transactionCancellationToken =>
+        {
+            await items.UpdateAsync(item, transactionCancellationToken);
+            await activities.LogAsync(spaceId, userId, ActivityActions.Updated, ActivityEntityTypes.Item, item.Id, new { item.Name, item.LocationId, item.CategoryId, item.Quantity }, transactionCancellationToken);
+        }, cancellationToken);
 
         return ToResponse(item, spaceId);
     }
@@ -79,7 +90,11 @@ public sealed class ItemService(IItemRepository items, IRoomRepository rooms, IB
         await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
 
         var item = await items.GetByIdAndSpaceAsync(id, spaceId, cancellationToken) ?? throw InventoryExceptions.ItemNotFound();
-        await items.DeleteAsync(item, cancellationToken);
+        await unitOfWork.ExecuteAsync(async transactionCancellationToken =>
+        {
+            await items.DeleteAsync(item, transactionCancellationToken);
+            await activities.LogAsync(spaceId, userId, ActivityActions.Deleted, ActivityEntityTypes.Item, item.Id, new { item.Name, item.LocationId, item.CategoryId, item.Quantity }, transactionCancellationToken);
+        }, cancellationToken);
     }
 
     #endregion

@@ -1,13 +1,16 @@
 using Application.Common.Exceptions;
+using Application.Interfaces.Persistence;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Services.Audit;
 using Application.Interfaces.Services.Inventory;
 using Application.Models.Rooms;
+using Domain.Modules.Audit;
 using Domain.Modules.Inventory;
 using Domain.Modules.Inventory.Entities;
 
 namespace Application.Services.Inventory;
 
-public sealed class RoomService(IRoomRepository rooms, IBoxRepository boxes, ISpaceRepository spaces) : IRoomService
+public sealed class RoomService(IRoomRepository rooms, IBoxRepository boxes, ISpaceRepository spaces, IActivityService activities, IUnitOfWork unitOfWork) : IRoomService
 {
     #region Service Methods
 
@@ -30,7 +33,12 @@ public sealed class RoomService(IRoomRepository rooms, IBoxRepository boxes, ISp
     {
         await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
         var room = new Location(spaceId, request.Name, LocationTypes.Room, createdByUserId: userId, description: request.Description, icon: request.Icon, color: request.Color);
-        await rooms.AddAsync(room, cancellationToken);
+        await unitOfWork.ExecuteAsync(async transactionCancellationToken =>
+        {
+            await rooms.AddAsync(room, transactionCancellationToken);
+            await activities.LogAsync(spaceId, userId, ActivityActions.Created, ActivityEntityTypes.Room, room.Id, new { room.Name }, transactionCancellationToken);
+        }, cancellationToken);
+
         return ToResponse(room, 0);
     }
 
@@ -39,7 +47,12 @@ public sealed class RoomService(IRoomRepository rooms, IBoxRepository boxes, ISp
         await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
         var room = await GetRoomAsync(id, spaceId, cancellationToken);
         room.UpdateDetails(request.Name, request.Description, request.Icon, request.Color);
-        await rooms.UpdateAsync(room, cancellationToken);
+        await unitOfWork.ExecuteAsync(async transactionCancellationToken =>
+        {
+            await rooms.UpdateAsync(room, transactionCancellationToken);
+            await activities.LogAsync(spaceId, userId, ActivityActions.Updated, ActivityEntityTypes.Room, room.Id, new { room.Name }, transactionCancellationToken);
+        }, cancellationToken);
+
         return ToResponse(room, await GetBoxesCountAsync(room.Id, cancellationToken));
     }
 
@@ -47,7 +60,11 @@ public sealed class RoomService(IRoomRepository rooms, IBoxRepository boxes, ISp
     {
         await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
         var room = await GetRoomAsync(id, spaceId, cancellationToken);
-        await rooms.DeleteAsync(room, cancellationToken);
+        await unitOfWork.ExecuteAsync(async transactionCancellationToken =>
+        {
+            await rooms.DeleteAsync(room, transactionCancellationToken);
+            await activities.LogAsync(spaceId, userId, ActivityActions.Deleted, ActivityEntityTypes.Room, room.Id, new { room.Name }, transactionCancellationToken);
+        }, cancellationToken);
     }
 
     #endregion

@@ -1,14 +1,22 @@
+using System.Threading.Channels;
+using Application.Interfaces.Persistence;
 using Application.Interfaces.Security;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Services.Audit;
 using Application.Interfaces.Services.Identity;
 using Application.Interfaces.Services.Inventory;
 using Application.Interfaces.Services.Spaces;
 using Achei.Configurations;
 using Achei.ExceptionHandling;
+using Achei.Logging;
 using Crosscutting.Common.Core.Security;
+using Data.Repositories.Audit;
 using Data.Repositories.Identity;
 using Data.Repositories.Spaces;
 using Data.Repositories.Inventory;
+using Data.Logging;
+using Data.Transactions;
+using Application.Services.Audit;
 using Application.Services.Identity;
 using Application.Services.Inventory;
 using Application.Services.Spaces;
@@ -20,6 +28,14 @@ builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddDbContextConfig(builder.Configuration);
 builder.Services.AddJwtConfig(builder.Configuration);
+builder.Services.AddSingleton(Channel.CreateBounded<SystemLog>(new BoundedChannelOptions(2000)
+{
+    FullMode = BoundedChannelFullMode.DropWrite,
+    SingleReader = true,
+    SingleWriter = false
+}));
+builder.Services.AddSingleton<ILoggerProvider, DatabaseLoggerProvider>();
+builder.Services.AddHostedService<SystemLogWorker>();
 builder.Services.AddSingleton<IEncryptionService>(provider =>
 {
     var configuration = provider.GetRequiredService<IConfiguration>();
@@ -33,6 +49,9 @@ builder.Services.AddSingleton<IEncryptionService>(provider =>
     return new AesEncryption(Convert.FromBase64String(keyBase64));
 });
 builder.Services.AddSingleton<IPasswordHasherService, Argon2PasswordHasher>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
+builder.Services.AddScoped<IActivityService, ActivityService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISpaceRepository, SpaceRepository>();

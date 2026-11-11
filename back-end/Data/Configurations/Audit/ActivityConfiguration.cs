@@ -25,7 +25,7 @@ public class ActivityConfiguration : IEntityTypeConfiguration<Activity>
         entity.HasOne<Space>()
             .WithMany()
             .HasForeignKey(e => e.SpaceId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.Cascade);
 
         entity.Property(e => e.UserId)
             .HasColumnName("user_id");
@@ -33,7 +33,7 @@ public class ActivityConfiguration : IEntityTypeConfiguration<Activity>
         entity.HasOne<User>()
             .WithMany()
             .HasForeignKey(e => e.UserId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.SetNull);
 
         entity.Property(e => e.Action)
             .HasColumnName("action")

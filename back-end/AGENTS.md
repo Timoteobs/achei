@@ -40,6 +40,8 @@ Não crie uma pasta exclusiva para uma entidade quando ela conteria somente seu 
 
 O nome Application.Models.Auth é intencional, mesmo que o módulo se chame Identity.
 
+Logs técnicos são uma exceção à organização por módulos de domínio: SystemLog e seu mapeamento pertencem a Data/Logging e Data/Configurations/Logging; o provider e o worker pertencem a Presentation/Logging. Não crie entidade de Domain, Repository ou Application Service para essa infraestrutura.
+
 ## Estilo C#
 
 O .editorconfig da raiz é obrigatório.
@@ -48,6 +50,7 @@ O .editorconfig da raiz é obrigatório.
 - Use chaves em todos os blocos de controle, inclusive blocos com uma única instrução.
 - Use chaves em métodos e construtores; não use corpo de método com =>.
 - Posicione a chave de abertura em uma nova linha.
+- Construtores privados vazios exigidos pelo EF Core são exceção e podem permanecer em uma linha, como private Activity() { }.
 - Mantenha assinaturas, construtores, records e chamadas em uma linha quando continuarem legíveis.
 - Quebre verticalmente somente quando a linha ficar realmente extensa e prejudicar a leitura.
 - Não aplique quebras verticais mecânicas em toda lista de parâmetros.
@@ -115,6 +118,28 @@ Regras:
 - Não exponha mensagens internas do banco ou stack traces na resposta.
 - Atualize o GlobalExceptionHandler quando uma nova família tipada de exceção for realmente necessária.
 
+## Histórico de atividades
+
+- Activity representa somente o histórico de ações dos usuários; não a utilize para logs técnicos ou exceções.
+- Registre criação e atualização de Spaces e criação, atualização e exclusão de Rooms, Boxes e Items por meio de IActivityService.
+- Não registre a exclusão de Space em Activity: o histórico pertence ao espaço e é removido com ele por Cascade.
+- Use as constantes ActivityActions e ActivityEntityTypes; não espalhe valores textuais de ação e entidade.
+- Activity pertence ao Space: sua FK deve usar Cascade para remover o histórico quando o espaço for excluído.
+- A FK opcional de Activity para User deve usar SetNull para preservar o histórico do espaço e anonimizar o autor excluído.
+- EntityId é uma referência histórica e não deve possuir FK para Room, Box, Item ou outras entidades internas que possam ser removidas.
+- Mantenha no Metadata apenas contexto básico em JSON. Nunca registre senhas, hashes, tokens, chaves ou dados sensíveis desnecessários.
+- Execute a escrita do recurso e da Activity dentro de IUnitOfWork para garantir que ambas sejam confirmadas ou revertidas juntas.
+- Não registre leituras como atividade sem uma necessidade funcional explícita.
+
+## Logs do sistema
+
+- SystemLog representa logs técnicos e exceções; não o confunda com o histórico funcional de Activity.
+- Persista somente os níveis Warning, Error e Critical no banco. Logs de níveis inferiores permanecem nos providers não persistentes configurados para a aplicação.
+- A persistência deve ocorrer de forma assíncrona pela fila limitada e pelo SystemLogWorker; nunca bloqueie a requisição para gravar um log técnico.
+- Não registre senhas, tokens, chaves, corpos de requisição ou outros dados sensíveis.
+- Mantenha apenas os últimos sete dias de logs. O SystemLogWorker deve remover diariamente os registros expirados.
+- Falhas na persistência dos próprios logs não devem interromper a aplicação nem ser reenviadas ao mesmo provider.
+
 ## Controllers e REST
 
 - Controllers devem ser finos: recebem a requisição, extraem o usuário, chamam o Service e produzem a resposta HTTP.
@@ -155,6 +180,7 @@ Os itens abaixo são intencionais. Não os remova, complete ou reorganize sem ta
 - Defina explicitamente tamanhos, obrigatoriedade, nomes de colunas, índices e comportamento de exclusão.
 - Não edite migrations históricas manualmente para acomodar uma nova alteração.
 - Mudanças de schema devem ser acompanhadas por migration própria quando a tarefa exigir atualização do banco.
+- Com EnableRetryOnFailure, execute transações explícitas por meio de Database.CreateExecutionStrategy().ExecuteAsync para que uma tentativa inclua toda a unidade transacional.
 
 ## Verificação antes da entrega
 

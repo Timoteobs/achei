@@ -1,12 +1,15 @@
 using Application.Common.Exceptions;
+using Application.Interfaces.Persistence;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Services.Audit;
 using Application.Interfaces.Services.Spaces;
 using Application.Models.Spaces;
+using Domain.Modules.Audit;
 using Domain.Modules.Spaces.Entities;
 
 namespace Application.Services.Spaces;
 
-public sealed class SpaceService(ISpaceRepository spaces) : ISpaceService
+public sealed class SpaceService(ISpaceRepository spaces, IActivityService activities, IUnitOfWork unitOfWork) : ISpaceService
 {
     #region Service Methods
 
@@ -24,7 +27,12 @@ public sealed class SpaceService(ISpaceRepository spaces) : ISpaceService
     public async Task<SpaceResponse> CreateAsync(long userId, SaveSpaceRequest request, CancellationToken cancellationToken = default)
     {
         var space = new Space(userId, request.Name, request.Description, request.ImageUrl);
-        await spaces.AddAsync(space, cancellationToken);
+        await unitOfWork.ExecuteAsync(async transactionCancellationToken =>
+        {
+            await spaces.AddAsync(space, transactionCancellationToken);
+            await activities.LogAsync(space.Id, userId, ActivityActions.Created, ActivityEntityTypes.Space, space.Id, new { space.Name }, transactionCancellationToken);
+        }, cancellationToken);
+
         return ToResponse(space);
     }
 
@@ -32,7 +40,12 @@ public sealed class SpaceService(ISpaceRepository spaces) : ISpaceService
     {
         var space = await GetOwnedSpaceAsync(id, userId, cancellationToken);
         space.Update(request.Name, request.Description, request.ImageUrl);
-        await spaces.UpdateAsync(space, cancellationToken);
+        await unitOfWork.ExecuteAsync(async transactionCancellationToken =>
+        {
+            await spaces.UpdateAsync(space, transactionCancellationToken);
+            await activities.LogAsync(space.Id, userId, ActivityActions.Updated, ActivityEntityTypes.Space, space.Id, new { space.Name }, transactionCancellationToken);
+        }, cancellationToken);
+
         return ToResponse(space);
     }
 

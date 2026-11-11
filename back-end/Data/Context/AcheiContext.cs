@@ -1,3 +1,4 @@
+using Data.Logging;
 using Domain.Modules.Audit.Entities;
 using Domain.Modules.Identity.Entities;
 using Domain.Modules.Inventory.Entities;
@@ -23,6 +24,7 @@ public class AcheiContext : DbContext
     public DbSet<ItemTag> ItemTags => Set<ItemTag>();
     public DbSet<Favorite> Favorites => Set<Favorite>();
     public DbSet<Activity> Activities => Set<Activity>();
+    public DbSet<SystemLog> SystemLogs => Set<SystemLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

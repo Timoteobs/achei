@@ -1,13 +1,16 @@
 using Application.Common.Exceptions;
+using Application.Interfaces.Persistence;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Services.Audit;
 using Application.Interfaces.Services.Inventory;
 using Application.Models.Boxes;
+using Domain.Modules.Audit;
 using Domain.Modules.Inventory;
 using Domain.Modules.Inventory.Entities;
 
 namespace Application.Services.Inventory;
 
-public sealed class BoxService(IBoxRepository boxes, IRoomRepository rooms, IItemRepository items, ISpaceRepository spaces) : IBoxService
+public sealed class BoxService(IBoxRepository boxes, IRoomRepository rooms, IItemRepository items, ISpaceRepository spaces, IActivityService activities, IUnitOfWork unitOfWork) : IBoxService
 {
     #region Service Methods
 
@@ -38,7 +41,11 @@ public sealed class BoxService(IBoxRepository boxes, IRoomRepository rooms, IIte
         var room = await rooms.GetByIdAndSpaceAsync(request.RoomId, spaceId, cancellationToken) ?? throw InventoryExceptions.RoomNotFound();
 
         var box = new Location(spaceId, request.Name, LocationTypes.Box, parentLocationId: room.Id, createdByUserId: userId, description: request.Description);
-        await boxes.AddAsync(box, cancellationToken);
+        await unitOfWork.ExecuteAsync(async transactionCancellationToken =>
+        {
+            await boxes.AddAsync(box, transactionCancellationToken);
+            await activities.LogAsync(spaceId, userId, ActivityActions.Created, ActivityEntityTypes.Box, box.Id, new { box.Name, RoomId = room.Id }, transactionCancellationToken);
+        }, cancellationToken);
 
         return ToResponse(box, room, 0);
     }
@@ -56,7 +63,12 @@ public sealed class BoxService(IBoxRepository boxes, IRoomRepository rooms, IIte
         var room = await rooms.GetByIdAndSpaceAsync(request.RoomId, spaceId, cancellationToken) ?? throw InventoryExceptions.RoomNotFound();
 
         box.UpdateBoxDetails(request.Name, request.Description, room.Id);
-        await boxes.UpdateAsync(box, cancellationToken);
+        await unitOfWork.ExecuteAsync(async transactionCancellationToken =>
+        {
+            await boxes.UpdateAsync(box, transactionCancellationToken);
+            await activities.LogAsync(spaceId, userId, ActivityActions.Updated, ActivityEntityTypes.Box, box.Id, new { box.Name, RoomId = room.Id }, transactionCancellationToken);
+        }, cancellationToken);
+
         return ToResponse(box, room, await GetItemsCountAsync(box.Id, cancellationToken));
     }
 
@@ -64,7 +76,11 @@ public sealed class BoxService(IBoxRepository boxes, IRoomRepository rooms, IIte
     {
         await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
         var box = await GetBoxAsync(id, spaceId, cancellationToken);
-        await boxes.DeleteAsync(box, cancellationToken);
+        await unitOfWork.ExecuteAsync(async transactionCancellationToken =>
+        {
+            await boxes.DeleteAsync(box, transactionCancellationToken);
+            await activities.LogAsync(spaceId, userId, ActivityActions.Deleted, ActivityEntityTypes.Box, box.Id, new { box.Name, RoomId = box.ParentLocationId }, transactionCancellationToken);
+        }, cancellationToken);
     }
 
     #endregion
