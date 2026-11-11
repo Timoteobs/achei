@@ -3,6 +3,7 @@ using Application.Common.Exceptions;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services.Audit;
 using Application.Models.Activities;
+using Domain.Modules.Audit;
 using Domain.Modules.Audit.Entities;
 
 namespace Application.Services.Audit;
@@ -21,6 +22,16 @@ public sealed class ActivityService(IActivityRepository activities, ISpaceReposi
         return new ActivitiesPageResponse(response, request.Page, request.PageSize, result.TotalCount, totalPages);
     }
 
+    public async Task<ActivityIndicatorsResponse> GetIndicatorsAsync(long spaceId, long userId, GetActivityIndicatorsRequest request, CancellationToken cancellationToken = default)
+    {
+        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+
+        var periodEnd = request.PeriodEnd?.UtcDateTime ?? DateTime.UtcNow;
+        var periodStart = request.PeriodStart?.UtcDateTime ?? periodEnd.AddDays(-30);
+        var counts = await activities.CountByActionAndEntityTypeAsync(spaceId, periodStart, periodEnd, cancellationToken);
+        return ToResponse(spaceId, counts, periodStart, periodEnd);
+    }
+
     public async Task LogAsync(long spaceId, long userId, string action, string entityType, long? entityId = null, object? metadata = null, CancellationToken cancellationToken = default)
     {
         var activity = new Activity(spaceId, action, entityType, userId, entityId, SerializeMetadata(metadata));
@@ -34,6 +45,22 @@ public sealed class ActivityService(IActivityRepository activities, ISpaceReposi
     private static ActivityResponse ToResponse(Activity activity)
     {
         return new ActivityResponse(activity.Id, activity.SpaceId, activity.UserId, activity.Action, activity.EntityType, activity.EntityId, activity.Metadata, DateTime.SpecifyKind(activity.CreatedAt, DateTimeKind.Utc));
+    }
+
+    private static ActivityIndicatorsResponse ToResponse(
+        long spaceId,
+        IReadOnlyDictionary<(string Action, string EntityType), int> counts,
+        DateTime periodStart,
+        DateTime periodEnd)
+    {
+        return new ActivityIndicatorsResponse(
+            spaceId,
+            periodStart,
+            periodEnd,
+            counts.Values.Sum(),
+            counts.GetValueOrDefault((ActivityActions.Created, ActivityEntityTypes.Item)),
+            counts.GetValueOrDefault((ActivityActions.Updated, ActivityEntityTypes.Item)),
+            counts.GetValueOrDefault((ActivityActions.Deleted, ActivityEntityTypes.Item)));
     }
 
     private async Task EnsureOwnedSpaceAsync(long spaceId, long userId, CancellationToken cancellationToken)

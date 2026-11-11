@@ -23,6 +23,17 @@ public sealed class ActivityRepository(AcheiContext context) : IActivityReposito
         return new PagedResult<Activity>(result, totalCount);
     }
 
+    public async Task<IReadOnlyDictionary<(string Action, string EntityType), int>> CountByActionAndEntityTypeAsync(long spaceId, DateTime periodStart, DateTime periodEnd, CancellationToken cancellationToken = default)
+    {
+        var counts = await context.Activities.AsNoTracking()
+            .Where(activity => activity.SpaceId == spaceId && activity.CreatedAt >= periodStart && activity.CreatedAt < periodEnd)
+            .GroupBy(activity => new { activity.Action, activity.EntityType })
+            .Select(group => new { group.Key.Action, group.Key.EntityType, Count = group.Count() })
+            .ToListAsync(cancellationToken);
+
+        return counts.ToDictionary(group => (group.Action, group.EntityType), group => group.Count);
+    }
+
     public async Task AddAsync(Activity activity, CancellationToken cancellationToken = default)
     {
         await context.Activities.AddAsync(activity, cancellationToken);

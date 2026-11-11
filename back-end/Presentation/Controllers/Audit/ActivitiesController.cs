@@ -13,6 +13,14 @@ namespace Achei.Controllers.Audit;
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
 public sealed class ActivitiesController(IActivityService activities) : ControllerBase
 {
+    [HttpGet("indicators")]
+    [ProducesResponseType<ActivityIndicatorsResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ActivityIndicatorsResponse>> GetIndicatorsAsync(long spaceId, [FromQuery] GetActivityIndicatorsRequest request, CancellationToken cancellationToken = default)
+    {
+        return Ok(await activities.GetIndicatorsAsync(spaceId, User.GetUserId(), request, cancellationToken));
+    }
+
     [HttpGet]
     [ProducesResponseType<ActivitiesPageResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
