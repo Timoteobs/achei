@@ -62,11 +62,13 @@ public sealed class BoxService(IBoxRepository boxes, IRoomRepository rooms, IIte
         var box = await GetBoxAsync(id, spaceId, cancellationToken);
         var room = await rooms.GetByIdAndSpaceAsync(request.RoomId, spaceId, cancellationToken) ?? throw InventoryExceptions.RoomNotFound();
 
+        var previousRoomId = box.ParentLocationId;
+        var action = previousRoomId == room.Id ? ActivityActions.Updated : ActivityActions.Moved;
         box.UpdateBoxDetails(request.Name, request.Description, room.Id);
         await unitOfWork.ExecuteAsync(async transactionCancellationToken =>
         {
             await boxes.UpdateAsync(box, transactionCancellationToken);
-            await activities.LogAsync(spaceId, userId, ActivityActions.Updated, ActivityEntityTypes.Box, box.Id, new { box.Name, RoomId = room.Id }, transactionCancellationToken);
+            await activities.LogAsync(spaceId, userId, action, ActivityEntityTypes.Box, box.Id, new { box.Name, RoomId = room.Id, PreviousRoomId = previousRoomId }, transactionCancellationToken);
         }, cancellationToken);
 
         return ToResponse(box, room, await GetItemsCountAsync(box.Id, cancellationToken));

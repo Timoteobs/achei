@@ -118,11 +118,13 @@ public sealed class ItemService(IItemRepository items, IRoomRepository rooms, IB
             throw InventoryExceptions.ItemReferenceNotFound();
         }
 
+        var previousLocationId = item.LocationId;
+        var action = previousLocationId == location.Id ? ActivityActions.Updated : ActivityActions.Moved;
         item.UpdateDetails(location.Id, request.Name, request.CategoryId, request.Description, request.Quantity, request.Notes);
         await unitOfWork.ExecuteAsync(async transactionCancellationToken =>
         {
             await items.UpdateAsync(item, transactionCancellationToken);
-            await activities.LogAsync(spaceId, userId, ActivityActions.Updated, ActivityEntityTypes.Item, item.Id, new { item.Name, item.LocationId, item.CategoryId, item.Quantity }, transactionCancellationToken);
+            await activities.LogAsync(spaceId, userId, action, ActivityEntityTypes.Item, item.Id, new { item.Name, item.LocationId, item.CategoryId, item.Quantity, PreviousLocationId = previousLocationId }, transactionCancellationToken);
         }, cancellationToken);
 
         return ToResponse(item, spaceId);

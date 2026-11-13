@@ -9,6 +9,16 @@ namespace Data.Repositories.Identity;
 
 public sealed class UserRepository(AcheiContext context) : IUserRepository
 {
+    public async Task<IReadOnlyList<User>> ListByIdsAsync(IReadOnlyCollection<long> ids, CancellationToken cancellationToken = default)
+    {
+        if (ids.Count == 0)
+        {
+            return Array.Empty<User>();
+        }
+
+        return await context.Users.AsNoTracking().Where(user => ids.Contains(user.Id)).ToListAsync(cancellationToken);
+    }
+
     public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         return context.Users.SingleOrDefaultAsync(user => user.Email == NormalizeEmail(email), cancellationToken);
