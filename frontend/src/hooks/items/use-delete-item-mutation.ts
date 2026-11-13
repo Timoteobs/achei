@@ -16,7 +16,7 @@ export function useDeleteItemMutation(spaceId: string) {
     onSuccess: async (_data, _itemId, context) => {
       const userId = context?.userId;
       if (!userId || useAuthStore.getState().session?.user.id !== userId) return;
-      const itemsKey = ["spaces", userId, "items", spaceId, "list"];
+      const itemsKey = ["spaces", userId, "items", spaceId];
       const boxesKey = ["spaces", userId, "boxes", spaceId, "list"];
       await Promise.all([
         queryClient.cancelQueries({ queryKey: itemsKey }),

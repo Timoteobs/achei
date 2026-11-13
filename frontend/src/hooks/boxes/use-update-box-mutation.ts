@@ -31,6 +31,7 @@ export function useUpdateBoxMutation(spaceId: string) {
       );
       void queryClient.invalidateQueries({ queryKey: boxesKey, exact: true });
       void queryClient.invalidateQueries({ queryKey: roomsKey, exact: true });
+      void queryClient.invalidateQueries({ queryKey: ["spaces", userId, "items", spaceId, "recent"] });
       toast.success("Caixa atualizada com sucesso!");
     },
     onError: (error) => {

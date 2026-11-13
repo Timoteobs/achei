@@ -48,7 +48,7 @@ export function RoomsSection({ onRoomClick }: Readonly<{ onRoomClick: (roomId: n
           facilmente.
         </Text>
       </Grid>
-      <RoomsQueryFeedback query={roomsQuery} onNewRoomClick={() => setIsNewRoomOpen(true)} />
+      <RoomsQueryFeedback query={roomsQuery} layout="compact" onNewRoomClick={() => setIsNewRoomOpen(true)} />
       {!!roomsQuery.data?.length && <Flex
         as="ul"
         aria-label="Prévia dos ambientes"

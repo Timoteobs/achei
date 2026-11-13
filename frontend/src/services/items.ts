@@ -35,6 +35,27 @@ export interface ItemsPageResponse {
   totalPages: number;
 }
 
+export interface RecentItemResponse {
+  id: number;
+  name: string;
+  room: { id: number; name: string };
+  box: { id: number; name: string } | null;
+  lastAction: string;
+  lastActivityAt: string;
+}
+
+export interface RecentItemsResponse {
+  items: RecentItemResponse[];
+}
+
+export async function getRecentItems(spaceId: string, limit = 5, signal?: AbortSignal) {
+  const { data } = await api.get<RecentItemsResponse>(
+    `/spaces/${encodeURIComponent(spaceId)}/items/recent`,
+    { params: { limit }, signal },
+  );
+  return data;
+}
+
 export async function getItems(spaceId: string, params: ListItemsRequest, signal?: AbortSignal) {
   const { data } = await api.get<ItemsPageResponse>(
     `/spaces/${encodeURIComponent(spaceId)}/items`,

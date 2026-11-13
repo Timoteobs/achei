@@ -1,20 +1,18 @@
-import { Flex, Spinner, Text } from "@chakra-ui/react";
+import { Flex, Text } from "@chakra-ui/react";
 import { isAxiosError } from "axios";
 import { Button } from "../../../../components/button/button";
 import { EmptyState } from "../../../../components/empty-state/empty-state";
 import type { useRoomsQuery } from "../../../../hooks/rooms/use-rooms-query";
+import type { RoomCardProps } from "../../../../components/room-card/room-card";
+import { RoomsSkeleton } from "./rooms-skeleton";
 
-export function RoomsQueryFeedback({ query, onNewRoomClick }: Readonly<{
+export function RoomsQueryFeedback({ query, onNewRoomClick, layout = "detailed" }: Readonly<{
   query: ReturnType<typeof useRoomsQuery>;
   onNewRoomClick: () => void;
+  layout?: RoomCardProps["layout"];
 }>) {
   if (query.isPending) {
-    return (
-      <Flex role="status" align="center" gap="3" py="4" color="fg.muted">
-        <Spinner size="sm" color="brand.fg" />
-        <Text fontSize="sm">Carregando ambientes...</Text>
-      </Flex>
-    );
+    return <RoomsSkeleton layout={layout} />;
   }
 
   if (query.isError) {

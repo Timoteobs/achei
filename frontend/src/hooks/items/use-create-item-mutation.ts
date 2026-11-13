@@ -18,7 +18,7 @@ export function useCreateItemMutation(spaceId: string) {
       const userId = context?.userId;
       if (!userId || useAuthStore.getState().session?.user.id !== userId) return;
       const boxesKey = ["spaces", userId, "boxes", spaceId, "list"];
-      const itemsKey = ["spaces", userId, "items", spaceId, "list"];
+      const itemsKey = ["spaces", userId, "items", spaceId];
       await Promise.all([
         queryClient.cancelQueries({ queryKey: boxesKey, exact: true }),
         queryClient.cancelQueries({ queryKey: itemsKey }),
