@@ -20,9 +20,12 @@ export function NewRoomModal({
   open,
   onOpenChange,
   room,
-}: Readonly<Pick<ModalProps, "open" | "onOpenChange"> & { room?: RoomResponse }>) {
+  spaceId: providedSpaceId,
+  onCreated,
+}: Readonly<Pick<ModalProps, "open" | "onOpenChange"> & { room?: RoomResponse; spaceId?: string; onCreated?: (room: RoomResponse) => void }>) {
   const formId = useId();
-  const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
+  const { spaceId: routeSpaceId } = useParams({ strict: false });
+  const spaceId = providedSpaceId ?? routeSpaceId ?? "";
   const createRoomMutation = useCreateRoomMutation(spaceId);
   const updateRoomMutation = useUpdateRoomMutation(spaceId);
   const {
@@ -64,7 +67,8 @@ export function NewRoomModal({
       color: room && !dirtyFields.color ? room.color : values.color,
     };
     const options = {
-      onSuccess: () => {
+      onSuccess: (savedRoom: RoomResponse) => {
+        if (!room) onCreated?.(savedRoom);
         reset();
         onOpenChange(false);
       },

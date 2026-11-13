@@ -1,5 +1,20 @@
-import { Box, Flex, Heading, IconButton, Menu, Portal, Text, chakra } from "@chakra-ui/react";
-import { ChevronRight, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import {
+  Box,
+  Flex,
+  Heading,
+  IconButton,
+  Menu,
+  Portal,
+  Text,
+  chakra,
+} from "@chakra-ui/react";
+import {
+  Box as BoxIcon,
+  Layers,
+  MoreVertical,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { colorVariantStyles } from "../color-variants";
 import type { ColorVariant } from "../color-variants";
@@ -32,9 +47,15 @@ export function RoomCard({
   onOpen,
 }: Readonly<RoomCardProps>) {
   const counts = [
-    itemsCount !== undefined ? `${itemsCount} ${itemsCount === 1 ? "item" : "itens"}` : null,
-    boxesCount !== undefined ? `${boxesCount} ${boxesCount === 1 ? "caixa" : "caixas"}` : null,
-  ].filter((count) => count !== null).join(" • ");
+    itemsCount !== undefined
+      ? `${itemsCount} ${itemsCount === 1 ? "item" : "itens"}`
+      : null,
+    boxesCount !== undefined
+      ? `${boxesCount} ${boxesCount === 1 ? "caixa" : "caixas"}`
+      : null,
+  ]
+    .filter((count) => count !== null)
+    .join(" • ");
 
   const openButton = onOpen && (
     <chakra.button
@@ -46,8 +67,12 @@ export function RoomCard({
       borderRadius="inherit"
       cursor="pointer"
       onClick={onOpen}
-      _hover={{ bg: "blackAlpha.50" }}
-      _focusVisible={{ outline: "2px solid", outlineColor: "brand.focusRing", outlineOffset: "2px" }}
+      _hover={layout === "compact" ? { bg: "blackAlpha.50" } : undefined}
+      _focusVisible={{
+        outline: "2px solid",
+        outlineColor: "brand.focusRing",
+        outlineOffset: "2px",
+      }}
     />
   );
 
@@ -60,6 +85,9 @@ export function RoomCard({
           variant="ghost"
           size="xs"
           color="fg.muted"
+          bg={layout === "detailed" ? "bg.surface" : undefined}
+          borderRadius="md"
+          boxShadow={layout === "detailed" ? "xs" : undefined}
           flexShrink="0"
           position="relative"
           zIndex="2"
@@ -70,7 +98,11 @@ export function RoomCard({
       </Menu.Trigger>
       <Portal>
         <Menu.Positioner>
-          <Menu.Content bg="bg.surface" borderColor="border.default" borderWidth="1px">
+          <Menu.Content
+            bg="bg.surface"
+            borderColor="border.default"
+            borderWidth="1px"
+          >
             {onEdit && (
               <Menu.Item
                 value="edit"
@@ -106,48 +138,72 @@ export function RoomCard({
       <Flex
         as="article"
         position="relative"
-        align="center"
-        gap="4"
+        direction="column"
         w="full"
-        minH="28"
-        p="4"
+        h="full"
+        minH="220px"
         bg="bg.surface"
         borderWidth="1px"
         borderColor="border.default"
         borderRadius="md"
+        boxShadow="xs"
+        _hover={{ borderColor: "border.emphasized", boxShadow: "sm" }}
       >
         {openButton}
+        {actions && (
+          <Box position="absolute" top="3" right="3" zIndex="2">
+            {actions}
+          </Box>
+        )}
         <Flex
           {...variantStyles[variant]}
-          boxSize={{ base: "16", md: "20" }}
+          h="120px"
           flexShrink="0"
           align="center"
           justify="center"
-          borderRadius="md"
+          borderTopRadius="md"
           aria-hidden="true"
         >
-          <Icon size={32} strokeWidth={1.8} />
+          <Icon size={42} strokeWidth={1.8} />
         </Flex>
-        <Flex direction="column" justify="space-between" flex="1" minW="0" alignSelf="stretch">
-          <Flex align="start" justify="space-between" gap="2">
-            <Heading
-              as="h3"
-              fontSize="sm"
-              fontWeight="semibold"
-              color="fg.default"
-              truncate
-            >
-              {name}
-            </Heading>
-            {actions}
-          </Flex>
-          <Flex align="end" justify="space-between" gap="2">
-            <Text color="fg.muted" fontSize="sm" truncate>
-              {counts}
-            </Text>
-            <Box color="fg.muted" flexShrink="0" aria-hidden="true">
-              <ChevronRight size={18} strokeWidth={1.8} />
-            </Box>
+        <Flex direction="column" gap="3" flex="1" minW="0" p="4">
+          <Heading
+            as="h3"
+            fontSize="sm"
+            fontWeight="semibold"
+            color="fg.default"
+            lineClamp="2"
+            overflowWrap="anywhere"
+          >
+            {name}
+          </Heading>
+          <Flex
+            align="center"
+            gap="3"
+            wrap="wrap"
+            color="fg.muted"
+            fontSize="sm"
+            mt="auto"
+          >
+            {boxesCount !== undefined && (
+              <Flex align="center" gap="2">
+                <BoxIcon size={18} strokeWidth={1.8} aria-hidden="true" />
+                <Text>
+                  {boxesCount} {boxesCount === 1 ? "caixa" : "caixas"}
+                </Text>
+              </Flex>
+            )}
+            {boxesCount !== undefined && itemsCount !== undefined && (
+              <Text aria-hidden="true">•</Text>
+            )}
+            {itemsCount !== undefined && (
+              <Flex align="center" gap="2">
+                <Layers size={18} strokeWidth={1.8} aria-hidden="true" />
+                <Text>
+                  {itemsCount} {itemsCount === 1 ? "item" : "itens"}
+                </Text>
+              </Flex>
+            )}
           </Flex>
         </Flex>
       </Flex>
@@ -172,7 +228,11 @@ export function RoomCard({
       textAlign="center"
     >
       {openButton}
-      {actions && <Box position="absolute" top="1" right="1">{actions}</Box>}
+      {actions && (
+        <Box position="absolute" top="1" right="1">
+          {actions}
+        </Box>
+      )}
       <Box mb="3" aria-hidden="true">
         <Icon size={28} strokeWidth={1.8} />
       </Box>
@@ -180,7 +240,7 @@ export function RoomCard({
         as="h3"
         fontSize="sm"
         fontWeight="semibold"
-        lineHeight="short"
+        lineClamp="2"
         color="fg.default"
         overflowWrap="anywhere"
       >

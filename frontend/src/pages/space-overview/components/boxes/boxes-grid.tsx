@@ -1,4 +1,4 @@
-import { Box, Flex, SimpleGrid, Spinner, Text } from "@chakra-ui/react";
+import { Box, Flex, Grid, Spinner, Text } from "@chakra-ui/react";
 import { useParams } from "@tanstack/react-router";
 import { isAxiosError } from "axios";
 import { useState } from "react";
@@ -39,10 +39,10 @@ export function BoxesGrid({ roomId, onNewBoxClick, onBoxClick }: Readonly<{ room
         <EmptyState action={{ label: "Nova caixa", onClick: onNewBoxClick }} />
       )}
       {boxes.length > 0 && (
-        <SimpleGrid
+        <Grid
           as="ul"
           aria-label="Lista de caixas"
-          columns={{ base: 1, md: 2, xl: 3 }}
+          templateColumns={{ base: "minmax(0, 1fr)", sm: "repeat(auto-fill, minmax(220px, 1fr))" }}
           gap="5"
           listStyleType="none"
           m="0"
@@ -60,10 +60,10 @@ export function BoxesGrid({ roomId, onNewBoxClick, onBoxClick }: Readonly<{ room
               />
             </Box>
           ))}
-          <Box as="li" minW="0">
+          <Box as="li" minW="0" minH="228px">
             <AddCard label="Nova caixa" size="lg" onClick={onNewBoxClick} />
           </Box>
-        </SimpleGrid>
+        </Grid>
       )}
       <DeleteBoxModal spaceId={spaceId} box={boxToDelete} onClose={() => setBoxToDelete(null)} />
       {boxToEdit && (

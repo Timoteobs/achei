@@ -2,12 +2,14 @@ import { Box } from "@chakra-ui/react";
 import { useState } from "react";
 import { NewSpaceModal } from "../spaces/components/new-space/new-space-modal";
 import { HomeHeader } from "./components/home-header";
+import { NewItemModal } from "../space-overview/components/items/new-item-modal";
 import { SpacesSection } from "./components/spaces/spaces-section";
 import { QuickAccessSection } from "./components/quick-access/quick-access-section";
 import { RecentActivitySection } from "./components/recent-activity/recent-activity-section";
 
 export function HomePage() {
   const [isNewSpaceOpen, setIsNewSpaceOpen] = useState(false);
+  const [isNewItemOpen, setIsNewItemOpen] = useState(false);
 
   return (
     <Box
@@ -16,15 +18,16 @@ export function HomePage() {
       minW="0"
       bg="bg.canvas"
       px={{ base: "5", md: "6", lg: "8" }}
-      py={{ base: "6", lg: "8" }}
+      py={{ base: "5", lg: "6" }}
     >
-      <HomeHeader onNewSpaceClick={() => setIsNewSpaceOpen(true)} />
+      <HomeHeader onNewItemClick={() => setIsNewItemOpen(true)} />
       <SpacesSection
         onNewSpaceClick={() => setIsNewSpaceOpen(true)}
       />
       <QuickAccessSection />
       <RecentActivitySection />
       <NewSpaceModal open={isNewSpaceOpen} onOpenChange={setIsNewSpaceOpen} />
+      {isNewItemOpen && <NewItemModal open onOpenChange={setIsNewItemOpen} />}
     </Box>
   );
 }

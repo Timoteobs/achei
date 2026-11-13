@@ -1,4 +1,4 @@
-import { Box, SimpleGrid } from "@chakra-ui/react";
+import { Box, Grid } from "@chakra-ui/react";
 import { useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import { AddCard } from "../../../../components/add-card/add-card";
@@ -22,7 +22,19 @@ export function RoomsGrid({ onNewRoomClick, onRoomClick }: Readonly<{
   return (
     <Box aria-busy={roomsQuery.isFetching}>
       <RoomsQueryFeedback query={roomsQuery} onNewRoomClick={onNewRoomClick} />
-      {!!roomsQuery.data?.length && <SimpleGrid as="ul" aria-label="Lista de ambientes" columns={{ base: 1, md: 2, xl: 3 }} gap="5" listStyleType="none" m="0" p="0">
+      {!!roomsQuery.data?.length && <Grid
+        as="ul"
+        aria-label="Lista de ambientes"
+        templateColumns={{ base: "minmax(0, 1fr)", sm: "repeat(auto-fill, minmax(220px, 1fr))" }}
+        gap="5"
+        alignItems="stretch"
+        listStyleType="none"
+        m="0"
+        p="0"
+      >
+        <Box as="li" minW="0" minH="220px">
+          <AddCard label="Novo ambiente" size="lg" onClick={onNewRoomClick} />
+        </Box>
         {roomsQuery.data?.map((room) => (
           <Box as="li" key={room.id} minW="0">
             <RoomCard
@@ -34,10 +46,7 @@ export function RoomsGrid({ onNewRoomClick, onRoomClick }: Readonly<{
             />
           </Box>
         ))}
-        <Box as="li" minW="0">
-          <AddCard label="Novo ambiente" size="lg" onClick={onNewRoomClick} />
-        </Box>
-      </SimpleGrid>}
+      </Grid>}
       <DeleteRoomModal spaceId={spaceId} room={roomToDelete} onClose={() => setRoomToDelete(null)} />
       {roomToEdit && (
         <NewRoomModal

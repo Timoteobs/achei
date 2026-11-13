@@ -1,35 +1,51 @@
 import { Box, Flex, Popover, Portal, Spinner, Stack, Text, chakra } from "@chakra-ui/react";
-import { Check, ChevronDown, House, Plus, Search } from "lucide-react";
+import { Check, ChevronDown, Layers, Plus, Search } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useRef, useState } from "react";
+import type { Ref } from "react";
 import { Input } from "../input/input";
 
-export interface SpaceSelectOption {
-  id: number;
-  name: string;
+export interface SearchSelectOption {
+  value: string;
+  label: string;
   description?: string;
   icon?: LucideIcon;
 }
 
-export interface SpaceSelectProps {
-  spaces: readonly SpaceSelectOption[];
-  value?: number;
-  onValueChange: (spaceId: number) => void;
-  onCreateSpace?: () => void;
+export interface SearchSelectProps {
+  options: readonly SearchSelectOption[];
+  label: string;
+  placeholder?: string;
+  searchPlaceholder?: string;
+  emptyMessage?: string;
+  icon?: LucideIcon;
+  value?: string;
+  onValueChange: (value: string) => void;
+  onBlur?: () => void;
+  createAction?: { label: string; onClick: () => void };
   loading?: boolean;
   disabled?: boolean;
+  portalled?: boolean;
+  size?: "md" | "lg";
+  triggerRef?: Ref<HTMLButtonElement>;
+  invalid?: boolean;
+  describedBy?: string;
 }
 
-export function SpaceSelect({
-  spaces, value, onValueChange, onCreateSpace, loading = false, disabled = false,
-}: Readonly<SpaceSelectProps>) {
+export function SearchSelect({
+  options, label, placeholder = "Selecione uma opção", searchPlaceholder = "Buscar...",
+  emptyMessage = "Nenhuma opção disponível.", icon: DefaultIcon = Layers,
+  value, onValueChange, onBlur, createAction, loading = false, disabled = false,
+  portalled = true, size = "md", triggerRef, invalid, describedBy,
+}: Readonly<SearchSelectProps>) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [pendingCreate, setPendingCreate] = useState<(() => void) | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
-  const selectedSpace = spaces.find((space) => space.id === value);
-  const SelectedIcon = selectedSpace?.icon ?? House;
+  const selectedOption = options.find((option) => option.value === value);
+  const SelectedIcon = selectedOption?.icon ?? DefaultIcon;
   const normalizedSearch = normalizeSearch(search);
-  const filteredSpaces = spaces.filter((space) => normalizeSearch(space.name).includes(normalizedSearch));
+  const filteredOptions = options.filter((option) => normalizeSearch(option.label).includes(normalizedSearch));
 
   const close = () => {
     setOpen(false);
@@ -39,11 +55,18 @@ export function SpaceSelect({
   return (
     <Popover.Root
       open={open}
+      restoreFocus={!pendingCreate}
+      onExitComplete={() => {
+        if (!pendingCreate) return;
+        setPendingCreate(null);
+        pendingCreate();
+      }}
       onOpenChange={({ open: nextOpen }) => {
         setOpen(nextOpen);
         if (!nextOpen) setSearch("");
       }}
-      positioning={{ placement: "bottom-start", sameWidth: true, gutter: 8 }}
+      portalled={portalled}
+      positioning={{ placement: "bottom-start", sameWidth: true, gutter: 8, strategy: portalled ? "absolute" : "fixed", hideWhenDetached: true }}
       initialFocusEl={() => searchRef.current}
       lazyMount
       unmountOnExit
@@ -51,13 +74,17 @@ export function SpaceSelect({
       <Popover.Trigger asChild>
         <chakra.button
           type="button"
+          ref={triggerRef}
+          onBlur={onBlur}
+          aria-invalid={invalid || undefined}
+          aria-describedby={describedBy}
           disabled={disabled || loading}
-          aria-label={loading ? "Carregando espaços" : `Selecionar espaço: ${selectedSpace?.name ?? "nenhum selecionado"}`}
+          aria-label={`${label}: ${loading ? "Carregando..." : selectedOption?.label ?? placeholder}`}
           display="flex"
           alignItems="center"
           gap="3"
           w="full"
-          minH="52px"
+          minH={size === "lg" ? "68px" : "52px"}
           px="3"
           py="1.5"
           textAlign="start"
@@ -70,23 +97,24 @@ export function SpaceSelect({
           _hover={{ bg: "brand.muted" }}
           _focusVisible={{ outline: "2px solid", outlineColor: "brand.focusRing", outlineOffset: "2px" }}
           _disabled={{ opacity: 0.6, cursor: "not-allowed" }}
+          _invalid={{ borderColor: "danger.500" }}
         >
-          <Flex boxSize="9" flexShrink="0" align="center" justify="center" bg="brand.muted" color="brand.fg" borderRadius="md" aria-hidden="true">
+          <Flex boxSize={size === "lg" ? "11" : "9"} flexShrink="0" align="center" justify="center" bg="brand.muted" color="brand.fg" borderRadius="md" aria-hidden="true">
             {loading ? <Spinner size="sm" /> : <SelectedIcon size={21} strokeWidth={1.8} />}
           </Flex>
           <Box flex="1" minW="0">
-            <Text fontSize="xs" color="fg.muted" lineHeight="short">Espaço</Text>
-            <Text fontSize="sm" fontWeight="semibold" truncate>
-              {loading ? "Carregando espaços..." : selectedSpace?.name ?? "Selecione um espaço"}
+            <Text fontSize={size === "lg" ? "sm" : "xs"} color="fg.muted" lineHeight="short">{label}</Text>
+            <Text fontSize={size === "lg" ? "md" : "sm"} fontWeight="semibold" truncate>
+              {loading ? "Carregando..." : selectedOption?.label ?? placeholder}
             </Text>
           </Box>
           <ChevronDown size={18} strokeWidth={1.8} aria-hidden="true" />
         </chakra.button>
       </Popover.Trigger>
-      <Portal>
+      <Portal disabled={!portalled}>
         <Popover.Positioner>
           <Popover.Content
-            aria-label="Selecionar espaço"
+            aria-label={label}
             w="var(--reference-width)"
             maxW="calc(100vw - 32px)"
             p="2"
@@ -100,8 +128,9 @@ export function SpaceSelect({
               <Input
                 ref={searchRef}
                 type="search"
-                aria-label="Buscar espaço"
-                placeholder="Buscar espaço..."
+                aria-label={searchPlaceholder}
+                placeholder={searchPlaceholder}
+                onKeyDown={(event) => { if (event.key === "Enter") event.preventDefault(); }}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 startElement={<Search size={16} strokeWidth={1.8} />}
@@ -109,16 +138,16 @@ export function SpaceSelect({
                 fontSize="sm"
               />
             </Box>
-            <Stack gap="1" maxH="64" overflowY="auto" role="group" aria-label="Espaços disponíveis">
-              {filteredSpaces.map((space) => {
-                const selected = space.id === value;
-                const Icon = space.icon ?? House;
+            <Stack gap="1" maxH="64" overflowY="auto" role="group" aria-label={`Opções de ${label}`}>
+              {filteredOptions.map((option) => {
+                const selected = option.value === value;
+                const Icon = option.icon ?? DefaultIcon;
                 return (
                   <chakra.button
-                    key={space.id}
+                    key={option.value}
                     type="button"
                     aria-pressed={selected}
-                    onClick={() => { onValueChange(space.id); close(); }}
+                    onClick={() => { onValueChange(option.value); close(); }}
                     display="flex"
                     alignItems="center"
                     gap="3"
@@ -137,24 +166,28 @@ export function SpaceSelect({
                       <Icon size={21} strokeWidth={1.8} />
                     </Flex>
                     <Box flex="1" minW="0">
-                      <Text fontSize="sm" fontWeight="semibold" color="fg.default" overflowWrap="anywhere">{space.name}</Text>
-                      {space.description && <Text fontSize="xs" color="fg.muted" overflowWrap="anywhere">{space.description}</Text>}
+                      <Text fontSize="sm" fontWeight="semibold" color="fg.default" overflowWrap="anywhere">{option.label}</Text>
+                      {option.description && <Text fontSize="xs" color="fg.muted" overflowWrap="anywhere">{option.description}</Text>}
                     </Box>
                     {selected && <Box color="brand.fg" flexShrink="0" aria-hidden="true"><Check size={19} strokeWidth={2.2} /></Box>}
                   </chakra.button>
                 );
               })}
-              {filteredSpaces.length === 0 && (
+              {filteredOptions.length === 0 && (
                 <Text role="status" fontSize="sm" color="fg.muted" px="3" py="4">
-                  {spaces.length === 0 ? "Nenhum espaço cadastrado." : "Nenhum espaço encontrado."}
+                  {options.length === 0 ? emptyMessage : "Nenhum resultado encontrado."}
                 </Text>
               )}
             </Stack>
-            {onCreateSpace && (
+            {createAction && (
               <Box borderTopWidth="1px" borderColor="border.default" mt="2" pt="1">
                 <chakra.button
                   type="button"
-                  onClick={() => { close(); onCreateSpace(); }}
+                  onClick={() => {
+                    // Let the popover release focus before opening another dialog.
+                    setPendingCreate(() => createAction.onClick);
+                    close();
+                  }}
                   display="flex"
                   alignItems="center"
                   gap="3"
@@ -170,7 +203,7 @@ export function SpaceSelect({
                   _focusVisible={{ outline: "2px solid", outlineColor: "brand.focusRing", outlineOffset: "-2px" }}
                 >
                   <Plus size={19} strokeWidth={1.8} aria-hidden="true" />
-                  Novo espaço
+                  {createAction.label}
                 </chakra.button>
               </Box>
             )}

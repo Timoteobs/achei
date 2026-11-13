@@ -1,4 +1,4 @@
-import { Dialog, IconButton, Portal } from "@chakra-ui/react";
+import { Box, Dialog, Flex, IconButton, Portal } from "@chakra-ui/react";
 import { X } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -8,6 +8,8 @@ export interface ModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
+  description?: string;
+  icon?: ReactNode;
   size?: ModalSize;
   footer?: ReactNode;
   closeDisabled?: boolean;
@@ -27,6 +29,8 @@ export function Modal({
   open,
   onOpenChange,
   title,
+  description,
+  icon,
   size = "md",
   footer,
   closeDisabled = false,
@@ -41,6 +45,8 @@ export function Modal({
       placement="center"
       closeOnEscape={!closeDisabled}
       closeOnInteractOutside={!closeDisabled}
+      // Restoring focus from the previous dialog must not dismiss this one.
+      onFocusOutside={(event) => event.preventDefault()}
       role={role}
       initialFocusEl={initialFocusEl}
     >
@@ -68,9 +74,15 @@ export function Modal({
               pb="4"
               flexShrink="0"
             >
-              <Dialog.Title fontSize="2xl" fontWeight="bold" color="fg.default">
-                {title}
-              </Dialog.Title>
+              <Flex align="center" gap="5" minW="0">
+                {icon && <Flex boxSize={{ base: "12", md: "16" }} flexShrink="0" align="center" justify="center" bg="brand.subtle" color="brand.fg" borderRadius="lg" aria-hidden="true">{icon}</Flex>}
+                <Box minW="0">
+                  <Dialog.Title fontSize={description ? { base: "2xl", md: "3xl" } : "2xl"} fontWeight="bold" color="fg.default">
+                    {title}
+                  </Dialog.Title>
+                  {description && <Dialog.Description color="fg.muted" fontSize={{ base: "sm", md: "md" }} mt="2">{description}</Dialog.Description>}
+                </Box>
+              </Flex>
               <Dialog.CloseTrigger asChild position="static">
                 <IconButton
                   aria-label="Fechar"

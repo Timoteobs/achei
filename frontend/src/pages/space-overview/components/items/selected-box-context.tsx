@@ -1,36 +1,31 @@
 import { Box, Flex, Heading, Text, useTabsContext } from "@chakra-ui/react";
 import { ArrowLeft, MapPin, Package } from "lucide-react";
 import { Button } from "../../../../components/button/button";
-import { colorVariantStyles } from "../../../../components/color-variants";
 import type { BoxResponse } from "../../../../services/boxes";
 
 export function SelectedBoxContext({ box }: Readonly<{ box: BoxResponse }>) {
   const tabs = useTabsContext();
   return (
-    <Box minW="0">
-      <Button type="button" variant="link" color="fg.muted" gap="2" mb="3"
+    <Flex align="center" gap={{ base: "3", sm: "5" }} wrap="wrap" minW="0">
+      <Button type="button" variant="link" color="fg.muted" gap="2" flexShrink="0" fontSize="sm" fontWeight="normal"
         onClick={() => tabs.setValue("boxes")}
         _hover={{ color: "fg.default", textDecoration: "underline" }}>
         <ArrowLeft size={16} strokeWidth={1.8} aria-hidden="true" />
         Voltar para Caixas
       </Button>
-      <Flex as="section" align="center" gap="4" w="full" minH="20" p="4"
-        bg="bg.surface" borderWidth="1px" borderColor="border.default" borderRadius="md">
-        <Flex {...colorVariantStyles.blue} boxSize="14" flexShrink="0" align="center" justify="center" borderRadius="md" aria-hidden="true">
-          <Package size={26} strokeWidth={1.8} />
+      <Box display={{ base: "none", sm: "block" }} h="4" borderLeftWidth="1px" borderColor="border.emphasized" aria-hidden="true" />
+      <Flex as="section" aria-label="Caixa selecionada" align="center" gap="2" minW="0" maxW="full" minH="10" ps="1" pe="3" py="1"
+        bg="bg.canvas" borderWidth="1px" borderColor="border.default" borderRadius="md">
+        <Flex bg="brand.subtle" color="brand.fg" boxSize="8" flexShrink="0" align="center" justify="center" borderRadius="sm" aria-hidden="true">
+          <Package size={18} strokeWidth={1.8} />
         </Flex>
-        <Box flex="1" minW="0">
-          <Heading as="h2" fontSize="sm" fontWeight="semibold" color="fg.default" truncate>{box.name}</Heading>
-          <Flex align="center" wrap="wrap" gap="1.5" mt="1" color="fg.muted" fontSize="sm" minW="0">
-            <Flex align="center" gap="1">
-              <MapPin size={13} strokeWidth={1.8} aria-hidden="true" />
-              <Text as="span">{box.roomName}</Text>
-            </Flex>
-            <Text as="span" color="fg.subtle" aria-hidden="true">•</Text>
-            <Text as="span">{box.itemsCount} {box.itemsCount === 1 ? "item" : "itens"}</Text>
-          </Flex>
-        </Box>
+        <Heading as="h2" fontSize="sm" fontWeight="semibold" color="fg.default" minW="0" truncate title={box.name}>{box.name}</Heading>
+        <Text as="span" color="fg.muted" mx="1" aria-hidden="true">•</Text>
+        <Flex align="center" gap="2" color="fg.muted" fontSize="sm" minW="0">
+          <Box flexShrink="0" aria-hidden="true"><MapPin size={16} strokeWidth={1.8} /></Box>
+          <Text as="span" truncate title={box.roomName}>{box.roomName}</Text>
+        </Flex>
       </Flex>
-    </Box>
+    </Flex>
   );
 }

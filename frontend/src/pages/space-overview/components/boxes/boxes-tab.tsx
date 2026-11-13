@@ -18,7 +18,7 @@ export function BoxesTab({ room, onBoxClick }: Readonly<{ room: RoomResponse; on
       </Button>
       <BoxesHeader roomName={room.name} onNewBoxClick={() => setIsNewBoxOpen(true)} />
       <BoxesGrid onBoxClick={onBoxClick} roomId={room.id} onNewBoxClick={() => setIsNewBoxOpen(true)} />
-      {isNewBoxOpen && <NewBoxModal open initialRoomId={room.id} onOpenChange={setIsNewBoxOpen} />}
+      {isNewBoxOpen && <NewBoxModal open initialRoomId={room.id} onOpenChange={setIsNewBoxOpen} onRoomsClick={() => tabs.setValue("rooms")} />}
     </Stack>
   );
 }

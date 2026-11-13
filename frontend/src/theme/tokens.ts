@@ -2,6 +2,15 @@ import { defineTokens } from "@chakra-ui/react";
 
 export const tokens = defineTokens({
   colors: {
+    illustration: {
+      cardboard: {
+        light: { value: "#EBC38E" },
+        medium: { value: "#E4AE72" },
+        dark: { value: "#AF6427" },
+        tape: { value: "#FAE6C8" },
+      },
+    },
+
     brand: {
       50: { value: "#EAF7F3" },
       100: { value: "#D2EFE7" },

@@ -2,6 +2,7 @@ import { number, object, string } from "yup";
 import type { InferType } from "yup";
 
 export const newItemSchema = object({
+  spaceId: string().required("Selecione um espaço.").matches(/^[1-9]\d*$/, "Selecione um espaço válido."),
   name: string().trim().required("Digite o nome do item.").max(150, "Use até 150 caracteres."),
   description: string().trim().max(1000, "Use até 1000 caracteres.").defined(),
   notes: string().trim().max(1000, "Use até 1000 caracteres.").defined(),

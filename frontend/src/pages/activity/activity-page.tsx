@@ -1,8 +1,9 @@
 import { Box, Flex, Text } from "@chakra-ui/react";
 import { useState } from "react";
+import { House } from "lucide-react";
 import { Button } from "../../components/button/button";
 import { CollectionHeader } from "../../components/collection-header/collection-header";
-import { SpaceSelect } from "../../components/space-select/space-select";
+import { SearchSelect } from "../../components/search-select/search-select";
 import { useSpacesQuery } from "../../hooks/spaces/use-spaces-query";
 import { useAuthStore } from "../../stores/auth-store";
 import { NewSpaceModal } from "../spaces/components/new-space/new-space-modal";
@@ -32,18 +33,23 @@ export function ActivityPage() {
         showFilters={false}
       />
       <Box mt="4" w="full" maxW="340px">
-        <SpaceSelect
-          spaces={(spacesQuery.data ?? []).map((space) => ({
-            id: space.id,
-            name: space.name,
+        <SearchSelect
+          label="Espaço"
+          placeholder="Selecione um espaço"
+          searchPlaceholder="Buscar espaço..."
+          emptyMessage="Nenhum espaço cadastrado."
+          icon={House}
+          options={(spacesQuery.data ?? []).map((space) => ({
+            value: String(space.id),
+            label: space.name,
             description: space.ownerUserId === userId ? "Espaço pessoal" : "Espaço compartilhado",
           }))}
-          value={selectedSpace?.id}
-          onValueChange={setSelectedSpaceId}
-          onCreateSpace={() => {
+          value={selectedSpace ? String(selectedSpace.id) : undefined}
+          onValueChange={(value) => setSelectedSpaceId(Number(value))}
+          createAction={{ label: "Novo espaço", onClick: () => {
             if (selectedSpace) setSelectedSpaceId(selectedSpace.id);
             setIsNewSpaceOpen(true);
-          }}
+          } }}
           loading={spacesQuery.isPending}
           disabled={spacesQuery.isError}
         />
@@ -54,7 +60,7 @@ export function ActivityPage() {
           <Button type="button" variant="outline" h="10" px="4" loading={spacesQuery.isFetching} onClick={() => { void spacesQuery.refetch(); }}>Tentar novamente</Button>
         </Flex>
       )}
-      <ActivityStats />
+      {spacesQuery.isSuccess && selectedSpace && <ActivityStats spaceId={String(selectedSpace.id)} />}
       {spacesQuery.isSuccess && <ActivityTimeline space={selectedSpace} />}
       {isNewSpaceOpen && <NewSpaceModal open onOpenChange={setIsNewSpaceOpen} />}
     </Box>

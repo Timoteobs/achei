@@ -1,5 +1,5 @@
 import { Badge, Box, Flex, Heading, IconButton, Menu, Portal, Text, chakra } from "@chakra-ui/react";
-import { ChevronRight, MapPin, MoreVertical, Package, Pencil, Trash2 } from "lucide-react";
+import { Layers, MapPin, MoreVertical, Package, Pencil, Trash2 } from "lucide-react";
 import { colorVariantStyles } from "../color-variants";
 import type { ColorVariant } from "../color-variants";
 
@@ -30,15 +30,17 @@ export function BoxCard({
     <Flex
       as="article"
       position="relative"
-      align="center"
-      gap="4"
+      direction="column"
       w="full"
-      minH="28"
-      p="4"
+      h="full"
+      minH="228px"
+      p="2"
       bg="bg.surface"
       borderWidth="1px"
       borderColor="border.default"
-      borderRadius="md"
+      borderRadius="lg"
+      boxShadow="xs"
+      _hover={{ borderColor: "border.emphasized", boxShadow: "sm" }}
     >
       {onOpen && (
         <chakra.button
@@ -50,28 +52,31 @@ export function BoxCard({
           borderRadius="inherit"
           cursor="pointer"
           onClick={onOpen}
-          _hover={{ bg: "blackAlpha.50" }}
           _focusVisible={{ outline: "2px solid", outlineColor: "brand.focusRing", outlineOffset: "2px" }}
         />
       )}
       <Flex
         {...colors}
-        boxSize={{ base: "16", md: "20" }}
+        boxSize="16"
+        mt="4"
+        mx="3"
+        mb="3"
         flexShrink="0"
         align="center"
         justify="center"
-        borderRadius="md"
+        borderRadius="xl"
         aria-hidden="true"
       >
-        <Package size={32} strokeWidth={1.8} />
+        <Package size={40} strokeWidth={1.8} />
       </Flex>
       <Flex
         direction="column"
-        justify="space-between"
         flex="1"
         minW="0"
         alignSelf="stretch"
-        gap="1"
+        gap="2"
+        px="2"
+        pb="6"
       >
         <Flex align="start" justify="space-between" gap="2">
           <Heading
@@ -79,7 +84,8 @@ export function BoxCard({
             fontSize="sm"
             fontWeight="semibold"
             color="fg.default"
-            truncate
+            lineClamp="2"
+            overflowWrap="anywhere"
           >
             {name}
           </Heading>
@@ -93,7 +99,9 @@ export function BoxCard({
                   size="xs"
                   color="fg.muted"
                   flexShrink="0"
-                  position="relative"
+                  position="absolute"
+                  top="3"
+                  right="2"
                   zIndex="2"
                   _hover={{ bg: "bg.subtle", color: "fg.default" }}
                 >
@@ -132,19 +140,13 @@ export function BoxCard({
           )}
         </Flex>
 
-        <Box minW="0">
-          <Text color="fg.muted" fontSize="sm" truncate>
+        <Flex align="center" gap="2" color="fg.muted" minW="0">
+          <Box flexShrink="0" aria-hidden="true"><Layers size={18} strokeWidth={1.8} /></Box>
+          <Text fontSize="sm">
             {itemsCount} {itemsCount === 1 ? "item" : "itens"}
           </Text>
-          <Flex align="center" gap="1" color="fg.muted" mt="0.5" minW="0">
-            <MapPin size={13} strokeWidth={1.8} aria-hidden="true" />
-            <Text as="span" fontSize="xs" truncate>
-              {roomName}
-            </Text>
-          </Flex>
-        </Box>
+        </Flex>
 
-        <Flex align="center" justify="space-between" gap="2">
           {category && <Badge
             {...colors}
             borderRadius="full"
@@ -152,13 +154,14 @@ export function BoxCard({
             py="0.5"
             fontSize="xs"
             fontWeight="medium"
+            alignSelf="start"
           >
             {category}
           </Badge>}
-          <Box color="fg.muted" flexShrink="0" aria-hidden="true">
-            <ChevronRight size={18} strokeWidth={1.8} />
-          </Box>
-        </Flex>
+      </Flex>
+      <Flex align="center" gap="2" bg="brand.subtle" color="fg.muted" borderRadius="sm" minH="9" px="3" py="2" minW="0">
+        <Box flexShrink="0" aria-hidden="true"><MapPin size={16} strokeWidth={1.8} /></Box>
+        <Text fontSize="sm" truncate title={roomName}>{roomName}</Text>
       </Flex>
     </Flex>
   );

@@ -1,4 +1,4 @@
-import { Field, Flex, NativeSelect, Text, Textarea, chakra, useTabsContext } from "@chakra-ui/react";
+import { Field, Flex, NativeSelect, Text, Textarea, chakra } from "@chakra-ui/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useParams } from "@tanstack/react-router";
 import { Package } from "lucide-react";
@@ -15,12 +15,12 @@ import type { BoxResponse } from "../../../../../services/boxes";
 import { newBoxSchema } from "./new-box-schema";
 import type { NewBoxValues } from "./new-box-schema";
 
-export function NewBoxModal({ open, onOpenChange, initialRoomId, box }: Readonly<
-  Pick<ModalProps, "open" | "onOpenChange"> & { initialRoomId: number; box?: BoxResponse }
+export function NewBoxModal({ open, onOpenChange, initialRoomId, box, spaceId: providedSpaceId, onCreated, onRoomsClick }: Readonly<
+  Pick<ModalProps, "open" | "onOpenChange"> & { initialRoomId: number; box?: BoxResponse; spaceId?: string; onCreated?: (box: BoxResponse) => void; onRoomsClick?: () => void }
 >) {
   const formId = useId();
-  const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
-  const tabs = useTabsContext();
+  const { spaceId: routeSpaceId } = useParams({ strict: false });
+  const spaceId = providedSpaceId ?? routeSpaceId ?? "";
   const roomsQuery = useRoomsQuery(spaceId);
   const createMutation = useCreateBoxMutation(spaceId);
   const updateMutation = useUpdateBoxMutation(spaceId);
@@ -56,7 +56,7 @@ export function NewBoxModal({ open, onOpenChange, initialRoomId, box }: Readonly
       return;
     }
     const payload = { name: values.name, description: values.description || null, roomId: room.id };
-    const options = { onSuccess: () => { reset(); onOpenChange(false); } };
+    const options = { onSuccess: (savedBox: BoxResponse) => { if (!box) onCreated?.(savedBox); reset(); onOpenChange(false); } };
     if (box) {
       updateMutation.mutate({ id: box.id, values: payload }, options);
     } else {
@@ -120,7 +120,7 @@ export function NewBoxModal({ open, onOpenChange, initialRoomId, box }: Readonly
         {roomsQuery.isSuccess && roomsQuery.data.length === 0 && (
           <Flex direction="column" gap="2" align="start">
             <Text color="fg.muted" fontSize="sm">Cadastre um ambiente antes de adicionar caixas neste espaço.</Text>
-            <Button type="button" variant="link" onClick={() => { handleOpenChange(false); tabs.setValue("rooms"); }}>Ir para Ambientes</Button>
+            {onRoomsClick && <Button type="button" variant="link" onClick={() => { handleOpenChange(false); onRoomsClick(); }}>Ir para Ambientes</Button>}
           </Flex>
         )}
         <Field.Root invalid={!!errors.description} disabled={isBusy}>

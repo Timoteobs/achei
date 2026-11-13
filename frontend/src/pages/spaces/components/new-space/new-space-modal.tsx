@@ -29,7 +29,8 @@ export function NewSpaceModal({
   open,
   onOpenChange,
   space,
-}: Readonly<Pick<ModalProps, "open" | "onOpenChange"> & { space?: SpaceResponse }>) {
+  onCreated,
+}: Readonly<Pick<ModalProps, "open" | "onOpenChange"> & { space?: SpaceResponse; onCreated?: (space: SpaceResponse) => void }>) {
   const formId = useId();
   const createSpaceMutation = useCreateSpaceMutation();
   const updateSpaceMutation = useUpdateSpaceMutation();
@@ -69,7 +70,8 @@ export function NewSpaceModal({
       imageUrl: values.imageUrl || null,
     };
     const options = {
-      onSuccess: () => {
+      onSuccess: (savedSpace: SpaceResponse) => {
+        if (!space) onCreated?.(savedSpace);
         reset();
         onOpenChange(false);
       },

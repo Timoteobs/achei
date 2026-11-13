@@ -31,3 +31,21 @@ export async function getActivities(spaceId: string, params: ListActivitiesReque
   );
   return data;
 }
+
+export interface ActivityIndicatorsResponse {
+  spaceId: number;
+  periodStart: string;
+  periodEnd: string;
+  totalActivities: number;
+  itemsAdded: number;
+  itemsUpdated: number;
+  itemsRemoved: number;
+}
+
+export async function getActivityIndicators(spaceId: string, signal?: AbortSignal) {
+  const { data } = await api.get<ActivityIndicatorsResponse>(
+    `/spaces/${encodeURIComponent(spaceId)}/activities/indicators`,
+    { signal },
+  );
+  return data;
+}
