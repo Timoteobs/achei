@@ -4,6 +4,7 @@ namespace Application.Interfaces.Repositories;
 
 public interface IBoxRepository
 {
+    Task<IReadOnlyList<Location>> ListByIdsAndSpaceAsync(IReadOnlyCollection<long> ids, long spaceId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Location>> ListBySpaceAsync(long spaceId, CancellationToken cancellationToken = default);
     Task<IReadOnlyDictionary<long, int>> CountByRoomIdsAsync(IReadOnlyCollection<long> roomIds, CancellationToken cancellationToken = default);
     Task<Location?> GetByIdAndSpaceAsync(long id, long spaceId, CancellationToken cancellationToken = default);

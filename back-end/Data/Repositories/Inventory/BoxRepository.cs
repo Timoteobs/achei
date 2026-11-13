@@ -19,6 +19,16 @@ public sealed class BoxRepository(AcheiContext context) : IBoxRepository
                select box;
     }
 
+    public async Task<IReadOnlyList<Location>> ListByIdsAndSpaceAsync(IReadOnlyCollection<long> ids, long spaceId, CancellationToken cancellationToken = default)
+    {
+        if (ids.Count == 0)
+        {
+            return Array.Empty<Location>();
+        }
+
+        return await Boxes(spaceId).AsNoTracking().Where(location => ids.Contains(location.Id)).ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<Location>> ListBySpaceAsync(long spaceId, CancellationToken cancellationToken = default)
     {
         return await Boxes(spaceId).AsNoTracking().OrderByDescending(box => box.CreatedAt).ThenByDescending(box => box.Id).ToListAsync(cancellationToken);

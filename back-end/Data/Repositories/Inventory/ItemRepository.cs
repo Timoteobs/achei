@@ -11,6 +11,19 @@ namespace Data.Repositories.Inventory;
 
 public sealed class ItemRepository(AcheiContext context) : IItemRepository
 {
+    public async Task<IReadOnlyList<Item>> ListByIdsAndSpaceAsync(IReadOnlyCollection<long> ids, long spaceId, CancellationToken cancellationToken = default)
+    {
+        if (ids.Count == 0)
+        {
+            return Array.Empty<Item>();
+        }
+
+        return await (from item in context.Items.AsNoTracking()
+                      join location in context.Locations.AsNoTracking() on item.LocationId equals location.Id
+                      where ids.Contains(item.Id) && location.SpaceId == spaceId
+                      select item).ToListAsync(cancellationToken);
+    }
+
     public async Task<PagedResult<Item>> ListBySpaceAsync(long spaceId, ItemListQuery queryParameters, CancellationToken cancellationToken = default)
     {
         var query = from item in context.Items.AsNoTracking()

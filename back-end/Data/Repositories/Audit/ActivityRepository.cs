@@ -1,6 +1,7 @@
 using Application.Common;
 using Application.Interfaces.Repositories;
 using Data.Context;
+using Domain.Modules.Audit;
 using Domain.Modules.Audit.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +33,23 @@ public sealed class ActivityRepository(AcheiContext context) : IActivityReposito
             .ToListAsync(cancellationToken);
 
         return counts.ToDictionary(group => (group.Action, group.EntityType), group => group.Count);
+    }
+
+    public async Task<IReadOnlyList<Activity>> ListRecentItemsBySpaceAsync(long spaceId, int limit, CancellationToken cancellationToken = default)
+    {
+        var itemActivities = context.Activities.AsNoTracking()
+            .Where(activity => activity.SpaceId == spaceId && activity.EntityType == ActivityEntityTypes.Item && activity.EntityId != null);
+
+        var query = from activity in itemActivities
+                    join item in context.Items.AsNoTracking() on activity.EntityId equals (long?)item.Id
+                    join location in context.Locations.AsNoTracking() on item.LocationId equals location.Id
+                    where location.SpaceId == spaceId && activity.Action != ActivityActions.Deleted &&
+                        !itemActivities.Any(newer => newer.EntityId == activity.EntityId &&
+                            (newer.CreatedAt > activity.CreatedAt || (newer.CreatedAt == activity.CreatedAt && newer.Id > activity.Id)))
+                    select activity;
+
+        return await query.OrderByDescending(activity => activity.CreatedAt).ThenByDescending(activity => activity.Id)
+            .Take(limit).ToListAsync(cancellationToken);
     }
 
     public async Task AddAsync(Activity activity, CancellationToken cancellationToken = default)

@@ -21,6 +21,14 @@ public sealed class ItemsController(IItemService items) : ControllerBase
         return Ok(await items.ListAsync(spaceId, User.GetUserId(), request, cancellationToken));
     }
 
+    [HttpGet("recent")]
+    [ProducesResponseType<RecentItemsResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<RecentItemsResponse>> ListRecentAsync(long spaceId, [FromQuery] ListRecentItemsRequest request, CancellationToken cancellationToken)
+    {
+        return Ok(await items.ListRecentAsync(spaceId, User.GetUserId(), request, cancellationToken));
+    }
+
     [HttpGet("{id:long}")]
     [ProducesResponseType<ItemResponse>(StatusCodes.Status200OK)]
     public async Task<ActionResult<ItemResponse>> GetById(long spaceId, long id, CancellationToken cancellationToken)

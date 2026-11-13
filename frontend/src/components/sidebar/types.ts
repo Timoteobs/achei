@@ -1,7 +1,13 @@
 import type { LucideIcon } from "lucide-react";
 
 export type SidebarSection =
-  "home" | "search" | "spaces" | "notifications" | "favorites" | "activity" | "trash";
+  | "home"
+  | "search"
+  | "spaces"
+  | "notifications"
+  | "favorites"
+  | "activity"
+  | "trash";
 
 export interface SidebarLocation {
   id: string;

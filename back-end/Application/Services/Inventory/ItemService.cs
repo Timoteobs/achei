@@ -5,13 +5,56 @@ using Application.Interfaces.Services.Audit;
 using Application.Interfaces.Services.Inventory;
 using Application.Models.Items;
 using Domain.Modules.Audit;
+using Domain.Modules.Audit.Entities;
 using Domain.Modules.Inventory.Entities;
 
 namespace Application.Services.Inventory;
 
-public sealed class ItemService(IItemRepository items, IRoomRepository rooms, IBoxRepository boxes, ISpaceRepository spaces, IActivityService activities, IUnitOfWork unitOfWork) : IItemService
+public sealed class ItemService(IItemRepository items, IRoomRepository rooms, IBoxRepository boxes, ISpaceRepository spaces, IActivityService activities, IUnitOfWork unitOfWork, IActivityRepository activityRepository) : IItemService
 {
     #region Service Methods
+
+    public async Task<RecentItemsResponse> ListRecentAsync(long spaceId, long userId, ListRecentItemsRequest request, CancellationToken cancellationToken = default)
+    {
+        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+
+        var recentActivities = await activityRepository.ListRecentItemsBySpaceAsync(spaceId, request.Limit, cancellationToken);
+        if (recentActivities.Count == 0)
+        {
+            return new RecentItemsResponse(Array.Empty<RecentItemResponse>());
+        }
+
+        var itemIds = recentActivities.Select(activity => activity.EntityId!.Value).ToArray();
+        var currentItems = await items.ListByIdsAndSpaceAsync(itemIds, spaceId, cancellationToken);
+        var itemsById = currentItems.ToDictionary(item => item.Id);
+        var locationIds = currentItems.Select(item => item.LocationId).Distinct().ToArray();
+        var currentBoxes = await boxes.ListByIdsAndSpaceAsync(locationIds, spaceId, cancellationToken);
+        var boxesById = currentBoxes.ToDictionary(box => box.Id);
+        var roomIds = locationIds.Concat(currentBoxes.Where(box => box.ParentLocationId.HasValue)
+            .Select(box => box.ParentLocationId!.Value)).Distinct().ToArray();
+        var currentRooms = await rooms.ListByIdsAndSpaceAsync(roomIds, spaceId, cancellationToken);
+        var roomsById = currentRooms.ToDictionary(room => room.Id);
+        var response = new List<RecentItemResponse>();
+
+        foreach (var activity in recentActivities)
+        {
+            if (!itemsById.TryGetValue(activity.EntityId!.Value, out var item))
+            {
+                continue;
+            }
+
+            boxesById.TryGetValue(item.LocationId, out var box);
+            var roomId = box?.ParentLocationId ?? item.LocationId;
+            if (!roomsById.TryGetValue(roomId, out var room))
+            {
+                continue;
+            }
+
+            response.Add(ToResponse(item, activity, room, box));
+        }
+
+        return new RecentItemsResponse(response);
+    }
 
     public async Task<ItemsPageResponse> ListAsync(long spaceId, long userId, ListItemsRequest request, CancellationToken cancellationToken = default)
     {
@@ -100,6 +143,15 @@ public sealed class ItemService(IItemRepository items, IRoomRepository rooms, IB
     #endregion
 
     #region Helper Methods
+
+    private static RecentItemResponse ToResponse(Item item, Activity activity, Location room, Location? box)
+    {
+        return new RecentItemResponse(
+            item.Id, item.Name,
+            new RecentItemLocationResponse(room.Id, room.Name),
+            box is null ? null : new RecentItemLocationResponse(box.Id, box.Name),
+            activity.Action, DateTime.SpecifyKind(activity.CreatedAt, DateTimeKind.Utc));
+    }
 
     private static ItemResponse ToResponse(Item item, long spaceId)
     {
