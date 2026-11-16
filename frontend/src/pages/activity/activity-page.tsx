@@ -1,5 +1,6 @@
 import { Box, Flex, Text } from "@chakra-ui/react";
 import { useState } from "react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { House } from "lucide-react";
 import { Button } from "../../components/button/button";
 import { CollectionHeader } from "../../components/collection-header/collection-header";
@@ -13,7 +14,11 @@ import { ActivityTimeline } from "./components/timeline/activity-timeline";
 export function ActivityPage() {
   const spacesQuery = useSpacesQuery();
   const userId = useAuthStore((state) => state.session?.user.id);
-  const [selectedSpaceId, setSelectedSpaceId] = useState<number>();
+  const { spaceId: selectedSpaceId } = useSearch({ from: "/_app/atividade" });
+  const navigate = useNavigate({ from: "/_app/atividade" });
+  const selectSpace = (spaceId: number) => {
+    void navigate({ search: { spaceId }, replace: true });
+  };
   const [isNewSpaceOpen, setIsNewSpaceOpen] = useState(false);
   const selectedSpace = spacesQuery.data?.find((space) => space.id === selectedSpaceId)
     ?? spacesQuery.data?.[0];
@@ -45,9 +50,9 @@ export function ActivityPage() {
             description: space.ownerUserId === userId ? "Espaço pessoal" : "Espaço compartilhado",
           }))}
           value={selectedSpace ? String(selectedSpace.id) : undefined}
-          onValueChange={(value) => setSelectedSpaceId(Number(value))}
+          onValueChange={(value) => selectSpace(Number(value))}
           createAction={{ label: "Novo espaço", onClick: () => {
-            if (selectedSpace) setSelectedSpaceId(selectedSpace.id);
+            if (selectedSpace) selectSpace(selectedSpace.id);
             setIsNewSpaceOpen(true);
           } }}
           loading={spacesQuery.isPending}
@@ -62,7 +67,7 @@ export function ActivityPage() {
       )}
       {spacesQuery.isSuccess && selectedSpace && <ActivityStats spaceId={String(selectedSpace.id)} />}
       {spacesQuery.isSuccess && <ActivityTimeline space={selectedSpace} />}
-      {isNewSpaceOpen && <NewSpaceModal open onOpenChange={setIsNewSpaceOpen} />}
+      {isNewSpaceOpen && <NewSpaceModal open onOpenChange={setIsNewSpaceOpen} onCreated={(space) => selectSpace(space.id)} />}
     </Box>
   );
 }

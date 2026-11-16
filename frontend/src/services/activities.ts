@@ -1,5 +1,10 @@
 import { api } from "./api";
 
+export interface ActivityLocation {
+  room: { id: number; name: string };
+  box: { id: number; name: string } | null;
+}
+
 export interface ActivityResponse {
   id: number;
   spaceId: number;
@@ -9,6 +14,15 @@ export interface ActivityResponse {
   entityId: number | null;
   metadata: string | null;
   createdAt: string;
+  author: {
+    id: number | null;
+    name: string;
+    avatarUrl: string | null;
+    isCurrentUser: boolean;
+  };
+  entityName: string | null;
+  location: ActivityLocation | null;
+  previousLocation: ActivityLocation | null;
 }
 
 export interface ListActivitiesRequest {
