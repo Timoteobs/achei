@@ -56,6 +56,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISpaceRepository, SpaceRepository>();
 builder.Services.AddScoped<ISpaceService, SpaceService>();
+builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
+builder.Services.AddScoped<IInvitationService, InvitationService>();
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
 builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<IBoxRepository, BoxRepository>();

@@ -22,24 +22,42 @@ public class Invitation : BaseEntity
     {
         DomainValidator.Validator(
             ValidationRule.Positive(spaceId, "Espaço"),
-            ValidationRule.Positive(invitedByUserId, "Usuário que convidou"),
-            ValidationRule.MaxLength(email, 255, "E-mail"),
-            ValidationRule.Email(email, "E-mail"),
-            ValidationRule.Required(token, "Token"),
-            ValidationRule.MaxLength(token, 255, "Token"),
-            ValidationRule.Required(role, "Papel"),
-            ValidationRule.MaxLength(role, 20, "Papel"),
-            ValidationRule.OneOf(role, "Papel", "EDITOR", "VIEWER"),
-            ValidationRule.FutureDate(expiresAt, "Expiração")
+            ValidationRule.Positive(invitedByUserId, "Usuário que convidou")
         );
 
         SpaceId = spaceId;
         InvitedByUserId = invitedByUserId;
-        Email = email?.Trim().ToLowerInvariant();
-        Token = token.Trim();
-        Role = role.Trim().ToUpperInvariant();
-        ExpiresAt = expiresAt;
+        SetDetails(email, token, role, expiresAt);
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = CreatedAt;
+    }
+
+    public void UpdateDetails(string? email, string token, string role, DateTime expiresAt)
+    {
+        DomainValidator.Validator(ValidationRule.OneOf(AcceptedAt.HasValue ? "ACCEPTED" : Status, "Status do convite para edição", "PENDING"));
+        SetDetails(email, token, role, expiresAt);
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    private void SetDetails(string? email, string token, string role, DateTime expiresAt)
+    {
+        var normalizedEmail = string.IsNullOrWhiteSpace(email) ? null : email.Trim().ToLowerInvariant();
+        var normalizedRole = role?.Trim().ToUpperInvariant();
+        var expiration = expiresAt.Kind == DateTimeKind.Local ? expiresAt.ToUniversalTime() : DateTime.SpecifyKind(expiresAt, DateTimeKind.Utc);
+        DomainValidator.Validator(
+            ValidationRule.MaxLength(normalizedEmail, 255, "E-mail"),
+            ValidationRule.Email(normalizedEmail, "E-mail"),
+            ValidationRule.Required(token, "Token"),
+            ValidationRule.MaxLength(token, 255, "Token"),
+            ValidationRule.Required(normalizedRole, "Papel"),
+            ValidationRule.MaxLength(normalizedRole, 20, "Papel"),
+            ValidationRule.OneOf(normalizedRole, "Papel", "EDITOR", "VIEWER"),
+            ValidationRule.FutureDate(expiration, "Expiração")
+        );
+
+        Email = normalizedEmail;
+        Token = token.Trim();
+        Role = normalizedRole!;
+        ExpiresAt = expiration;
     }
 }
