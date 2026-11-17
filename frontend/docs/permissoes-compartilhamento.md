@@ -53,6 +53,14 @@ interface SpaceResponse {
 
 O frontend chama `/spaces` por meio da instância Axios em [api.ts](../src/services/api.ts); a base da API já inclui `/api`. O interceptor adiciona o Bearer token. Não duplique a base nem monte manualmente cabeçalhos de autenticação nos componentes.
 
+### Resumo no detalhe do espaço
+
+`GET /api/spaces/{spaceId}` retorna `SpaceDetailsResponse`: os campos de `SpaceResponse` mais `itemsCount`, `roomsCount`, `membersCount` e `membersPreview`. Cada pessoa da prévia tem `id` (ID do usuário), `name` e `avatarUrl`. A API inclui o proprietário sem duplicá-lo e limita a prévia a três pessoas; convites pendentes não concedem acesso nem entram no total.
+
+O [SpaceSummary](../src/pages/space-overview/components/summary/space-summary.tsx) usa os dados de `useSpaceQuery` recebidos pela página, inclusive a contagem de ambientes. Exibe as fotos com fallback de iniciais e calcula o restante como `Math.max(0, membersCount - membersPreview.length)`, mostrando “+N” apenas quando positivo. O resumo é visível para OWNER, EDITOR e VIEWER.
+
+As respostas de criação/edição e a listagem continuam usando `SpaceResponse`. Não grave essas respostas incompletas como detalhe: na criação, deixe a consulta buscar o detalhe; na edição, preserve os campos já carregados e revalide a consulta. Criação/exclusão de itens e ambientes, aceite e revogação de convites invalidam o detalhe do espaço para o usuário da operação. Alterações feitas em outra sessão aparecem na próxima reconsulta, sem atualização em tempo real.
+
 ## 4. Helpers de permissão
 
 ### Com um espaço já carregado

@@ -21,10 +21,6 @@ export function useCreateSpaceMutation() {
       queryClient.setQueryData<SpaceResponse[]>(listKey, (previous) =>
         previous ? [space, ...previous.filter(({ id }) => id !== space.id)] : undefined,
       );
-      queryClient.setQueryData(
-        ["spaces", space.ownerUserId, "detail", String(space.id)],
-        space,
-      );
       void queryClient.invalidateQueries({ queryKey: listKey, exact: true });
       toast.success("Espaço criado com sucesso!");
     },

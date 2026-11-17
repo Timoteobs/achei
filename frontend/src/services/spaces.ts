@@ -11,6 +11,19 @@ export interface SpaceResponse {
   updatedAt: string;
 }
 
+export interface SpaceMemberResponse {
+  id: number;
+  name: string;
+  avatarUrl: string | null;
+}
+
+export interface SpaceDetailsResponse extends SpaceResponse {
+  itemsCount: number;
+  roomsCount: number;
+  membersCount: number;
+  membersPreview: SpaceMemberResponse[];
+}
+
 export interface SaveSpaceRequest {
   name: string;
   description: string | null;
@@ -37,7 +50,7 @@ export async function getSpaces(signal?: AbortSignal) {
 }
 
 export async function getSpace(spaceId: string, signal?: AbortSignal) {
-  const { data } = await api.get<SpaceResponse>(
+  const { data } = await api.get<SpaceDetailsResponse>(
     `/spaces/${encodeURIComponent(spaceId)}`,
     { signal },
   );

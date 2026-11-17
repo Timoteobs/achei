@@ -24,6 +24,7 @@ export function useRevokeInvitationMutation(spaceId: string) {
         previous?.map((current) => current.id === invitation.id ? invitation : current),
       );
       void queryClient.invalidateQueries({ queryKey: listKey, exact: true });
+      void queryClient.invalidateQueries({ queryKey: ["spaces", userId, "detail", spaceId], exact: true });
       toast.success("Acesso revogado!", {
         description: "A pessoa não tem mais acesso a este espaço.",
       });

@@ -26,6 +26,7 @@ export function useCreateItemMutation(spaceId: string) {
       if (useAuthStore.getState().session?.user.id !== userId) return;
       void queryClient.invalidateQueries({ queryKey: boxesKey, exact: true });
       void queryClient.invalidateQueries({ queryKey: itemsKey });
+      void queryClient.invalidateQueries({ queryKey: ["spaces", userId, "detail", spaceId], exact: true });
       toast.success("Item cadastrado com sucesso!");
     },
     onError: (error) => {

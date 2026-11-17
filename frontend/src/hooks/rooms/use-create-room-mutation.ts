@@ -25,6 +25,7 @@ export function useCreateRoomMutation(spaceId: string) {
         previous ? [...previous.filter(({ id }) => id !== room.id), room] : undefined,
       );
       void queryClient.invalidateQueries({ queryKey: listKey, exact: true });
+      void queryClient.invalidateQueries({ queryKey: ["spaces", userId, "detail", spaceId], exact: true });
       toast.success("Ambiente criado com sucesso!");
     },
     onError: (error) => {

@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { toast } from "sonner";
 import { updateSpace } from "../../services/spaces";
-import type { SaveSpaceRequest, SpaceResponse } from "../../services/spaces";
+import type { SaveSpaceRequest, SpaceDetailsResponse, SpaceResponse } from "../../services/spaces";
 import { useAuthStore } from "../../stores/auth-store";
 
 export function useUpdateSpaceMutation() {
@@ -26,7 +26,10 @@ export function useUpdateSpaceMutation() {
       queryClient.setQueryData<SpaceResponse[]>(listKey, (previous) =>
         previous?.map((item) => item.id === space.id ? space : item),
       );
-      queryClient.setQueryData(detailKey, space);
+      queryClient.setQueryData<SpaceDetailsResponse>(detailKey, (previous) =>
+        previous ? { ...previous, ...space } : undefined,
+      );
+      void queryClient.invalidateQueries({ queryKey: detailKey, exact: true });
       void queryClient.invalidateQueries({ queryKey: listKey, exact: true });
       toast.success("Espaço atualizado com sucesso!");
     },

@@ -25,6 +25,7 @@ export function useDeleteRoomMutation(spaceId: string) {
         previous?.filter(({ id }) => id !== roomId),
       );
       void queryClient.invalidateQueries({ queryKey: listKey, exact: true });
+      void queryClient.invalidateQueries({ queryKey: ["spaces", userId, "detail", spaceId], exact: true });
       toast.success("Ambiente excluído com sucesso!");
     },
     onError: (error) => {

@@ -26,6 +26,7 @@ export function useDeleteItemMutation(spaceId: string) {
 
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: itemsKey }),
+        queryClient.invalidateQueries({ queryKey: ["spaces", userId, "detail", spaceId], exact: true }),
         queryClient.invalidateQueries({ queryKey: boxesKey, exact: true }),
       ]);
       if (useAuthStore.getState().session?.user.id !== userId) return;

@@ -26,6 +26,7 @@ export function useRespondToInvitationMutation() {
       void queryClient.invalidateQueries({ queryKey: receivedKey, exact: true });
       void queryClient.invalidateQueries({ queryKey: ["spaces", userId, "invitations", String(response.spaceId), "list"], exact: true });
       if (response.status === "ACCEPTED") {
+        void queryClient.invalidateQueries({ queryKey: ["spaces", userId, "detail", String(response.spaceId)], exact: true });
         void queryClient.invalidateQueries({ queryKey: ["spaces", userId, "list"], exact: true });
       }
       toast.success(response.status === "ACCEPTED" ? "Convite aceito com sucesso!" : "Convite rejeitado.");

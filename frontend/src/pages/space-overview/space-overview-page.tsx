@@ -66,7 +66,7 @@ export function SpaceOverviewPage() {
             imageUrl={space.imageUrl}
             onDelete={() => setSpaceToDelete(space)}
           />
-          <SpaceSummary createdAt={space.createdAt} />
+          <SpaceSummary space={space} />
           <SpaceTabs key={space.id} spaceName={space.name} />
         </>
       )}

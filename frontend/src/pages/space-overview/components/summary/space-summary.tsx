@@ -1,16 +1,16 @@
 import { Avatar, AvatarGroup, Flex, Grid, Text } from "@chakra-ui/react";
-import { useParams } from "@tanstack/react-router";
 import { CalendarDays, LayoutGrid, Package, UsersRound } from "lucide-react";
 import { InfoCard } from "../../../../components/info-card/info-card";
+import type { SpaceDetailsResponse } from "../../../../services/spaces";
 import { formatDate } from "../../../../utils/date";
-import { spaceSummaryMock } from "./space-summary-mock";
-import { useRoomsQuery } from "../../../../hooks/rooms/use-rooms-query";
 
-export function SpaceSummary({ createdAt }: Readonly<{ createdAt: string }>) {
-  const { members, itemsCount } = spaceSummaryMock;
-  const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
-  const roomsQuery = useRoomsQuery(spaceId);
-  const roomsCount = roomsQuery.data?.length;
+type SpaceSummaryData = Pick<SpaceDetailsResponse,
+  "createdAt" | "itemsCount" | "roomsCount" | "membersCount" | "membersPreview"
+>;
+
+export function SpaceSummary({ space }: Readonly<{ space: SpaceSummaryData }>) {
+  const { createdAt, itemsCount, roomsCount, membersCount, membersPreview } = space;
+  const remainingMembers = Math.max(0, membersCount - membersPreview.length);
 
   return (
     <Grid
@@ -28,48 +28,47 @@ export function SpaceSummary({ createdAt }: Readonly<{ createdAt: string }>) {
         icon={<UsersRound size={18} strokeWidth={1.8} />}
         value={
           <Flex align="center" flexWrap="wrap" gap="2">
-            <Text>{members.total} membros</Text>
-            <AvatarGroup size="2xs" spaceX="-1.5">
-              {members.visibleMembers.map((member) => (
-                <Avatar.Root
-                  key={member.id}
-                  boxSize="7"
-                  bg="brand.subtle"
-                  color="brand.fg"
-                  borderWidth="2px"
-                  borderColor="bg.surface"
-                  title={member.name}
-                >
-                  <Avatar.Fallback name={member.name} fontSize="xs">
-                    {member.fallback}
-                  </Avatar.Fallback>
-                </Avatar.Root>
-              ))}
-              <Avatar.Root
-                boxSize="7"
-                bg="bg.subtle"
-                color="fg.muted"
-                borderWidth="2px"
-                borderColor="bg.surface"
-                aria-label={`Mais ${members.remaining} membro`}
-              >
-                <Avatar.Fallback fontSize="xs">
-                  +{members.remaining}
-                </Avatar.Fallback>
-              </Avatar.Root>
-            </AvatarGroup>
+            <Text>{membersCount} {membersCount === 1 ? "membro" : "membros"}</Text>
+            {membersPreview.length > 0 && (
+              <AvatarGroup size="2xs" spaceX="-1.5">
+                {membersPreview.map((member) => (
+                  <Avatar.Root
+                    key={member.id}
+                    boxSize="7"
+                    bg="brand.subtle"
+                    color="brand.fg"
+                    borderWidth="2px"
+                    borderColor="bg.surface"
+                    title={member.name}
+                  >
+                    <Avatar.Fallback name={member.name} fontSize="xs" />
+                    {member.avatarUrl && <Avatar.Image src={member.avatarUrl} alt={member.name} />}
+                  </Avatar.Root>
+                ))}
+                {remainingMembers > 0 && (
+                  <Avatar.Root
+                    boxSize="7"
+                    bg="bg.subtle"
+                    color="fg.muted"
+                    borderWidth="2px"
+                    borderColor="bg.surface"
+                    aria-label={`Mais ${remainingMembers} ${remainingMembers === 1 ? "membro" : "membros"}`}
+                  >
+                    <Avatar.Fallback fontSize="xs">+{remainingMembers}</Avatar.Fallback>
+                  </Avatar.Root>
+                )}
+              </AvatarGroup>
+            )}
           </Flex>
         }
       />
       <InfoCard
         icon={<Package size={18} strokeWidth={1.8} />}
-        value={`${itemsCount} itens`}
+        value={`${itemsCount} ${itemsCount === 1 ? "item" : "itens"}`}
       />
       <InfoCard
         icon={<LayoutGrid size={18} strokeWidth={1.8} />}
-        value={roomsCount !== undefined
-          ? `${roomsCount} ${roomsCount === 1 ? "ambiente" : "ambientes"}`
-          : roomsQuery.isPending ? "Carregando ambientes..." : "Ambientes indisponíveis"}
+        value={`${roomsCount} ${roomsCount === 1 ? "ambiente" : "ambientes"}`}
       />
       <InfoCard
         icon={<CalendarDays size={18} strokeWidth={1.8} />}
