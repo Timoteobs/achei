@@ -24,6 +24,21 @@ public sealed class MemberRepository(AcheiContext context) : IMemberRepository
         return context.Members.AsNoTracking().AnyAsync(member => member.SpaceId == spaceId && member.UserId == userId, cancellationToken);
     }
 
+    public async Task DeleteBySpaceAndUserAsync(long spaceId, long userId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await context.Members
+                .Where(member => member.SpaceId == spaceId && member.UserId == userId &&
+                    !context.Spaces.Any(space => space.Id == spaceId && space.OwnerUserId == userId))
+                .ExecuteDeleteAsync(cancellationToken);
+        }
+        catch (SqlException exception) when (exception.Number == 547)
+        {
+            throw SpacesExceptions.MemberHasDependencies(exception);
+        }
+    }
+
     public async Task AddAsync(Member member, CancellationToken cancellationToken = default)
     {
         await context.Members.AddAsync(member, cancellationToken);

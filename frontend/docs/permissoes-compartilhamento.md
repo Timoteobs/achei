@@ -21,7 +21,7 @@ Não deduza permissões a partir do nome do espaço, do e-mail, da presença de 
 | Criar, editar, mover e excluir caixas e itens | Sim | Sim | Não |
 | Editar nome, descrição ou imagem do espaço | Sim | Não | Não |
 | Excluir o espaço | Sim | Não | Não |
-| Criar, listar, editar ou cancelar convites enviados do espaço | Sim | Não | Não |
+| Criar, listar, editar, cancelar ou revogar convites enviados do espaço | Sim | Não | Não |
 
 - **OWNER:** proprietário identificado pelo `ownerUserId` do espaço.
 - **EDITOR:** membro com permissão para alterar o conteúdo do espaço.
@@ -211,6 +211,7 @@ Fluxo implementado:
 4. Aceitar registra o vínculo em `tbl_member` e marca o convite como ACCEPTED na mesma transação. Um vínculo existente não é duplicado nem tem seu papel sobrescrito.
 5. Rejeitar marca o convite como DECLINED e não cria vínculo.
 6. Após o aceite, a mutation invalida a lista de espaços para incluir o compartilhamento.
+7. O proprietário pode usar **Revogar acesso** em um convite aceito. Após confirmação, a API marca o convite como REVOKED e remove o vínculo em `tbl_member` na mesma transação. Os recursos cadastrados pelo membro e o histórico são preservados.
 
 Endpoints usados:
 
@@ -222,12 +223,26 @@ Endpoints usados:
 | Convites enviados de um espaço | GET /api/spaces/{spaceId}/invitations |
 | Criar convite | POST /api/spaces/{spaceId}/invitations |
 | Cancelar convite | DELETE /api/spaces/{spaceId}/invitations/{id} |
+| Revogar acesso de convite aceito | POST /api/spaces/{spaceId}/invitations/{id}/revoke |
 
 Consulte [services/invitations.ts](../src/services/invitations.ts), [useRespondToInvitationMutation](../src/hooks/invitations/use-respond-to-invitation-mutation.ts) e a [listagem de convites recebidos](../src/pages/invitations/components/received-invitations-list.tsx).
 
 Convite pendente, expirado ou rejeitado não concede acesso. A listagem de espaços depende do vínculo de membro, não da simples existência do convite.
 
-O cancelamento atual exclui o registro do convite; não é uma operação de remoção de membro. O envio por e-mail ainda não está integrado. Também não há fluxo de verificação de e-mail implementado: não documente ou trate o e-mail como verificado apenas porque a conta está autenticada.
+O cancelamento de convite pendente exclui o registro; não é uma operação de remoção de membro. Para retirar o acesso de quem já aceitou, use a revogação:
+
+- Apenas o proprietário pode revogar. EDITOR e VIEWER não administram membros.
+- O endpoint retorna `InvitationResponse` atualizado (200). Convite não aceito ou já revogado retorna conflito (409); espaço/convite inexistente ou sem autorização retorna 404.
+- A validade do convite não limita a revogação de um convite aceito. A data de aceite é preservada como histórico.
+- O destinatário é localizado pelo e-mail do convite, conforme o fluxo atual de aceite. Atualmente não existe fluxo de alteração de e-mail; se ele for implementado, passe a persistir a identidade do destinatário no aceite antes de permitir essa alteração.
+- O acesso do proprietário não pode ser removido. Se o vínculo do destinatário já não existir, o convite ainda pode ser revogado.
+- A atualização condicional de status impede que a mesma revogação seja aplicada duas vezes. Se a remoção do vínculo falhar, a transação desfaz a alteração do convite.
+- O vínculo é por usuário/espaço, portanto removê-lo retira todo o acesso do destinatário àquele espaço. Outros convites não são alterados: os aceitos permanecem como histórico e não concedem acesso por si só; um convite pendente válido ainda pode ser aceito para ingressar novamente.
+- O frontend usa [useRevokeInvitationMutation](../src/hooks/invitations/use-revoke-invitation-mutation.ts) e [RevokeInvitationModal](../src/pages/space-overview/components/invite-members/revoke-invitation-modal.tsx), reaproveitando `ConfirmationModal`. Durante a operação, confirmação e fechamento ficam bloqueados.
+- Após sucesso, a lista de convites do proprietário é atualizada e revalidada com chave por usuário/espaço. Erros mantêm a confirmação aberta e mostram feedback via Sonner.
+- A API passa a negar novas consultas e alterações do ex-membro. Não há atualização em tempo real entre navegadores: dados já carregados no navegador do destinatário podem permanecer até a reconsulta. Invalidar o cache do proprietário não limpa a sessão de outra pessoa.
+
+O envio por e-mail ainda não está integrado. Também não há fluxo de verificação de e-mail implementado: não documente ou trate o e-mail como verificado apenas porque a conta está autenticada.
 
 ## 8. Garantias do backend relevantes ao frontend
 

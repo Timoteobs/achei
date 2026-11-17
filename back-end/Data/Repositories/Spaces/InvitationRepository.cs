@@ -48,6 +48,17 @@ public sealed class InvitationRepository(AcheiContext context) : IInvitationRepo
         return affected == 1;
     }
 
+    public async Task<bool> TryRevokeAsync(Invitation invitation, CancellationToken cancellationToken = default)
+    {
+        var affected = await context.Invitations
+            .Where(current => current.Id == invitation.Id && current.SpaceId == invitation.SpaceId &&
+                current.Status == "ACCEPTED" && current.Email == invitation.Email)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(current => current.Status, invitation.Status)
+                .SetProperty(current => current.UpdatedAt, invitation.UpdatedAt), cancellationToken);
+        return affected == 1;
+    }
+
     public async Task AddAsync(Invitation invitation, CancellationToken cancellationToken = default)
     {
         await context.Invitations.AddAsync(invitation, cancellationToken);

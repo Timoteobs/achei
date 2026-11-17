@@ -9,6 +9,7 @@ public interface IInvitationRepository
     Task<Invitation?> GetByIdAndSpaceAsync(long id, long spaceId, CancellationToken cancellationToken = default);
     Task<Invitation?> GetByIdAndRecipientAsync(long id, long userId, CancellationToken cancellationToken = default);
     Task<bool> TryRespondAsync(Invitation invitation, long userId, CancellationToken cancellationToken = default);
+    Task<bool> TryRevokeAsync(Invitation invitation, CancellationToken cancellationToken = default);
     Task AddAsync(Invitation invitation, CancellationToken cancellationToken = default);
     Task UpdateAsync(Invitation invitation, CancellationToken cancellationToken = default);
     Task DeleteAsync(Invitation invitation, CancellationToken cancellationToken = default);

@@ -17,6 +17,21 @@ public static class SpacesExceptions
         return new BusinessConflictException("spaces.space_has_dependencies", "Não é possível excluir um espaço com registros vinculados. Remova os vínculos antes de excluir.", innerException);
     }
 
+    public static BusinessConflictException InvitationNotAccepted()
+    {
+        return new BusinessConflictException("spaces.invitation_not_accepted", "Somente convites aceitos podem ter o acesso revogado.");
+    }
+
+    public static BusinessConflictException OwnerAccessCannotBeRevoked()
+    {
+        return new BusinessConflictException("spaces.owner_access_cannot_be_revoked", "O acesso do proprietário do espaço não pode ser revogado.");
+    }
+
+    public static BusinessConflictException MemberHasDependencies(Exception? innerException = null)
+    {
+        return new BusinessConflictException("spaces.member_has_dependencies", "Não é possível remover este membro enquanto houver registros vinculados a ele.", innerException);
+    }
+
     public static BusinessConflictException InvitationAlreadyAnswered()
     {
         return new BusinessConflictException("spaces.invitation_already_answered", "Este convite já foi respondido.");

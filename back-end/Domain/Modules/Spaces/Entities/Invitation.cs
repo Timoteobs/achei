@@ -54,6 +54,13 @@ public class Invitation : BaseEntity
         UpdatedAt = DateTime.UtcNow;
     }
 
+    public void Revoke()
+    {
+        DomainValidator.Validator(ValidationRule.OneOf(Status, "Status do convite para revogação", "ACCEPTED"));
+        Status = "REVOKED";
+        UpdatedAt = DateTime.UtcNow;
+    }
+
     private void ValidatePendingResponse()
     {
         DomainValidator.Validator(

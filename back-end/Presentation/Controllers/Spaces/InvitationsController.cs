@@ -45,6 +45,14 @@ public sealed class InvitationsController(IInvitationService invitations) : Cont
         return Ok(await invitations.UpdateAsync(id, spaceId, User.GetUserId(), request, cancellationToken));
     }
 
+    [HttpPost("{id:long}/revoke")]
+    [ProducesResponseType<InvitationResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<InvitationResponse>> Revoke(long spaceId, long id, CancellationToken cancellationToken)
+    {
+        return Ok(await invitations.RevokeAsync(id, spaceId, User.GetUserId(), cancellationToken));
+    }
+
     [HttpDelete("{id:long}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]

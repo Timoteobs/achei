@@ -40,6 +40,13 @@ export async function deleteInvitation(spaceId: string, invitationId: number) {
   await api.delete(`/spaces/${encodeURIComponent(spaceId)}/invitations/${invitationId}`);
 }
 
+export async function revokeInvitation(spaceId: string, invitationId: number) {
+  const { data } = await api.post<InvitationResponse>(
+    `/spaces/${encodeURIComponent(spaceId)}/invitations/${invitationId}/revoke`,
+  );
+  return data;
+}
+
 export interface ReceivedInvitationResponse {
   id: number;
   spaceId: number;

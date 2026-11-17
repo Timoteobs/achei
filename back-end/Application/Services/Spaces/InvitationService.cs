@@ -73,6 +73,41 @@ public sealed class InvitationService(IInvitationRepository invitations, ISpaceR
         return RespondAsync(id, userId, false, cancellationToken);
     }
 
+    public async Task<InvitationResponse> RevokeAsync(long id, long spaceId, long userId, CancellationToken cancellationToken = default)
+    {
+        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+        InvitationResponse response = null!;
+        await unitOfWork.ExecuteAsync(async transactionCancellationToken =>
+        {
+            var invitation = await GetInvitationAsync(id, spaceId, transactionCancellationToken);
+            if (invitation.Status != "ACCEPTED")
+            {
+                throw SpacesExceptions.InvitationNotAccepted();
+            }
+
+            var recipient = invitation.Email is null ? null : await users.GetByEmailAsync(invitation.Email, transactionCancellationToken);
+            if (recipient?.Id == userId)
+            {
+                throw SpacesExceptions.OwnerAccessCannotBeRevoked();
+            }
+
+            invitation.Revoke();
+            if (!await invitations.TryRevokeAsync(invitation, transactionCancellationToken))
+            {
+                throw SpacesExceptions.InvitationUnavailable();
+            }
+
+            if (recipient is not null)
+            {
+                await members.DeleteBySpaceAndUserAsync(spaceId, recipient.Id, transactionCancellationToken);
+            }
+
+            response = ToResponse(invitation);
+        }, cancellationToken);
+
+        return response;
+    }
+
     public async Task DeleteAsync(long id, long spaceId, long userId, CancellationToken cancellationToken = default)
     {
         await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);

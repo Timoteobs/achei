@@ -1,5 +1,5 @@
 import { Badge, Box, Flex, Heading, Skeleton, Text } from "@chakra-ui/react";
-import { Mail, X } from "lucide-react";
+import { Mail, UserRoundMinus, X } from "lucide-react";
 import { useId, useState } from "react";
 import { Button } from "../../../../components/button/button";
 import { EmptyState } from "../../../../components/empty-state/empty-state";
@@ -7,6 +7,7 @@ import { useInvitationsQuery } from "../../../../hooks/invitations/use-invitatio
 import { formatDate } from "../../../../utils/date";
 import type { InvitationResponse } from "../../../../services/invitations";
 import { CancelInvitationModal } from "./cancel-invitation-modal";
+import { RevokeInvitationModal } from "./revoke-invitation-modal";
 
 const statuses: Record<string, { label: string; color: string; bg: string }> = {
   PENDING: { label: "Pendente", color: "brand.fg", bg: "brand.subtle" },
@@ -20,6 +21,7 @@ export function InvitationList({ spaceId }: Readonly<{ spaceId: string }>) {
   const titleId = useId();
   const query = useInvitationsQuery(spaceId);
   const [invitationToCancel, setInvitationToCancel] = useState<InvitationResponse | null>(null);
+  const [invitationToRevoke, setInvitationToRevoke] = useState<InvitationResponse | null>(null);
 
   return (
     <Flex
@@ -92,6 +94,20 @@ export function InvitationList({ spaceId }: Readonly<{ spaceId: string }>) {
                       <Text fontSize="xs" color="fg.muted" mt="1">
                         {invitation.acceptedAt ? `Aceito em ${formatDate(invitation.acceptedAt)}` : `Validade: ${formatDate(invitation.expiresAt)}`}
                       </Text>
+                      {invitation.status === "ACCEPTED" && (
+                        <Button
+                          type="button"
+                          variant="link"
+                          mt="2"
+                          color="danger.700"
+                          gap="1"
+                          aria-label={`Revogar acesso de ${invitation.email || "membro"}`}
+                          onClick={() => setInvitationToRevoke(invitation)}
+                        >
+                          <UserRoundMinus size={14} strokeWidth={1.8} aria-hidden="true" />
+                          Revogar acesso
+                        </Button>
+                      )}
                       {invitation.status === "PENDING" && !invitation.acceptedAt && (
                         <Button
                           type="button"
@@ -114,6 +130,11 @@ export function InvitationList({ spaceId }: Readonly<{ spaceId: string }>) {
           </Box>
         )}
       </Box>
+      <RevokeInvitationModal
+        spaceId={spaceId}
+        invitation={invitationToRevoke}
+        onClose={() => setInvitationToRevoke(null)}
+      />
       <CancelInvitationModal
         spaceId={spaceId}
         invitation={invitationToCancel}
