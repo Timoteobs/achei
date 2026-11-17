@@ -1,3 +1,4 @@
+import { useSpacePermissions } from "../../../../hooks/spaces/use-space-permissions";
 import { Box, Flex, Spinner, Stack, Text } from "@chakra-ui/react";
 import { useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -15,6 +16,7 @@ import { NewItemModal } from "./new-item-modal";
 
 export function ItemsTab({ box, spaceName }: Readonly<{ box: BoxResponse; spaceName: string }>) {
   const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
+  const { canEdit } = useSpacePermissions(spaceId);
   const [isNewItemModalOpen, setIsNewItemModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<ItemResponse | null>(null);
   const [itemToEdit, setItemToEdit] = useState<ItemResponse | null>(null);
@@ -66,13 +68,13 @@ export function ItemsTab({ box, spaceName }: Readonly<{ box: BoxResponse; spaceN
         ) : (
           <EmptyState
             title={filters.search ? "Nenhum item encontrado" : undefined}
-            description={filters.search ? "Tente buscar por outro nome." : "Adicione o primeiro item desta caixa."}
-            action={filters.search ? undefined : { label: "Novo item", onClick: () => setIsNewItemModalOpen(true) }}
+            description={filters.search ? "Tente buscar por outro nome." : canEdit ? "Adicione o primeiro item desta caixa." : "Nenhum item foi cadastrado nesta caixa."}
+            action={filters.search || !canEdit ? undefined : { label: "Novo item", onClick: () => setIsNewItemModalOpen(true) }}
           />
         )}
       </Box>
       <DeleteItemModal spaceId={spaceId} item={itemToDelete} onClose={() => setItemToDelete(null)} />
-      {itemToMove && (
+      {canEdit && itemToMove && (
         <MoveItemModal
           key={itemToMove.id}
           spaceId={spaceId}
@@ -81,7 +83,7 @@ export function ItemsTab({ box, spaceName }: Readonly<{ box: BoxResponse; spaceN
           onClose={() => setItemToMove(null)}
         />
       )}
-      {itemToEdit && (
+      {canEdit && itemToEdit && (
         <NewItemModal
           key={itemToEdit.id}
           open
@@ -92,7 +94,7 @@ export function ItemsTab({ box, spaceName }: Readonly<{ box: BoxResponse; spaceN
           }}
         />
       )}
-      {isNewItemModalOpen && (
+      {canEdit && isNewItemModalOpen && (
         <NewItemModal
           open
           location={{ space: spaceName, room: box.roomName, roomId: box.roomId, box: box.name, boxId: box.id }}

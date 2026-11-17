@@ -8,7 +8,7 @@ import { RoomsSkeleton } from "./rooms-skeleton";
 
 export function RoomsQueryFeedback({ query, onNewRoomClick, layout = "detailed" }: Readonly<{
   query: ReturnType<typeof useRoomsQuery>;
-  onNewRoomClick: () => void;
+  onNewRoomClick?: () => void;
   layout?: RoomCardProps["layout"];
 }>) {
   if (query.isPending) {
@@ -39,7 +39,7 @@ export function RoomsQueryFeedback({ query, onNewRoomClick, layout = "detailed" 
   }
 
   if (query.data.length === 0) {
-    return <EmptyState action={{ label: "Novo ambiente", onClick: onNewRoomClick }} />;
+    return <EmptyState action={onNewRoomClick ? { label: "Novo ambiente", onClick: onNewRoomClick } : undefined} />;
   }
 
   return null;

@@ -8,7 +8,7 @@ export function useSpaceQuery(spaceId: string) {
   return useQuery({
     queryKey: ["spaces", userId, "detail", spaceId],
     queryFn: ({ signal }) => getSpace(spaceId, signal),
-    enabled: !!userId,
+    enabled: !!userId && !!spaceId,
     staleTime: 30000,
     retry: false,
     networkMode: "always",

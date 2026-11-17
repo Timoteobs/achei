@@ -9,6 +9,16 @@ namespace Data.Repositories.Spaces;
 
 public sealed class MemberRepository(AcheiContext context) : IMemberRepository
 {
+    public async Task<IReadOnlyList<Member>> ListByUserAsync(long userId, CancellationToken cancellationToken = default)
+    {
+        return await context.Members.AsNoTracking().Where(member => member.UserId == userId).ToListAsync(cancellationToken);
+    }
+
+    public Task<Member?> GetBySpaceAndUserAsync(long spaceId, long userId, CancellationToken cancellationToken = default)
+    {
+        return context.Members.AsNoTracking().SingleOrDefaultAsync(member => member.SpaceId == spaceId && member.UserId == userId, cancellationToken);
+    }
+
     public Task<bool> ExistsAsync(long spaceId, long userId, CancellationToken cancellationToken = default)
     {
         return context.Members.AsNoTracking().AnyAsync(member => member.SpaceId == spaceId && member.UserId == userId, cancellationToken);

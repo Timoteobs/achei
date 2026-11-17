@@ -1,3 +1,4 @@
+import { useSpacePermissions } from "../../../../hooks/spaces/use-space-permissions";
 import { Stack, useTabsContext } from "@chakra-ui/react";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
@@ -8,6 +9,7 @@ import { BoxesGrid } from "./boxes-grid";
 import { BoxesHeader } from "./boxes-header";
 
 export function BoxesTab({ room, onBoxClick }: Readonly<{ room: RoomResponse; onBoxClick: (boxId: number) => void }>) {
+  const { canEdit } = useSpacePermissions();
   const [isNewBoxOpen, setIsNewBoxOpen] = useState(false);
   const tabs = useTabsContext();
   return (
@@ -18,7 +20,7 @@ export function BoxesTab({ room, onBoxClick }: Readonly<{ room: RoomResponse; on
       </Button>
       <BoxesHeader roomName={room.name} onNewBoxClick={() => setIsNewBoxOpen(true)} />
       <BoxesGrid onBoxClick={onBoxClick} roomId={room.id} onNewBoxClick={() => setIsNewBoxOpen(true)} />
-      {isNewBoxOpen && <NewBoxModal open initialRoomId={room.id} onOpenChange={setIsNewBoxOpen} onRoomsClick={() => tabs.setValue("rooms")} />}
+      {canEdit && isNewBoxOpen && <NewBoxModal open initialRoomId={room.id} onOpenChange={setIsNewBoxOpen} onRoomsClick={() => tabs.setValue("rooms")} />}
     </Stack>
   );
 }

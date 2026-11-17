@@ -17,9 +17,20 @@ public sealed class SpaceRepository(AcheiContext context) : ISpaceRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Space>> ListByOwnerAsync(long ownerUserId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Space>> ListByUserAsync(long userId, CancellationToken cancellationToken = default)
     {
-        return await context.Spaces.AsNoTracking().Where(space => space.OwnerUserId == ownerUserId).OrderByDescending(space => space.CreatedAt).ThenByDescending(space => space.Id).ToListAsync(cancellationToken);
+        return await AccessibleSpaces(userId).OrderByDescending(space => space.CreatedAt).ThenByDescending(space => space.Id).ToListAsync(cancellationToken);
+    }
+
+    public Task<Space?> GetByIdAndUserAsync(long id, long userId, CancellationToken cancellationToken = default)
+    {
+        return AccessibleSpaces(userId).SingleOrDefaultAsync(space => space.Id == id, cancellationToken);
+    }
+
+    private IQueryable<Space> AccessibleSpaces(long userId)
+    {
+        return context.Spaces.AsNoTracking().Where(space => space.OwnerUserId == userId ||
+            context.Members.Any(member => member.SpaceId == space.Id && member.UserId == userId && (member.Role == "EDITOR" || member.Role == "VIEWER")));
     }
 
     public Task<Space?> GetByIdAndOwnerAsync(long id, long ownerUserId, CancellationToken cancellationToken = default)

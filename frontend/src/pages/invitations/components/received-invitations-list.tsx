@@ -1,5 +1,9 @@
 import { Badge, Box, Flex, Heading, Skeleton, Text } from "@chakra-ui/react";
-import { Mail, RefreshCw } from "lucide-react";
+import { Check, Mail, RefreshCw, X } from "lucide-react";
+import { useState } from "react";
+import { ConfirmationModal } from "../../../components/confirmation-modal/confirmation-modal";
+import { useRespondToInvitationMutation } from "../../../hooks/invitations/use-respond-to-invitation-mutation";
+import type { ReceivedInvitationResponse } from "../../../services/invitations";
 import { Button } from "../../../components/button/button";
 import { EmptyState } from "../../../components/empty-state/empty-state";
 import { useReceivedInvitationsQuery } from "../../../hooks/invitations/use-received-invitations-query";
@@ -10,11 +14,13 @@ const statusLabels: Record<string, string> = {
   ACCEPTED: "Aceito",
   EXPIRED: "Expirado",
   REVOKED: "Revogado",
-  DECLINED: "Recusado",
+  DECLINED: "Rejeitado",
 };
 
 export function ReceivedInvitationsList() {
   const query = useReceivedInvitationsQuery();
+  const respondMutation = useRespondToInvitationMutation();
+  const [invitationToDecline, setInvitationToDecline] = useState<ReceivedInvitationResponse | null>(null);
 
   return (
     <Box as="section" aria-label="Convites recebidos" mt="6" bg="bg.surface" borderWidth="1px" borderColor="border.default" borderRadius="lg" overflow="hidden">
@@ -75,6 +81,38 @@ export function ReceivedInvitationsList() {
                       {statusLabels[invitation.status] ?? "Indisponível"}
                     </Badge>
                   </Flex>
+                  {invitation.status === "PENDING" && !invitation.acceptedAt && (
+                    <Flex gap="2" mt="3" wrap="wrap">
+                      <Button
+                        type="button"
+                        w="auto"
+                        h="9"
+                        px="4"
+                        disabled={respondMutation.isPending}
+                        loading={respondMutation.isPending && respondMutation.variables?.id === invitation.id && respondMutation.variables.decision === "accept"}
+                        loadingText="Aceitando..."
+                        aria-label={`Aceitar convite para ${invitation.spaceName}`}
+                        onClick={() => {
+                          if (!respondMutation.isPending) respondMutation.mutate({ id: invitation.id, decision: "accept" });
+                        }}
+                      >
+                        <Check size={16} aria-hidden="true" />
+                        Aceitar
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        h="9"
+                        px="4"
+                        disabled={respondMutation.isPending}
+                        aria-label={`Rejeitar convite para ${invitation.spaceName}`}
+                        onClick={() => setInvitationToDecline(invitation)}
+                      >
+                        <X size={16} aria-hidden="true" />
+                        Rejeitar
+                      </Button>
+                    </Flex>
+                  )}
                 </Box>
                 <Box flexShrink="0" textAlign={{ base: "left", lg: "right" }}>
                   <Text fontSize="xs" color="fg.muted">Recebido em {formatDateTime(invitation.createdAt)}</Text>
@@ -87,6 +125,30 @@ export function ReceivedInvitationsList() {
           ))}
         </Box>
       )}
+      <ConfirmationModal
+        open={invitationToDecline !== null}
+        title="Rejeitar convite"
+        description={<>Deseja rejeitar o convite para <strong>{invitationToDecline?.spaceName}</strong>? Para participar depois, será necessário receber um novo convite.</>}
+        confirmLabel="Rejeitar convite"
+        cancelLabel="Voltar"
+        loadingText="Rejeitando..."
+        destructive
+        isLoading={respondMutation.isPending}
+        onOpenChange={(open) => {
+          if (!open && !respondMutation.isPending) {
+            setInvitationToDecline(null);
+            respondMutation.reset();
+          }
+        }}
+        onConfirm={() => {
+          if (invitationToDecline && !respondMutation.isPending) {
+            respondMutation.mutate(
+              { id: invitationToDecline.id, decision: "decline" },
+              { onSuccess: () => setInvitationToDecline(null) },
+            );
+          }
+        }}
+      />
     </Box>
   );
 }

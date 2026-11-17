@@ -1,3 +1,4 @@
+import { useSpacePermissions } from "../../../../hooks/spaces/use-space-permissions";
 import { Box, Flex, Grid, Spinner, Text } from "@chakra-ui/react";
 import { useParams } from "@tanstack/react-router";
 import { isAxiosError } from "axios";
@@ -13,6 +14,7 @@ import { NewBoxModal } from "./new-box/new-box-modal";
 
 export function BoxesGrid({ roomId, onNewBoxClick, onBoxClick }: Readonly<{ roomId: number; onNewBoxClick: () => void; onBoxClick: (boxId: number) => void }>) {
   const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
+  const { canEdit } = useSpacePermissions(spaceId);
   const boxesQuery = useBoxesQuery(spaceId);
   const [boxToDelete, setBoxToDelete] = useState<BoxResponse | null>(null);
   const [boxToEdit, setBoxToEdit] = useState<BoxResponse | null>(null);
@@ -36,7 +38,7 @@ export function BoxesGrid({ roomId, onNewBoxClick, onBoxClick }: Readonly<{ room
         </Flex>
       )}
       {boxesQuery.isSuccess && boxes.length === 0 && (
-        <EmptyState action={{ label: "Nova caixa", onClick: onNewBoxClick }} />
+        <EmptyState action={canEdit ? { label: "Nova caixa", onClick: onNewBoxClick } : undefined} />
       )}
       {boxes.length > 0 && (
         <Grid
@@ -55,18 +57,18 @@ export function BoxesGrid({ roomId, onNewBoxClick, onBoxClick }: Readonly<{ room
                 roomName={box.roomName}
                 itemsCount={box.itemsCount}
                 onOpen={() => onBoxClick(box.id)}
-                onDelete={() => setBoxToDelete(box)}
-                onEdit={() => setBoxToEdit(box)}
+                onDelete={canEdit ? () => setBoxToDelete(box) : undefined}
+                onEdit={canEdit ? () => setBoxToEdit(box) : undefined}
               />
             </Box>
           ))}
-          <Box as="li" minW="0" minH="228px">
+          {canEdit && <Box as="li" minW="0" minH="228px">
             <AddCard label="Nova caixa" size="lg" onClick={onNewBoxClick} />
-          </Box>
+          </Box>}
         </Grid>
       )}
       <DeleteBoxModal spaceId={spaceId} box={boxToDelete} onClose={() => setBoxToDelete(null)} />
-      {boxToEdit && (
+      {canEdit && boxToEdit && (
         <NewBoxModal
           key={boxToEdit.id}
           open

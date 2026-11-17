@@ -10,6 +10,7 @@ namespace Achei.Controllers.Inventory;
 [Authorize]
 [Route("api/spaces/{spaceId:long}/rooms")]
 [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+[ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
 public sealed class RoomsController(IRoomService rooms) : ControllerBase
 {

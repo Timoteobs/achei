@@ -2,6 +2,11 @@ namespace Application.Common.Exceptions;
 
 public static class SpacesExceptions
 {
+    public static ForbiddenException ReadOnlyAccess()
+    {
+        return new ForbiddenException("spaces.read_only_access", "Você tem permissão apenas para visualizar este espaço.");
+    }
+
     public static ResourceNotFoundException SpaceNotFound(Exception? innerException = null)
     {
         return new ResourceNotFoundException("spaces.space_not_found", "Espaço não encontrado ou sem permissão de acesso.", innerException);

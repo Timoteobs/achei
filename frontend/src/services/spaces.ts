@@ -3,6 +3,7 @@ import { api } from "./api";
 export interface SpaceResponse {
   id: number;
   ownerUserId: number;
+  role: "OWNER" | "EDITOR" | "VIEWER";
   name: string;
   description: string | null;
   imageUrl: string | null;

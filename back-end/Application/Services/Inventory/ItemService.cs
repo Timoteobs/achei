@@ -3,6 +3,7 @@ using Application.Interfaces.Persistence;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services.Audit;
 using Application.Interfaces.Services.Inventory;
+using Application.Interfaces.Services.Spaces;
 using Application.Models.Items;
 using Domain.Modules.Audit;
 using Domain.Modules.Audit.Entities;
@@ -10,13 +11,13 @@ using Domain.Modules.Inventory.Entities;
 
 namespace Application.Services.Inventory;
 
-public sealed class ItemService(IItemRepository items, IRoomRepository rooms, IBoxRepository boxes, ISpaceRepository spaces, IActivityService activities, IUnitOfWork unitOfWork, IActivityRepository activityRepository) : IItemService
+public sealed class ItemService(IItemRepository items, IRoomRepository rooms, IBoxRepository boxes, ISpaceAccessService access, IActivityService activities, IUnitOfWork unitOfWork, IActivityRepository activityRepository) : IItemService
 {
     #region Service Methods
 
     public async Task<RecentItemsResponse> ListRecentAsync(long spaceId, long userId, ListRecentItemsRequest request, CancellationToken cancellationToken = default)
     {
-        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+        await access.EnsureCanReadAsync(spaceId, userId, cancellationToken);
 
         var recentActivities = await activityRepository.ListRecentItemsBySpaceAsync(spaceId, request.Limit, cancellationToken);
         if (recentActivities.Count == 0)
@@ -58,7 +59,7 @@ public sealed class ItemService(IItemRepository items, IRoomRepository rooms, IB
 
     public async Task<ItemsPageResponse> ListAsync(long spaceId, long userId, ListItemsRequest request, CancellationToken cancellationToken = default)
     {
-        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+        await access.EnsureCanReadAsync(spaceId, userId, cancellationToken);
 
         if (request.LocationId is long locationId)
         {
@@ -78,14 +79,14 @@ public sealed class ItemService(IItemRepository items, IRoomRepository rooms, IB
 
     public async Task<ItemResponse> GetByIdAsync(long id, long spaceId, long userId, CancellationToken cancellationToken = default)
     {
-        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+        await access.EnsureCanReadAsync(spaceId, userId, cancellationToken);
         var item = await items.GetByIdAndSpaceAsync(id, spaceId, cancellationToken) ?? throw InventoryExceptions.ItemNotFound();
         return ToResponse(item, spaceId);
     }
 
     public async Task<ItemResponse> CreateAsync(long spaceId, long userId, CreateItemRequest request, CancellationToken cancellationToken = default)
     {
-        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+        await access.EnsureCanEditAsync(spaceId, userId, cancellationToken);
 
         var location = await rooms.GetByIdAndSpaceAsync(request.LocationId, spaceId, cancellationToken)
             ?? await boxes.GetByIdAndSpaceAsync(request.LocationId, spaceId, cancellationToken) ?? throw InventoryExceptions.ItemReferenceNotFound();
@@ -107,7 +108,7 @@ public sealed class ItemService(IItemRepository items, IRoomRepository rooms, IB
 
     public async Task<ItemResponse> UpdateAsync(long id, long spaceId, long userId, UpdateItemRequest request, CancellationToken cancellationToken = default)
     {
-        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+        await access.EnsureCanEditAsync(spaceId, userId, cancellationToken);
 
         var item = await items.GetByIdAndSpaceAsync(id, spaceId, cancellationToken) ?? throw InventoryExceptions.ItemNotFound();
         var location = await rooms.GetByIdAndSpaceAsync(request.LocationId, spaceId, cancellationToken)
@@ -132,7 +133,7 @@ public sealed class ItemService(IItemRepository items, IRoomRepository rooms, IB
 
     public async Task DeleteAsync(long id, long spaceId, long userId, CancellationToken cancellationToken = default)
     {
-        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+        await access.EnsureCanEditAsync(spaceId, userId, cancellationToken);
 
         var item = await items.GetByIdAndSpaceAsync(id, spaceId, cancellationToken) ?? throw InventoryExceptions.ItemNotFound();
         await unitOfWork.ExecuteAsync(async transactionCancellationToken =>
@@ -158,14 +159,6 @@ public sealed class ItemService(IItemRepository items, IRoomRepository rooms, IB
     private static ItemResponse ToResponse(Item item, long spaceId)
     {
         return new ItemResponse(item.Id, spaceId, item.LocationId, item.CategoryId, item.CreatedByUserId, item.Name, item.Description, item.Quantity, item.Notes, DateTime.SpecifyKind(item.CreatedAt, DateTimeKind.Utc), DateTime.SpecifyKind(item.UpdatedAt, DateTimeKind.Utc));
-    }
-
-    private async Task EnsureOwnedSpaceAsync(long spaceId, long userId, CancellationToken cancellationToken)
-    {
-        if (await spaces.GetByIdAndOwnerAsync(spaceId, userId, cancellationToken) is null)
-        {
-            throw SpacesExceptions.SpaceNotFound();
-        }
     }
 
     #endregion

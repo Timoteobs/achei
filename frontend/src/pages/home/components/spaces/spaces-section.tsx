@@ -93,8 +93,9 @@ export function SpacesSection({
               name={space.name}
               description={space.description}
               imageUrl={space.imageUrl}
-              onDelete={() => setSpaceToDelete(space)}
-              onEdit={() => setSpaceToEdit(space)}
+              accessLabel={space.role === "OWNER" ? undefined : space.role === "EDITOR" ? "Compartilhado · Editor" : "Compartilhado · Visualizador"}
+              onDelete={space.role === "OWNER" ? () => setSpaceToDelete(space) : undefined}
+              onEdit={space.role === "OWNER" ? () => setSpaceToEdit(space) : undefined}
             />
           </Box>
         ))}

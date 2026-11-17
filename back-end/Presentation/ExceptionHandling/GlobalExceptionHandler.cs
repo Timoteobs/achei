@@ -17,6 +17,7 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
             ResourceNotFoundException notFound => (StatusCodes.Status404NotFound, "Recurso não encontrado.", exception.Message, notFound.Code),
             BusinessConflictException conflict => (StatusCodes.Status409Conflict, "Conflito de negócio.", exception.Message, conflict.Code),
             UnauthorizedException unauthorized => (StatusCodes.Status401Unauthorized, "Falha na autenticação.", exception.Message, unauthorized.Code),
+            ForbiddenException forbidden => (StatusCodes.Status403Forbidden, "Acesso negado.", exception.Message, forbidden.Code),
             ArgumentException => (StatusCodes.Status400BadRequest, "Dados inválidos.", exception.Message, null),
             _ => (StatusCodes.Status500InternalServerError, "Erro interno do servidor.", "Ocorreu um erro inesperado.", null)
         };

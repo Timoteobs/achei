@@ -121,16 +121,16 @@ public sealed class InvitationService(IInvitationRepository invitations, ISpaceR
                 await members.AddAsync(new Member(invitation.SpaceId, userId, invitation.Role, invitation.AcceptedAt), transactionCancellationToken);
             }
 
-            response = ToResponse(invitation, invitation.Status);
+            response = ToResponse(invitation.Id, invitation.SpaceId, invitation.Status, invitation.AcceptedAt);
         }, cancellationToken);
 
         return response;
     }
 
-    private static InvitationDecisionResponse ToResponse(Invitation invitation, string status)
+    private static InvitationDecisionResponse ToResponse(long id, long spaceId, string status, DateTime? acceptedAt)
     {
-        return new InvitationDecisionResponse(invitation.Id, invitation.SpaceId, status,
-            invitation.AcceptedAt.HasValue ? DateTime.SpecifyKind(invitation.AcceptedAt.Value, DateTimeKind.Utc) : null);
+        return new InvitationDecisionResponse(id, spaceId, status,
+            acceptedAt.HasValue ? DateTime.SpecifyKind(acceptedAt.Value, DateTimeKind.Utc) : null);
     }
 
     private async Task EnsureOwnedSpaceAsync(long spaceId, long userId, CancellationToken cancellationToken)

@@ -9,6 +9,7 @@ import { Input } from "../../../../components/input/input";
 import { Modal } from "../../../../components/modal/modal";
 import type { ModalProps } from "../../../../components/modal/modal";
 import { SearchSelect } from "../../../../components/search-select/search-select";
+import { getSpacePermissions } from "../../../../utils/space-permissions";
 import { useSpacesQuery } from "../../../../hooks/spaces/use-spaces-query";
 import { useRoomsQuery } from "../../../../hooks/rooms/use-rooms-query";
 import { useBoxesQuery } from "../../../../hooks/boxes/use-boxes-query";
@@ -74,10 +75,11 @@ export function NewItemModal({ open, onOpenChange, location, item, spaceId: prov
   const selectedRoom = roomsQuery.data?.find((room) => String(room.id) === roomId);
   const boxes = boxesQuery.data?.filter((box) => String(box.roomId) === roomId) ?? [];
   const isBusy = isSubmitting || createMutation.isPending || updateMutation.isPending;
-  const canSave = spacesQuery.isSuccess && roomsQuery.isSuccess && (!boxId || boxesQuery.isSuccess);
+  const canSave = getSpacePermissions(selectedSpace).canEdit && spacesQuery.isSuccess && roomsQuery.isSuccess && (!boxId || boxesQuery.isSuccess);
 
   useEffect(() => {
-    if (!spaceId && spacesQuery.data?.[0]) setValue("spaceId", String(spacesQuery.data[0].id));
+    const firstEditable = spacesQuery.data?.find((space) => getSpacePermissions(space).canEdit);
+    if (!spaceId && firstEditable) setValue("spaceId", String(firstEditable.id));
   }, [spaceId, spacesQuery.data, setValue]);
 
   const selectSpace = (id: number) => {
@@ -99,7 +101,7 @@ export function NewItemModal({ open, onOpenChange, location, item, spaceId: prov
 
   const submit = (values: NewItemValues, addMore = false) => {
     if (createMutation.isPending || updateMutation.isPending || creation || !canSave) return;
-    if (!spacesQuery.data?.some((space) => String(space.id) === values.spaceId)) {
+    if (!spacesQuery.data?.some((space) => String(space.id) === values.spaceId && getSpacePermissions(space).canEdit)) {
       setError("spaceId", { message: "Selecione um espaço disponível." }, { shouldFocus: true });
       return;
     }
@@ -229,7 +231,7 @@ export function NewItemModal({ open, onOpenChange, location, item, spaceId: prov
                     searchPlaceholder="Buscar espaço..."
                     emptyMessage="Nenhum espaço cadastrado."
                     icon={House}
-                    options={(spacesQuery.data ?? []).map((space) => ({ value: String(space.id), label: space.name, description: space.description ?? undefined }))}
+                    options={(spacesQuery.data ?? []).filter((space) => getSpacePermissions(space).canEdit).map((space) => ({ value: String(space.id), label: space.name, description: space.description ?? undefined }))}
                     value={field.value}
                     onValueChange={(value) => selectSpace(Number(value))}
                     onBlur={field.onBlur}
@@ -267,7 +269,7 @@ export function NewItemModal({ open, onOpenChange, location, item, spaceId: prov
                       clearErrors("boxId");
                     }}
                     onBlur={field.onBlur}
-                    createAction={{ label: "Novo ambiente", onClick: () => setCreation("room") }}
+                    createAction={getSpacePermissions(selectedSpace).canEdit ? { label: "Novo ambiente", onClick: () => setCreation("room") } : undefined}
                     disabled={isBusy || !selectedSpace || !roomsQuery.isSuccess}
                     loading={!!spaceId && roomsQuery.isPending}
                     portalled={false}
@@ -295,7 +297,7 @@ export function NewItemModal({ open, onOpenChange, location, item, spaceId: prov
                     value={field.value}
                     onValueChange={field.onChange}
                     onBlur={field.onBlur}
-                    createAction={{ label: "Nova caixa", onClick: () => setCreation("box") }}
+                    createAction={getSpacePermissions(selectedSpace).canEdit ? { label: "Nova caixa", onClick: () => setCreation("box") } : undefined}
                     disabled={isBusy || !selectedRoom || !boxesQuery.isSuccess}
                     loading={!!spaceId && boxesQuery.isPending}
                     portalled={false}
@@ -312,7 +314,7 @@ export function NewItemModal({ open, onOpenChange, location, item, spaceId: prov
           {spacesQuery.isError && <LocationQueryError message="Não foi possível carregar os espaços." loading={spacesQuery.isFetching} disabled={isBusy} onRetry={() => { void spacesQuery.refetch(); }} />}
           {roomsQuery.isError && <LocationQueryError message="Não foi possível carregar os ambientes." loading={roomsQuery.isFetching} disabled={isBusy} onRetry={() => { void roomsQuery.refetch(); }} />}
           {boxesQuery.isError && <LocationQueryError message="Não foi possível carregar as caixas." loading={boxesQuery.isFetching} disabled={isBusy} onRetry={() => { void boxesQuery.refetch(); }} />}
-          {spacesQuery.isSuccess && spacesQuery.data.length === 0 && <Text role="status" fontSize="sm" color="fg.muted">Use “Novo espaço” no seletor para começar a organizar seus itens.</Text>}
+          {spacesQuery.isSuccess && !spacesQuery.data.some((space) => getSpacePermissions(space).canEdit) && <Text role="status" fontSize="sm" color="fg.muted">Você não tem espaços com permissão de edição. Use “Novo espaço” no seletor para criar o seu.</Text>}
           {roomsQuery.isSuccess && roomsQuery.data.length === 0 && <Text role="status" fontSize="sm" color="fg.muted">Crie um ambiente para guardar o item neste espaço.</Text>}
           <Field.Root invalid={!!errors.notes} disabled={isBusy} mt="3">
             <Field.Label fontSize="sm">Observações (opcional)</Field.Label>

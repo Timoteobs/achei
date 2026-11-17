@@ -1,4 +1,5 @@
-import { Box, Flex, Heading, Image, Text } from "@chakra-ui/react";
+import { useSpacePermissions } from "../../../hooks/spaces/use-space-permissions";
+import { Badge, Box, Flex, Heading, Image, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { House, Plus, Trash2, UserRoundPlus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -21,6 +22,7 @@ export function SpaceOverviewHeader({
   icon?: LucideIcon;
   onDelete: () => void;
 }>) {
+  const { canEdit, isOwner, role } = useSpacePermissions(spaceId);
   const [failedImage, setFailedImage] = useState<string | null>(null);
   const [isNewItemOpen, setIsNewItemOpen] = useState(false);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
@@ -69,13 +71,14 @@ export function SpaceOverviewHeader({
           >
             {name}
           </Heading>
+          {role && !isOwner && <Badge mt="2" bg="brand.subtle" color="brand.fg">{canEdit ? "Compartilhado · Editor" : "Compartilhado · Somente visualização"}</Badge>}
           <Text color="fg.muted" fontSize="sm" mt="1" overflowWrap="anywhere">
             {description || "Aqui estão todos os itens, ambientes e caixas deste espaço."}
           </Text>
         </Box>
       </Flex>
-      <Flex gap="3" flex={{ base: "1 1 100%", md: "0 0 auto" }} flexWrap="wrap">
-        <Button
+      {canEdit && <Flex gap="3" flex={{ base: "1 1 100%", md: "0 0 auto" }} flexWrap="wrap">
+        {isOwner && <Button
           type="button"
           variant="outline"
           h="10"
@@ -87,8 +90,8 @@ export function SpaceOverviewHeader({
         >
           <Trash2 size={16} strokeWidth={1.8} aria-hidden="true" />
           Excluir espaço
-        </Button>
-        <Button
+        </Button>}
+        {isOwner && <Button
           type="button"
           variant="link"
           onClick={() => setIsInviteOpen(true)}
@@ -106,8 +109,8 @@ export function SpaceOverviewHeader({
         >
           <UserRoundPlus size={16} strokeWidth={1.8} aria-hidden="true" />
           Convidar membros
-        </Button>
-        <Button
+        </Button>}
+        {canEdit && <Button
           type="button"
           w="auto"
           h="10"
@@ -119,10 +122,10 @@ export function SpaceOverviewHeader({
         >
           <Plus size={16} strokeWidth={1.8} aria-hidden="true" />
           Novo item
-        </Button>
-      </Flex>
-      {isNewItemOpen && <NewItemModal open onOpenChange={setIsNewItemOpen} />}
-      {isInviteOpen && <InviteMembersModal open onOpenChange={setIsInviteOpen} spaceId={spaceId} spaceName={name} />}
+        </Button>}
+      </Flex>}
+      {canEdit && isNewItemOpen && <NewItemModal open onOpenChange={setIsNewItemOpen} />}
+      {isOwner && isInviteOpen && <InviteMembersModal open onOpenChange={setIsInviteOpen} spaceId={spaceId} spaceName={name} />}
     </Flex>
   );
 }

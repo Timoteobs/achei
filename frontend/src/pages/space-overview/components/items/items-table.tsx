@@ -1,3 +1,4 @@
+import { useSpacePermissions } from "../../../../hooks/spaces/use-space-permissions";
 import { Box, Flex, Text } from "@chakra-ui/react";
 import { Package } from "lucide-react";
 import { DataTable } from "../../../../components/data-table/data-table";
@@ -50,6 +51,7 @@ export function ItemsTable({ data, onPageChange, onDelete, onEdit, onMove }: Rea
   onEdit: (item: ItemResponse) => void;
   onMove: (item: ItemResponse) => void;
 }>) {
+  const { canEdit } = useSpacePermissions();
   const tableColumns: DataTableColumn<ItemResponse>[] = [
     ...columns,
     {
@@ -64,7 +66,7 @@ export function ItemsTable({ data, onPageChange, onDelete, onEdit, onMove }: Rea
   const last = first + data.items.length - 1;
   return (
     <Box>
-      <DataTable data={data.items} columns={tableColumns} getRowId={(item) => String(item.id)} />
+      <DataTable data={data.items} columns={canEdit ? tableColumns : columns} getRowId={(item) => String(item.id)} />
       <Flex align="center" justify="space-between" flexWrap="wrap" gap="3" mt="4">
         <Text color="fg.muted" fontSize="sm">Mostrando {first}–{last} de {data.totalCount} itens</Text>
         <Pagination count={data.totalCount} pageSize={data.pageSize} page={data.page} onPageChange={onPageChange} />

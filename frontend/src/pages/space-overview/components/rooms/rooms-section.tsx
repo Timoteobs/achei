@@ -1,3 +1,4 @@
+import { useSpacePermissions } from "../../../../hooks/spaces/use-space-permissions";
 import { Box, Flex, Grid, Heading, Text, useTabsContext } from "@chakra-ui/react";
 import { useParams } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
@@ -18,6 +19,7 @@ export function RoomsSection({ onRoomClick }: Readonly<{ onRoomClick: (roomId: n
   const [roomToDelete, setRoomToDelete] = useState<RoomResponse | null>(null);
   const [roomToEdit, setRoomToEdit] = useState<RoomResponse | null>(null);
   const { spaceId } = useParams({ from: "/_app/espacos/$spaceId/" });
+  const { canEdit } = useSpacePermissions(spaceId);
   const roomsQuery = useRoomsQuery(spaceId);
   const tabs = useTabsContext();
 
@@ -48,7 +50,7 @@ export function RoomsSection({ onRoomClick }: Readonly<{ onRoomClick: (roomId: n
           facilmente.
         </Text>
       </Grid>
-      <RoomsQueryFeedback query={roomsQuery} layout="compact" onNewRoomClick={() => setIsNewRoomOpen(true)} />
+      <RoomsQueryFeedback query={roomsQuery} layout="compact" onNewRoomClick={canEdit ? () => setIsNewRoomOpen(true) : undefined} />
       {!!roomsQuery.data?.length && <Flex
         as="ul"
         aria-label="Prévia dos ambientes"
@@ -66,18 +68,18 @@ export function RoomsSection({ onRoomClick }: Readonly<{ onRoomClick: (roomId: n
             <RoomCard
               {...getRoomCardProps(room)}
               onOpen={() => onRoomClick(room.id)}
-              onDelete={() => setRoomToDelete(room)}
-              onEdit={() => setRoomToEdit(room)}
+              onDelete={canEdit ? () => setRoomToDelete(room) : undefined}
+              onEdit={canEdit ? () => setRoomToEdit(room) : undefined}
             />
           </Box>
         ))}
-        <Box as="li" flexShrink="0">
+        {canEdit && <Box as="li" flexShrink="0">
           <AddCard label="Novo ambiente" size="sm" onClick={() => setIsNewRoomOpen(true)} />
-        </Box>
+        </Box>}
       </Flex>}
-      <NewRoomModal open={isNewRoomOpen} onOpenChange={setIsNewRoomOpen} />
+      {canEdit && <NewRoomModal open={isNewRoomOpen} onOpenChange={setIsNewRoomOpen} />}
       <DeleteRoomModal spaceId={spaceId} room={roomToDelete} onClose={() => setRoomToDelete(null)} />
-      {roomToEdit && (
+      {canEdit && roomToEdit && (
         <NewRoomModal
           key={roomToEdit.id}
           open

@@ -3,6 +3,7 @@ using Application.Interfaces.Persistence;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services.Audit;
 using Application.Interfaces.Services.Inventory;
+using Application.Interfaces.Services.Spaces;
 using Application.Models.Boxes;
 using Domain.Modules.Audit;
 using Domain.Modules.Inventory;
@@ -10,13 +11,13 @@ using Domain.Modules.Inventory.Entities;
 
 namespace Application.Services.Inventory;
 
-public sealed class BoxService(IBoxRepository boxes, IRoomRepository rooms, IItemRepository items, ISpaceRepository spaces, IActivityService activities, IUnitOfWork unitOfWork) : IBoxService
+public sealed class BoxService(IBoxRepository boxes, IRoomRepository rooms, IItemRepository items, ISpaceAccessService access, IActivityService activities, IUnitOfWork unitOfWork) : IBoxService
 {
     #region Service Methods
 
     public async Task<IReadOnlyList<BoxResponse>> ListAsync(long spaceId, long userId, CancellationToken cancellationToken = default)
     {
-        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+        await access.EnsureCanReadAsync(spaceId, userId, cancellationToken);
         var result = await boxes.ListBySpaceAsync(spaceId, cancellationToken);
         var roomById = (await rooms.ListBySpaceAsync(spaceId, cancellationToken)).ToDictionary(room => room.Id);
         var counts = await items.CountByLocationIdsAsync(result.Select(box => box.Id).ToArray(), cancellationToken);
@@ -37,7 +38,7 @@ public sealed class BoxService(IBoxRepository boxes, IRoomRepository rooms, IIte
 
     public async Task<BoxResponse> CreateAsync(long spaceId, long userId, CreateBoxRequest request, CancellationToken cancellationToken = default)
     {
-        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+        await access.EnsureCanEditAsync(spaceId, userId, cancellationToken);
         var room = await rooms.GetByIdAndSpaceAsync(request.RoomId, spaceId, cancellationToken) ?? throw InventoryExceptions.RoomNotFound();
 
         var box = new Location(spaceId, request.Name, LocationTypes.Box, parentLocationId: room.Id, createdByUserId: userId, description: request.Description);
@@ -52,13 +53,13 @@ public sealed class BoxService(IBoxRepository boxes, IRoomRepository rooms, IIte
 
     public async Task<BoxResponse> GetByIdAsync(long id, long spaceId, long userId, CancellationToken cancellationToken = default)
     {
-        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+        await access.EnsureCanReadAsync(spaceId, userId, cancellationToken);
         return await GetResponseAsync(id, spaceId, cancellationToken);
     }
 
     public async Task<BoxResponse> UpdateAsync(long id, long spaceId, long userId, UpdateBoxRequest request, CancellationToken cancellationToken = default)
     {
-        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+        await access.EnsureCanEditAsync(spaceId, userId, cancellationToken);
         var box = await GetBoxAsync(id, spaceId, cancellationToken);
         var room = await rooms.GetByIdAndSpaceAsync(request.RoomId, spaceId, cancellationToken) ?? throw InventoryExceptions.RoomNotFound();
 
@@ -76,7 +77,7 @@ public sealed class BoxService(IBoxRepository boxes, IRoomRepository rooms, IIte
 
     public async Task DeleteAsync(long id, long spaceId, long userId, CancellationToken cancellationToken = default)
     {
-        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+        await access.EnsureCanEditAsync(spaceId, userId, cancellationToken);
         var box = await GetBoxAsync(id, spaceId, cancellationToken);
         await unitOfWork.ExecuteAsync(async transactionCancellationToken =>
         {
@@ -111,14 +112,6 @@ public sealed class BoxService(IBoxRepository boxes, IRoomRepository rooms, IIte
     private static BoxResponse ToResponse(Location box, Location room, int itemsCount)
     {
         return new BoxResponse(box.Id, box.SpaceId, room.Id, room.Name, box.Name, box.Description, itemsCount, DateTime.SpecifyKind(box.CreatedAt, DateTimeKind.Utc), DateTime.SpecifyKind(box.UpdatedAt, DateTimeKind.Utc));
-    }
-
-    private async Task EnsureOwnedSpaceAsync(long spaceId, long userId, CancellationToken cancellationToken)
-    {
-        if (await spaces.GetByIdAndOwnerAsync(spaceId, userId, cancellationToken) is null)
-        {
-            throw SpacesExceptions.SpaceNotFound();
-        }
     }
 
     #endregion

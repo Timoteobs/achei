@@ -23,6 +23,7 @@ export interface SpaceCardProps {
   membersCount?: number;
   itemsCount?: number;
   icon?: LucideIcon;
+  accessLabel?: string;
   onDelete?: () => void;
   onEdit?: () => void;
 }
@@ -35,6 +36,7 @@ export function SpaceCard({
   membersCount,
   itemsCount,
   icon: Icon = House,
+  accessLabel,
   onDelete,
   onEdit,
 }: Readonly<SpaceCardProps>) {
@@ -141,6 +143,7 @@ export function SpaceCard({
             </Link>
           </LinkOverlay>
         </Heading>
+        {accessLabel && <Text fontSize="xs" color="brand.fg" mt="2">{accessLabel}</Text>}
         {description && (
           <Text fontSize="sm" color="fg.muted" mt="1" lineClamp="2" overflowWrap="anywhere">
             {description}

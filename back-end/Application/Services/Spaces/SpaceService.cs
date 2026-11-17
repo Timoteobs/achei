@@ -9,19 +9,22 @@ using Domain.Modules.Spaces.Entities;
 
 namespace Application.Services.Spaces;
 
-public sealed class SpaceService(ISpaceRepository spaces, IActivityService activities, IUnitOfWork unitOfWork) : ISpaceService
+public sealed class SpaceService(ISpaceRepository spaces, IMemberRepository members, IActivityService activities, IUnitOfWork unitOfWork) : ISpaceService
 {
     #region Service Methods
 
     public async Task<IReadOnlyList<SpaceResponse>> ListAsync(long userId, CancellationToken cancellationToken = default)
     {
-        var result = await spaces.ListByOwnerAsync(userId, cancellationToken);
-        return result.Select(ToResponse).ToArray();
+        var result = await spaces.ListByUserAsync(userId, cancellationToken);
+        var memberships = (await members.ListByUserAsync(userId, cancellationToken)).ToDictionary(member => member.SpaceId);
+        return result.Select(space => ToResponse(space, space.OwnerUserId == userId ? "OWNER" : memberships.GetValueOrDefault(space.Id)?.Role ?? "VIEWER")).ToArray();
     }
 
     public async Task<SpaceResponse> GetByIdAsync(long id, long userId, CancellationToken cancellationToken = default)
     {
-        return ToResponse(await GetOwnedSpaceAsync(id, userId, cancellationToken));
+        var space = await spaces.GetByIdAndUserAsync(id, userId, cancellationToken) ?? throw SpacesExceptions.SpaceNotFound();
+        var role = space.OwnerUserId == userId ? "OWNER" : (await members.GetBySpaceAndUserAsync(id, userId, cancellationToken))?.Role ?? "VIEWER";
+        return ToResponse(space, role);
     }
 
     public async Task<SpaceResponse> CreateAsync(long userId, SaveSpaceRequest request, CancellationToken cancellationToken = default)
@@ -33,7 +36,7 @@ public sealed class SpaceService(ISpaceRepository spaces, IActivityService activ
             await activities.LogAsync(space.Id, userId, ActivityActions.Created, ActivityEntityTypes.Space, space.Id, new { space.Name }, transactionCancellationToken);
         }, cancellationToken);
 
-        return ToResponse(space);
+        return ToResponse(space, "OWNER");
     }
 
     public async Task<SpaceResponse> UpdateAsync(long id, long userId, SaveSpaceRequest request, CancellationToken cancellationToken = default)
@@ -46,7 +49,7 @@ public sealed class SpaceService(ISpaceRepository spaces, IActivityService activ
             await activities.LogAsync(space.Id, userId, ActivityActions.Updated, ActivityEntityTypes.Space, space.Id, new { space.Name }, transactionCancellationToken);
         }, cancellationToken);
 
-        return ToResponse(space);
+        return ToResponse(space, "OWNER");
     }
 
     public async Task DeleteAsync(long id, long userId, CancellationToken cancellationToken = default)
@@ -64,9 +67,9 @@ public sealed class SpaceService(ISpaceRepository spaces, IActivityService activ
         return await spaces.GetByIdAndOwnerAsync(id, userId, cancellationToken) ?? throw SpacesExceptions.SpaceNotFound();
     }
 
-    private static SpaceResponse ToResponse(Space space)
+    private static SpaceResponse ToResponse(Space space, string role)
     {
-        return new SpaceResponse(space.Id, space.OwnerUserId, space.Name, space.Description, space.ImageUrl, DateTime.SpecifyKind(space.CreatedAt, DateTimeKind.Utc), DateTime.SpecifyKind(space.UpdatedAt, DateTimeKind.Utc));
+        return new SpaceResponse(space.Id, space.OwnerUserId, space.Name, space.Description, space.ImageUrl, DateTime.SpecifyKind(space.CreatedAt, DateTimeKind.Utc), DateTime.SpecifyKind(space.UpdatedAt, DateTimeKind.Utc), role);
     }
 
     #endregion

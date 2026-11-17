@@ -3,6 +3,7 @@ using Application.Interfaces.Persistence;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services.Audit;
 using Application.Interfaces.Services.Inventory;
+using Application.Interfaces.Services.Spaces;
 using Application.Models.Rooms;
 using Domain.Modules.Audit;
 using Domain.Modules.Inventory;
@@ -10,13 +11,13 @@ using Domain.Modules.Inventory.Entities;
 
 namespace Application.Services.Inventory;
 
-public sealed class RoomService(IRoomRepository rooms, IBoxRepository boxes, ISpaceRepository spaces, IActivityService activities, IUnitOfWork unitOfWork) : IRoomService
+public sealed class RoomService(IRoomRepository rooms, IBoxRepository boxes, ISpaceAccessService access, IActivityService activities, IUnitOfWork unitOfWork) : IRoomService
 {
     #region Service Methods
 
     public async Task<IReadOnlyList<RoomResponse>> ListAsync(long spaceId, long userId, CancellationToken cancellationToken = default)
     {
-        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+        await access.EnsureCanReadAsync(spaceId, userId, cancellationToken);
         var result = await rooms.ListBySpaceAsync(spaceId, cancellationToken);
         var counts = await boxes.CountByRoomIdsAsync(result.Select(room => room.Id).ToArray(), cancellationToken);
         return result.Select(room => ToResponse(room, counts.GetValueOrDefault(room.Id))).ToArray();
@@ -24,14 +25,14 @@ public sealed class RoomService(IRoomRepository rooms, IBoxRepository boxes, ISp
 
     public async Task<RoomResponse> GetByIdAsync(long id, long spaceId, long userId, CancellationToken cancellationToken = default)
     {
-        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+        await access.EnsureCanReadAsync(spaceId, userId, cancellationToken);
         var room = await GetRoomAsync(id, spaceId, cancellationToken);
         return ToResponse(room, await GetBoxesCountAsync(room.Id, cancellationToken));
     }
 
     public async Task<RoomResponse> CreateAsync(long spaceId, long userId, SaveRoomRequest request, CancellationToken cancellationToken = default)
     {
-        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+        await access.EnsureCanEditAsync(spaceId, userId, cancellationToken);
         var room = new Location(spaceId, request.Name, LocationTypes.Room, createdByUserId: userId, description: request.Description, icon: request.Icon, color: request.Color);
         await unitOfWork.ExecuteAsync(async transactionCancellationToken =>
         {
@@ -44,7 +45,7 @@ public sealed class RoomService(IRoomRepository rooms, IBoxRepository boxes, ISp
 
     public async Task<RoomResponse> UpdateAsync(long id, long spaceId, long userId, SaveRoomRequest request, CancellationToken cancellationToken = default)
     {
-        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+        await access.EnsureCanEditAsync(spaceId, userId, cancellationToken);
         var room = await GetRoomAsync(id, spaceId, cancellationToken);
         room.UpdateDetails(request.Name, request.Description, request.Icon, request.Color);
         await unitOfWork.ExecuteAsync(async transactionCancellationToken =>
@@ -58,7 +59,7 @@ public sealed class RoomService(IRoomRepository rooms, IBoxRepository boxes, ISp
 
     public async Task DeleteAsync(long id, long spaceId, long userId, CancellationToken cancellationToken = default)
     {
-        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+        await access.EnsureCanEditAsync(spaceId, userId, cancellationToken);
         var room = await GetRoomAsync(id, spaceId, cancellationToken);
         await unitOfWork.ExecuteAsync(async transactionCancellationToken =>
         {
@@ -70,14 +71,6 @@ public sealed class RoomService(IRoomRepository rooms, IBoxRepository boxes, ISp
     #endregion
 
     #region Helper Methods
-
-    private async Task EnsureOwnedSpaceAsync(long spaceId, long userId, CancellationToken cancellationToken)
-    {
-        if (await spaces.GetByIdAndOwnerAsync(spaceId, userId, cancellationToken) is null)
-        {
-            throw SpacesExceptions.SpaceNotFound();
-        }
-    }
 
     private async Task<Location> GetRoomAsync(long id, long spaceId, CancellationToken cancellationToken)
     {

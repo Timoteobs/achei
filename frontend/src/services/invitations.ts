@@ -56,3 +56,17 @@ export async function getReceivedInvitations(signal?: AbortSignal) {
   const { data } = await api.get<ReceivedInvitationResponse[]>("/invitations/received", { signal });
   return data;
 }
+
+export type InvitationDecision = "accept" | "decline";
+
+export interface InvitationDecisionResponse {
+  id: number;
+  spaceId: number;
+  status: "ACCEPTED" | "DECLINED";
+  acceptedAt: string | null;
+}
+
+export async function respondToInvitation(id: number, decision: InvitationDecision) {
+  const { data } = await api.post<InvitationDecisionResponse>(`/invitations/received/${id}/${decision}`);
+  return data;
+}

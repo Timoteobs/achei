@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using Application.Common.Exceptions;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services.Audit;
+using Application.Interfaces.Services.Spaces;
 using Application.Models.Activities;
 using Domain.Modules.Audit;
 using Domain.Modules.Audit.Entities;
@@ -10,13 +11,13 @@ using Domain.Modules.Identity.Entities;
 
 namespace Application.Services.Audit;
 
-public sealed class ActivityService(IActivityRepository activities, ISpaceRepository spaces, IUserRepository users, IRoomRepository rooms, IBoxRepository boxes) : IActivityService
+public sealed class ActivityService(IActivityRepository activities, ISpaceAccessService access, IUserRepository users, IRoomRepository rooms, IBoxRepository boxes) : IActivityService
 {
     #region Service Methods
 
     public async Task<ActivitiesPageResponse> ListAsync(long spaceId, long userId, ListActivitiesRequest request, CancellationToken cancellationToken = default)
     {
-        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+        await access.EnsureCanReadAsync(spaceId, userId, cancellationToken);
 
         var result = await activities.ListBySpaceAsync(spaceId, request.Page, request.PageSize, cancellationToken);
         var totalPages = (int)Math.Ceiling(result.TotalCount / (double)request.PageSize);
@@ -29,7 +30,7 @@ public sealed class ActivityService(IActivityRepository activities, ISpaceReposi
 
     public async Task<ActivityIndicatorsResponse> GetIndicatorsAsync(long spaceId, long userId, GetActivityIndicatorsRequest request, CancellationToken cancellationToken = default)
     {
-        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
+        await access.EnsureCanReadAsync(spaceId, userId, cancellationToken);
 
         var periodEnd = request.PeriodEnd?.UtcDateTime ?? DateTime.UtcNow;
         var periodStart = request.PeriodStart?.UtcDateTime ?? periodEnd.AddDays(-30);
@@ -137,14 +138,6 @@ public sealed class ActivityService(IActivityRepository activities, ISpaceReposi
             counts.GetValueOrDefault((ActivityActions.Created, ActivityEntityTypes.Item)),
             counts.GetValueOrDefault((ActivityActions.Updated, ActivityEntityTypes.Item)) + counts.GetValueOrDefault((ActivityActions.Moved, ActivityEntityTypes.Item)),
             counts.GetValueOrDefault((ActivityActions.Deleted, ActivityEntityTypes.Item)));
-    }
-
-    private async Task EnsureOwnedSpaceAsync(long spaceId, long userId, CancellationToken cancellationToken)
-    {
-        if (await spaces.GetByIdAndOwnerAsync(spaceId, userId, cancellationToken) is null)
-        {
-            throw SpacesExceptions.SpaceNotFound();
-        }
     }
 
     private static string? SerializeMetadata(object? metadata)

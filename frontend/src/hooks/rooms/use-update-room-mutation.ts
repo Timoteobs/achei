@@ -33,6 +33,12 @@ export function useUpdateRoomMutation(spaceId: string) {
     onError: (error) => {
       if (isAxiosError(error)) {
         if (error.response?.status === 401) return;
+        if (error.response?.status === 403) {
+          toast.warning("Você tem permissão apenas para visualizar este espaço.");
+          const userId = useAuthStore.getState().session?.user.id;
+          if (userId) void queryClient.invalidateQueries({ queryKey: ["spaces", userId] });
+          return;
+        }
         if (error.response?.status === 400) {
           toast.warning("Confira os dados do ambiente e tente novamente.");
           return;

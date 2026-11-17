@@ -10,6 +10,7 @@ namespace Achei.Controllers.Inventory;
 [Authorize]
 [Route("api/spaces/{spaceId:long}/items")]
 [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+[ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
 public sealed class ItemsController(IItemService items) : ControllerBase
 {
