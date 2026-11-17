@@ -20,9 +20,9 @@ public sealed class SpacesController(ISpaceService spaces) : ControllerBase
     }
 
     [HttpGet("{id:long}")]
-    [ProducesResponseType<SpaceResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<SpaceDetailsResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<SpaceResponse>> GetById(long id, CancellationToken cancellationToken)
+    public async Task<ActionResult<SpaceDetailsResponse>> GetById(long id, CancellationToken cancellationToken)
     {
         return Ok(await spaces.GetByIdAsync(id, User.GetUserId(), cancellationToken));
     }

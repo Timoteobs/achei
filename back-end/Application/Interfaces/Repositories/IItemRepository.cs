@@ -6,6 +6,7 @@ namespace Application.Interfaces.Repositories;
 
 public interface IItemRepository
 {
+    Task<int> CountBySpaceAsync(long spaceId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Item>> ListByIdsAndSpaceAsync(IReadOnlyCollection<long> ids, long spaceId, CancellationToken cancellationToken = default);
     Task<PagedResult<Item>> ListBySpaceAsync(long spaceId, ItemListQuery query, CancellationToken cancellationToken = default);
     Task<IReadOnlyDictionary<long, int>> CountByLocationIdsAsync(IReadOnlyCollection<long> locationIds, CancellationToken cancellationToken = default);

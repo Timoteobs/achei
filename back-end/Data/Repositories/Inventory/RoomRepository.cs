@@ -15,6 +15,11 @@ public sealed class RoomRepository(AcheiContext context) : IRoomRepository
         return context.Locations.Where(location => location.SpaceId == spaceId && location.Type == LocationTypes.Room && location.ParentLocationId == null);
     }
 
+    public Task<int> CountBySpaceAsync(long spaceId, CancellationToken cancellationToken = default)
+    {
+        return Rooms(spaceId).AsNoTracking().CountAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<Location>> ListByIdsAndSpaceAsync(IReadOnlyCollection<long> ids, long spaceId, CancellationToken cancellationToken = default)
     {
         if (ids.Count == 0)

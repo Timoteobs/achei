@@ -5,11 +5,14 @@ using Application.Interfaces.Services.Audit;
 using Application.Interfaces.Services.Spaces;
 using Application.Models.Spaces;
 using Domain.Modules.Audit;
+using Domain.Modules.Identity.Entities;
 using Domain.Modules.Spaces.Entities;
 
 namespace Application.Services.Spaces;
 
-public sealed class SpaceService(ISpaceRepository spaces, IMemberRepository members, IActivityService activities, IUnitOfWork unitOfWork) : ISpaceService
+public sealed class SpaceService(
+    ISpaceRepository spaces, IMemberRepository members, IUserRepository users, IItemRepository items, IRoomRepository rooms,
+    IActivityService activities, IUnitOfWork unitOfWork) : ISpaceService
 {
     #region Service Methods
 
@@ -20,11 +23,15 @@ public sealed class SpaceService(ISpaceRepository spaces, IMemberRepository memb
         return result.Select(space => ToResponse(space, space.OwnerUserId == userId ? "OWNER" : memberships.GetValueOrDefault(space.Id)?.Role ?? "VIEWER")).ToArray();
     }
 
-    public async Task<SpaceResponse> GetByIdAsync(long id, long userId, CancellationToken cancellationToken = default)
+    public async Task<SpaceDetailsResponse> GetByIdAsync(long id, long userId, CancellationToken cancellationToken = default)
     {
         var space = await spaces.GetByIdAndUserAsync(id, userId, cancellationToken) ?? throw SpacesExceptions.SpaceNotFound();
         var role = space.OwnerUserId == userId ? "OWNER" : (await members.GetBySpaceAndUserAsync(id, userId, cancellationToken))?.Role ?? "VIEWER";
-        return ToResponse(space, role);
+        var itemsCount = await items.CountBySpaceAsync(id, cancellationToken);
+        var roomsCount = await rooms.CountBySpaceAsync(id, cancellationToken);
+        var membersCount = await users.CountBySpaceAsync(id, cancellationToken);
+        var membersPreview = await users.ListBySpaceAsync(id, 3, cancellationToken);
+        return ToResponse(space, role, itemsCount, roomsCount, membersCount, membersPreview);
     }
 
     public async Task<SpaceResponse> CreateAsync(long userId, SaveSpaceRequest request, CancellationToken cancellationToken = default)
@@ -65,6 +72,19 @@ public sealed class SpaceService(ISpaceRepository spaces, IMemberRepository memb
     private async Task<Space> GetOwnedSpaceAsync(long id, long userId, CancellationToken cancellationToken)
     {
         return await spaces.GetByIdAndOwnerAsync(id, userId, cancellationToken) ?? throw SpacesExceptions.SpaceNotFound();
+    }
+
+    private static SpaceDetailsResponse ToResponse(Space space, string role, int itemsCount, int roomsCount, int membersCount, IReadOnlyList<User> membersPreview)
+    {
+        return new SpaceDetailsResponse(
+            space.Id, space.OwnerUserId, space.Name, space.Description, space.ImageUrl,
+            DateTime.SpecifyKind(space.CreatedAt, DateTimeKind.Utc), DateTime.SpecifyKind(space.UpdatedAt, DateTimeKind.Utc), role,
+            itemsCount, roomsCount, membersCount, membersPreview.Select(ToResponse).ToArray());
+    }
+
+    private static SpaceMemberResponse ToResponse(User user)
+    {
+        return new SpaceMemberResponse(user.Id, user.Name, user.AvatarUrl);
     }
 
     private static SpaceResponse ToResponse(Space space, string role)

@@ -9,6 +9,19 @@ namespace Data.Repositories.Identity;
 
 public sealed class UserRepository(AcheiContext context) : IUserRepository
 {
+    public Task<int> CountBySpaceAsync(long spaceId, CancellationToken cancellationToken = default)
+    {
+        return SpaceUsers(spaceId).CountAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<User>> ListBySpaceAsync(long spaceId, int limit, CancellationToken cancellationToken = default)
+    {
+        return await SpaceUsers(spaceId)
+            .OrderByDescending(user => context.Spaces.Any(space => space.Id == spaceId && space.OwnerUserId == user.Id))
+            .ThenBy(user => user.Name).ThenBy(user => user.Id)
+            .Take(limit).ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<User>> ListByIdsAsync(IReadOnlyCollection<long> ids, CancellationToken cancellationToken = default)
     {
         if (ids.Count == 0)
@@ -41,6 +54,14 @@ public sealed class UserRepository(AcheiContext context) : IUserRepository
         {
             throw IdentityExceptions.EmailAlreadyRegistered(exception);
         }
+    }
+
+    private IQueryable<User> SpaceUsers(long spaceId)
+    {
+        return context.Users.AsNoTracking().Where(user =>
+            context.Spaces.Any(space => space.Id == spaceId && space.OwnerUserId == user.Id) ||
+            context.Members.Any(member => member.SpaceId == spaceId && member.UserId == user.Id &&
+                (member.Role == "EDITOR" || member.Role == "VIEWER")));
     }
 
     private static string NormalizeEmail(string email)

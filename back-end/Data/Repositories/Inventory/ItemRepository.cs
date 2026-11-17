@@ -11,6 +11,14 @@ namespace Data.Repositories.Inventory;
 
 public sealed class ItemRepository(AcheiContext context) : IItemRepository
 {
+    public Task<int> CountBySpaceAsync(long spaceId, CancellationToken cancellationToken = default)
+    {
+        return (from item in context.Items.AsNoTracking()
+                join location in context.Locations.AsNoTracking() on item.LocationId equals location.Id
+                where location.SpaceId == spaceId
+                select item).CountAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<Item>> ListByIdsAndSpaceAsync(IReadOnlyCollection<long> ids, long spaceId, CancellationToken cancellationToken = default)
     {
         if (ids.Count == 0)
