@@ -9,6 +9,13 @@ namespace Data.Repositories.Spaces;
 
 public sealed class InvitationRepository(AcheiContext context) : IInvitationRepository
 {
+    public async Task<IReadOnlyList<Invitation>> ListByRecipientAsync(long userId, CancellationToken cancellationToken = default)
+    {
+        return await context.Invitations.AsNoTracking()
+            .Where(invitation => invitation.Email != null && context.Users.Any(user => user.Id == userId && user.Active && user.Email == invitation.Email))
+            .OrderByDescending(invitation => invitation.CreatedAt).ThenByDescending(invitation => invitation.Id).ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<Invitation>> ListBySpaceAsync(long spaceId, CancellationToken cancellationToken = default)
     {
         return await context.Invitations.AsNoTracking().Where(invitation => invitation.SpaceId == spaceId)
@@ -20,6 +27,27 @@ public sealed class InvitationRepository(AcheiContext context) : IInvitationRepo
         return context.Invitations.AsNoTracking().SingleOrDefaultAsync(invitation => invitation.Id == id && invitation.SpaceId == spaceId, cancellationToken);
     }
 
+    public Task<Invitation?> GetByIdAndRecipientAsync(long id, long userId, CancellationToken cancellationToken = default)
+    {
+        return context.Invitations.AsNoTracking().SingleOrDefaultAsync(invitation => invitation.Id == id && invitation.Email != null &&
+            context.Users.Any(user => user.Id == userId && user.Active && user.Email == invitation.Email), cancellationToken);
+    }
+
+    public async Task<bool> TryRespondAsync(Invitation invitation, long userId, CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+        var affected = await context.Invitations
+            .Where(current => current.Id == invitation.Id && current.SpaceId == invitation.SpaceId &&
+                current.Status == "PENDING" && current.AcceptedAt == null && current.ExpiresAt > now &&
+                current.Token == invitation.Token && current.Role == invitation.Role && current.Email == invitation.Email &&
+                context.Users.Any(user => user.Id == userId && user.Active && user.Email == current.Email))
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(current => current.Status, invitation.Status)
+                .SetProperty(current => current.AcceptedAt, invitation.AcceptedAt)
+                .SetProperty(current => current.UpdatedAt, invitation.UpdatedAt), cancellationToken);
+        return affected == 1;
+    }
+
     public async Task AddAsync(Invitation invitation, CancellationToken cancellationToken = default)
     {
         await context.Invitations.AddAsync(invitation, cancellationToken);
@@ -28,8 +56,19 @@ public sealed class InvitationRepository(AcheiContext context) : IInvitationRepo
 
     public async Task UpdateAsync(Invitation invitation, CancellationToken cancellationToken = default)
     {
-        context.Invitations.Update(invitation);
-        await SaveInvitationAsync(cancellationToken);
+        var affected = await context.Invitations
+            .Where(current => current.Id == invitation.Id && current.SpaceId == invitation.SpaceId &&
+                current.Status == "PENDING" && current.AcceptedAt == null)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(current => current.Email, invitation.Email)
+                .SetProperty(current => current.Token, invitation.Token)
+                .SetProperty(current => current.Role, invitation.Role)
+                .SetProperty(current => current.ExpiresAt, invitation.ExpiresAt)
+                .SetProperty(current => current.UpdatedAt, invitation.UpdatedAt), cancellationToken);
+        if (affected == 0)
+        {
+            throw SpacesExceptions.InvitationUnavailable();
+        }
     }
 
     public async Task DeleteAsync(Invitation invitation, CancellationToken cancellationToken = default)

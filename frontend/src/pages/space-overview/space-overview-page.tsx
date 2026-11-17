@@ -60,6 +60,7 @@ export function SpaceOverviewPage() {
       ) : (
         <>
           <SpaceOverviewHeader
+            spaceId={spaceId}
             name={space.name}
             description={space.description}
             imageUrl={space.imageUrl}

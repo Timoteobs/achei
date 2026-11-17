@@ -1,4 +1,5 @@
 import { Box, Dialog, Flex, IconButton, Portal } from "@chakra-ui/react";
+import type { BoxProps } from "@chakra-ui/react";
 import { X } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -11,6 +12,8 @@ export interface ModalProps {
   description?: string;
   icon?: ReactNode;
   size?: ModalSize;
+  compact?: boolean;
+  bodyOverflow?: BoxProps["overflow"];
   footer?: ReactNode;
   closeDisabled?: boolean;
   role?: "dialog" | "alertdialog";
@@ -32,6 +35,8 @@ export function Modal({
   description,
   icon,
   size = "md",
+  compact = false,
+  bodyOverflow = "auto",
   footer,
   closeDisabled = false,
   role = "dialog",
@@ -66,21 +71,21 @@ export function Modal({
           >
             <Dialog.Header
               display="flex"
-              alignItems="center"
+              alignItems={compact ? "flex-start" : "center"}
               justifyContent="space-between"
-              gap="4"
-              px={{ base: "5", md: "7" }}
+              gap={compact ? "2" : "4"}
+              px={compact ? "4" : { base: "5", md: "7" }}
               pt="5"
               pb="4"
               flexShrink="0"
             >
-              <Flex align="center" gap="5" minW="0">
-                {icon && <Flex boxSize={{ base: "12", md: "16" }} flexShrink="0" align="center" justify="center" bg="brand.subtle" color="brand.fg" borderRadius="lg" aria-hidden="true">{icon}</Flex>}
+              <Flex align={compact ? "flex-start" : "center"} gap={compact ? "3" : "5"} minW="0">
+                {icon && <Flex boxSize={compact ? "12" : { base: "12", md: "16" }} flexShrink="0" align="center" justify="center" bg="brand.subtle" color="brand.fg" borderRadius="lg" aria-hidden="true">{icon}</Flex>}
                 <Box minW="0">
-                  <Dialog.Title fontSize={description ? { base: "2xl", md: "3xl" } : "2xl"} fontWeight="bold" color="fg.default">
+                  <Dialog.Title fontSize={compact ? "md" : description ? { base: "2xl", md: "3xl" } : "2xl"} fontWeight="bold" color="fg.default">
                     {title}
                   </Dialog.Title>
-                  {description && <Dialog.Description color="fg.muted" fontSize={{ base: "sm", md: "md" }} mt="2">{description}</Dialog.Description>}
+                  {description && <Dialog.Description color="fg.muted" fontSize={compact ? "xs" : { base: "sm", md: "md" }} mt={compact ? "1" : "2"}>{description}</Dialog.Description>}
                 </Box>
               </Flex>
               <Dialog.CloseTrigger asChild position="static">
@@ -101,8 +106,8 @@ export function Modal({
             <Dialog.Body
               flex="1"
               minH="0"
-              overflowY="auto"
-              px={{ base: "5", md: "7" }}
+              overflow={bodyOverflow}
+              px={compact ? "4" : { base: "5", md: "7" }}
               pt="0"
               pb="5"
             >

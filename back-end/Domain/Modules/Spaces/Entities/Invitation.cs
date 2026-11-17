@@ -39,6 +39,29 @@ public class Invitation : BaseEntity
         UpdatedAt = DateTime.UtcNow;
     }
 
+    public void Accept()
+    {
+        ValidatePendingResponse();
+        Status = "ACCEPTED";
+        AcceptedAt = DateTime.UtcNow;
+        UpdatedAt = AcceptedAt.Value;
+    }
+
+    public void Decline()
+    {
+        ValidatePendingResponse();
+        Status = "DECLINED";
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    private void ValidatePendingResponse()
+    {
+        DomainValidator.Validator(
+            ValidationRule.OneOf(AcceptedAt.HasValue ? "ACCEPTED" : Status, "Status do convite para resposta", "PENDING"),
+            ValidationRule.FutureDate(DateTime.SpecifyKind(ExpiresAt, DateTimeKind.Utc), "Expiração")
+        );
+    }
+
     private void SetDetails(string? email, string token, string role, DateTime expiresAt)
     {
         var normalizedEmail = string.IsNullOrWhiteSpace(email) ? null : email.Trim().ToLowerInvariant();

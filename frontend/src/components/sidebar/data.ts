@@ -7,6 +7,7 @@ import {
   CookingPot,
   House,
   HouseHeart,
+  Mail,
   Sofa,
   Trash2,
   Warehouse,
@@ -19,6 +20,7 @@ export const navigationPaths = {
   search: "/buscar",
   spaces: "/espacos",
   notifications: "/notificacoes",
+  invitations: "/convites",
   favorites: "/favoritos",
   activity: "/atividade",
   trash: "/lixeira",
@@ -33,6 +35,7 @@ export const navigationItems: {
   { id: "spaces", label: "Meus espaços", icon: Building2 },
   { id: "activity", label: "Atividade", icon: Clock3 },
   { id: "notifications", label: "Notificações", icon: Bell },
+  { id: "invitations", label: "Convites", icon: Mail },
   { id: "trash", label: "Lixeira", icon: Trash2 },
 ];
 

@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
 import { Route as AppAtividadeRouteImport } from './routes/_app.atividade'
 import { Route as AppBuscarRouteImport } from './routes/_app.buscar'
+import { Route as AppConvitesRouteImport } from './routes/_app.convites'
 import { Route as AppEspacosRouteImport } from './routes/_app.espacos'
 import { Route as AppFavoritosRouteImport } from './routes/_app.favoritos'
 import { Route as AppLixeiraRouteImport } from './routes/_app.lixeira'
@@ -48,6 +49,11 @@ const AppAtividadeRoute = AppAtividadeRouteImport.update({
 const AppBuscarRoute = AppBuscarRouteImport.update({
   id: '/buscar',
   path: '/buscar',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppConvitesRoute = AppConvitesRouteImport.update({
+  id: '/convites',
+  path: '/convites',
   getParentRoute: () => AppRoute,
 } as any)
 const AppEspacosRoute = AppEspacosRouteImport.update({
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/atividade': typeof AppAtividadeRoute
   '/buscar': typeof AppBuscarRoute
+  '/convites': typeof AppConvitesRoute
   '/espacos': typeof AppEspacosRouteWithChildren
   '/favoritos': typeof AppFavoritosRoute
   '/lixeira': typeof AppLixeiraRoute
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/atividade': typeof AppAtividadeRoute
   '/buscar': typeof AppBuscarRoute
+  '/convites': typeof AppConvitesRoute
   '/favoritos': typeof AppFavoritosRoute
   '/lixeira': typeof AppLixeiraRoute
   '/notificacoes': typeof AppNotificacoesRoute
@@ -150,6 +158,7 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/_app/atividade': typeof AppAtividadeRoute
   '/_app/buscar': typeof AppBuscarRoute
+  '/_app/convites': typeof AppConvitesRoute
   '/_app/espacos': typeof AppEspacosRouteWithChildren
   '/_app/favoritos': typeof AppFavoritosRoute
   '/_app/lixeira': typeof AppLixeiraRoute
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/'
     | '/atividade'
     | '/buscar'
+    | '/convites'
     | '/espacos'
     | '/favoritos'
     | '/lixeira'
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/'
     | '/atividade'
     | '/buscar'
+    | '/convites'
     | '/favoritos'
     | '/lixeira'
     | '/notificacoes'
@@ -203,6 +214,7 @@ export interface FileRouteTypes {
     | '/_auth'
     | '/_app/atividade'
     | '/_app/buscar'
+    | '/_app/convites'
     | '/_app/espacos'
     | '/_app/favoritos'
     | '/_app/lixeira'
@@ -258,6 +270,13 @@ declare module '@tanstack/react-router' {
       path: '/buscar'
       fullPath: '/buscar'
       preLoaderRoute: typeof AppBuscarRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/convites': {
+      id: '/_app/convites'
+      path: '/convites'
+      fullPath: '/convites'
+      preLoaderRoute: typeof AppConvitesRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/espacos': {
@@ -378,6 +397,7 @@ const AppEspacosRouteWithChildren = AppEspacosRoute._addFileChildren(
 interface AppRouteChildren {
   AppAtividadeRoute: typeof AppAtividadeRoute
   AppBuscarRoute: typeof AppBuscarRoute
+  AppConvitesRoute: typeof AppConvitesRoute
   AppEspacosRoute: typeof AppEspacosRouteWithChildren
   AppFavoritosRoute: typeof AppFavoritosRoute
   AppLixeiraRoute: typeof AppLixeiraRoute
@@ -388,6 +408,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAtividadeRoute: AppAtividadeRoute,
   AppBuscarRoute: AppBuscarRoute,
+  AppConvitesRoute: AppConvitesRoute,
   AppEspacosRoute: AppEspacosRouteWithChildren,
   AppFavoritosRoute: AppFavoritosRoute,
   AppLixeiraRoute: AppLixeiraRoute,

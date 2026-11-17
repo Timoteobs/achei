@@ -5,6 +5,7 @@ export type SidebarSection =
   | "search"
   | "spaces"
   | "notifications"
+  | "invitations"
   | "favorites"
   | "activity"
   | "trash";

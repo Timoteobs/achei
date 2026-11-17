@@ -4,14 +4,17 @@ import { House, Plus, Trash2, UserRoundPlus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "../../../components/button/button";
 import { NewItemModal } from "./items/new-item-modal";
+import { InviteMembersModal } from "./invite-members/invite-members-modal";
 
 export function SpaceOverviewHeader({
+  spaceId,
   name,
   description,
   imageUrl,
   icon: Icon = House,
   onDelete,
 }: Readonly<{
+  spaceId: string;
   name: string;
   description?: string | null;
   imageUrl?: string | null;
@@ -20,6 +23,7 @@ export function SpaceOverviewHeader({
 }>) {
   const [failedImage, setFailedImage] = useState<string | null>(null);
   const [isNewItemOpen, setIsNewItemOpen] = useState(false);
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
   return (
     <Flex
       as="header"
@@ -87,6 +91,7 @@ export function SpaceOverviewHeader({
         <Button
           type="button"
           variant="link"
+          onClick={() => setIsInviteOpen(true)}
           h="10"
           px="4"
           gap="2"
@@ -117,6 +122,7 @@ export function SpaceOverviewHeader({
         </Button>
       </Flex>
       {isNewItemOpen && <NewItemModal open onOpenChange={setIsNewItemOpen} />}
+      {isInviteOpen && <InviteMembersModal open onOpenChange={setIsInviteOpen} spaceId={spaceId} spaceName={name} />}
     </Flex>
   );
 }
