@@ -12,5 +12,4 @@ public interface IInvitationRepository
     Task<bool> TryRevokeAsync(Invitation invitation, CancellationToken cancellationToken = default);
     Task AddAsync(Invitation invitation, CancellationToken cancellationToken = default);
     Task UpdateAsync(Invitation invitation, CancellationToken cancellationToken = default);
-    Task DeleteAsync(Invitation invitation, CancellationToken cancellationToken = default);
 }

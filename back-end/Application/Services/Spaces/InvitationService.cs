@@ -85,7 +85,7 @@ public sealed class InvitationService(IInvitationRepository invitations, ISpaceR
                 throw SpacesExceptions.InvitationNotAccepted();
             }
 
-            var recipient = invitation.Email is null ? null : await users.GetByEmailAsync(invitation.Email, transactionCancellationToken);
+            var recipient = await users.GetByEmailAsync(invitation.Email, transactionCancellationToken);
             if (recipient?.Id == userId)
             {
                 throw SpacesExceptions.OwnerAccessCannotBeRevoked();
@@ -106,13 +106,6 @@ public sealed class InvitationService(IInvitationRepository invitations, ISpaceR
         }, cancellationToken);
 
         return response;
-    }
-
-    public async Task DeleteAsync(long id, long spaceId, long userId, CancellationToken cancellationToken = default)
-    {
-        await EnsureOwnedSpaceAsync(spaceId, userId, cancellationToken);
-        var invitation = await GetInvitationAsync(id, spaceId, cancellationToken);
-        await invitations.DeleteAsync(invitation, cancellationToken);
     }
 
     #endregion

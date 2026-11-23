@@ -38,7 +38,8 @@ public class InvitationConfiguration : IEntityTypeConfiguration<Invitation>
         entity.Property(e => e.Email)
             .HasColumnName("email")
             .HasMaxLength(255)
-            .IsUnicode(false);
+            .IsUnicode(false)
+            .IsRequired();
 
         entity.HasIndex(e => new { e.SpaceId, e.Email });
 

@@ -67,11 +67,6 @@ public static class SpacesExceptions
         return new BusinessConflictException("spaces.invitation_not_pending", "Somente convites pendentes podem ser editados.");
     }
 
-    public static BusinessConflictException InvitationHasDependencies(Exception? innerException = null)
-    {
-        return new BusinessConflictException("spaces.invitation_has_dependencies", "Não é possível excluir um convite com registros vinculados.", innerException);
-    }
-
     public static ResourceNotFoundException InvitationReferenceNotFound(Exception? innerException = null)
     {
         return new ResourceNotFoundException("spaces.invitation_reference_not_found", "Espaço ou usuário do convite não encontrado.", innerException);

@@ -12,7 +12,7 @@ public sealed class SpaceRepository(AcheiContext context) : ISpaceRepository
     public async Task<IReadOnlyList<Space>> ListByInvitationRecipientAsync(long userId, CancellationToken cancellationToken = default)
     {
         return await context.Spaces.AsNoTracking()
-            .Where(space => context.Invitations.Any(invitation => invitation.SpaceId == space.Id && invitation.Email != null &&
+            .Where(space => context.Invitations.Any(invitation => invitation.SpaceId == space.Id &&
                 context.Users.Any(user => user.Id == userId && user.Active && user.Email == invitation.Email)))
             .ToListAsync(cancellationToken);
     }

@@ -7,7 +7,7 @@ public class Invitation : BaseEntity
 {
     public long SpaceId { get; private set; }
     public long InvitedByUserId { get; private set; }
-    public string? Email { get; private set; }
+    public string Email { get; private set; } = string.Empty;
     public string Token { get; private set; } = string.Empty;
     public string Role { get; private set; } = string.Empty;
     public string Status { get; private set; } = "PENDING";
@@ -18,7 +18,7 @@ public class Invitation : BaseEntity
 
     private Invitation() { }
 
-    public Invitation(long spaceId, long invitedByUserId, string? email, string token, string role, DateTime expiresAt)
+    public Invitation(long spaceId, long invitedByUserId, string email, string token, string role, DateTime expiresAt)
     {
         DomainValidator.Validator(
             ValidationRule.Positive(spaceId, "Espaço"),
@@ -32,7 +32,7 @@ public class Invitation : BaseEntity
         UpdatedAt = CreatedAt;
     }
 
-    public void UpdateDetails(string? email, string token, string role, DateTime expiresAt)
+    public void UpdateDetails(string email, string token, string role, DateTime expiresAt)
     {
         DomainValidator.Validator(ValidationRule.OneOf(AcceptedAt.HasValue ? "ACCEPTED" : Status, "Status do convite para edição", "PENDING"));
         SetDetails(email, token, role, expiresAt);
@@ -69,12 +69,13 @@ public class Invitation : BaseEntity
         );
     }
 
-    private void SetDetails(string? email, string token, string role, DateTime expiresAt)
+    private void SetDetails(string email, string token, string role, DateTime expiresAt)
     {
-        var normalizedEmail = string.IsNullOrWhiteSpace(email) ? null : email.Trim().ToLowerInvariant();
+        var normalizedEmail = email?.Trim().ToLowerInvariant();
         var normalizedRole = role?.Trim().ToUpperInvariant();
         var expiration = expiresAt.Kind == DateTimeKind.Local ? expiresAt.ToUniversalTime() : DateTime.SpecifyKind(expiresAt, DateTimeKind.Utc);
         DomainValidator.Validator(
+            ValidationRule.Required(normalizedEmail, "E-mail"),
             ValidationRule.MaxLength(normalizedEmail, 255, "E-mail"),
             ValidationRule.Email(normalizedEmail, "E-mail"),
             ValidationRule.Required(token, "Token"),
@@ -85,7 +86,7 @@ public class Invitation : BaseEntity
             ValidationRule.FutureDate(expiration, "Expiração")
         );
 
-        Email = normalizedEmail;
+        Email = normalizedEmail!;
         Token = token.Trim();
         Role = normalizedRole!;
         ExpiresAt = expiration;

@@ -52,13 +52,4 @@ public sealed class InvitationsController(IInvitationService invitations) : Cont
     {
         return Ok(await invitations.RevokeAsync(id, spaceId, User.GetUserId(), cancellationToken));
     }
-
-    [HttpDelete("{id:long}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> Delete(long spaceId, long id, CancellationToken cancellationToken)
-    {
-        await invitations.DeleteAsync(id, spaceId, User.GetUserId(), cancellationToken);
-        return NoContent();
-    }
 }

@@ -12,7 +12,7 @@ public sealed class InvitationRepository(AcheiContext context) : IInvitationRepo
     public async Task<IReadOnlyList<Invitation>> ListByRecipientAsync(long userId, CancellationToken cancellationToken = default)
     {
         return await context.Invitations.AsNoTracking()
-            .Where(invitation => invitation.Email != null && context.Users.Any(user => user.Id == userId && user.Active && user.Email == invitation.Email))
+            .Where(invitation => context.Users.Any(user => user.Id == userId && user.Active && user.Email == invitation.Email))
             .OrderByDescending(invitation => invitation.CreatedAt).ThenByDescending(invitation => invitation.Id).ToListAsync(cancellationToken);
     }
 
@@ -29,7 +29,7 @@ public sealed class InvitationRepository(AcheiContext context) : IInvitationRepo
 
     public Task<Invitation?> GetByIdAndRecipientAsync(long id, long userId, CancellationToken cancellationToken = default)
     {
-        return context.Invitations.AsNoTracking().SingleOrDefaultAsync(invitation => invitation.Id == id && invitation.Email != null &&
+        return context.Invitations.AsNoTracking().SingleOrDefaultAsync(invitation => invitation.Id == id &&
             context.Users.Any(user => user.Id == userId && user.Active && user.Email == invitation.Email), cancellationToken);
     }
 
@@ -79,19 +79,6 @@ public sealed class InvitationRepository(AcheiContext context) : IInvitationRepo
         if (affected == 0)
         {
             throw SpacesExceptions.InvitationUnavailable();
-        }
-    }
-
-    public async Task DeleteAsync(Invitation invitation, CancellationToken cancellationToken = default)
-    {
-        context.Invitations.Remove(invitation);
-        try
-        {
-            await SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is SqlException { Number: 547 })
-        {
-            throw SpacesExceptions.InvitationHasDependencies(exception);
         }
     }
 
