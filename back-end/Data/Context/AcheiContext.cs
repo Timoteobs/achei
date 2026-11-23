@@ -12,6 +12,7 @@ public class AcheiContext : DbContext
     public AcheiContext(DbContextOptions<AcheiContext> options) : base(options) { }
 
     public DbSet<User> Users => Set<User>();
+    public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<Space> Spaces => Set<Space>();
     public DbSet<Member> Members => Set<Member>();
     public DbSet<Invitation> Invitations => Set<Invitation>();

@@ -54,6 +54,8 @@ builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<ISpaceRepository, SpaceRepository>();
 builder.Services.AddScoped<ISpaceService, SpaceService>();
 builder.Services.AddScoped<ISpaceAccessService, SpaceAccessService>();

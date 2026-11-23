@@ -140,6 +140,16 @@ Regras:
 - Mantenha apenas os últimos sete dias de logs. O SystemLogWorker deve remover diariamente os registros expirados.
 - Falhas na persistência dos próprios logs não devem interromper a aplicação nem ser reenviadas ao mesmo provider.
 
+## Notificações
+
+- Notification pertence ao módulo Identity e sempre deve estar vinculada a um User.
+- A API deve listar e alterar somente notificações do usuário autenticado; nunca aceite userId do corpo ou da rota pública.
+- A criação de notificações é interna aos casos de negócio. Não exponha endpoint para o usuário criar notificações para si mesmo.
+- WasRead, ReadAt e UpdatedAt devem ser atualizados pela entidade por meio de MarkAsRead; a operação deve ser idempotente.
+- Payload contém somente contexto básico em JSON. Nunca inclua senhas, tokens, chaves ou outros dados sensíveis.
+- A FK para User usa Cascade, pois a notificação não possui utilidade após a exclusão do destinatário.
+- Armazene SentAt, ReadAt, CreatedAt e UpdatedAt em UTC.
+
 ## Controllers e REST
 
 - Controllers devem ser finos: recebem a requisição, extraem o usuário, chamam o Service e produzem a resposta HTTP.

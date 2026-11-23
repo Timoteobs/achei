@@ -129,6 +129,79 @@ namespace Data.Migrations
                     b.ToTable("tbl_activity", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Modules.Identity.Entities.Notification", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)")
+                        .HasColumnName("message");
+
+                    b.Property<string>("Payload")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("payload");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("read_at");
+
+                    b.Property<string>("ScreenId")
+                        .HasMaxLength(100)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("screen_id");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("sent_at");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("title");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("type");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
+
+                    b.Property<bool>("WasRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("was_read");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "SentAt");
+
+                    b.HasIndex("UserId", "WasRead");
+
+                    b.ToTable("tbl_notification", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Modules.Identity.Entities.User", b =>
                 {
                     b.Property<long>("Id")
@@ -737,6 +810,15 @@ namespace Data.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("Domain.Modules.Identity.Entities.Notification", b =>
+                {
+                    b.HasOne("Domain.Modules.Identity.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.Modules.Inventory.Entities.Category", b =>

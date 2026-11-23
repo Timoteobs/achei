@@ -16,4 +16,14 @@ public static class IdentityExceptions
     {
         return new UnauthorizedException("identity.invalid_user_claim", "Token sem identificação válida de usuário.", innerException);
     }
+
+    public static ResourceNotFoundException NotificationNotFound(Exception? innerException = null)
+    {
+        return new ResourceNotFoundException("identity.notification_not_found", "Notificação não encontrada.", innerException);
+    }
+
+    public static ResourceNotFoundException NotificationReferenceNotFound(Exception? innerException = null)
+    {
+        return new ResourceNotFoundException("identity.notification_reference_not_found", "Usuário da notificação não encontrado.", innerException);
+    }
 }
